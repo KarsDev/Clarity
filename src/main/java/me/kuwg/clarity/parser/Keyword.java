@@ -2,7 +2,7 @@ package me.kuwg.clarity.parser;
 
 import me.kuwg.clarity.token.Token;
 
-public enum Keyword { // <></>ODO
+public enum Keyword { // TODO
     ;
 
     public static Keyword keyword(final Token token) {

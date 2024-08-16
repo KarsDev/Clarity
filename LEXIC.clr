@@ -29,5 +29,3 @@ define fn main {
 
     call native println with "Factorial of " + number + " equals to " + fact
 }
-
-include, define, class, var, constructor, with, set, local, fn, call, native, if, or, return, else

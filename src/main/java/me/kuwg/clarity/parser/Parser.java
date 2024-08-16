@@ -45,8 +45,7 @@ public final class Parser {
 
         consume(DIVIDER, "{");
 
-        while (!matchAndConsume(DIVIDER, "}"))
-            node.addChild(parseStatement());
+        while (!matchAndConsume(DIVIDER, "}")) node.addChild(parseStatement());
 
         return node;
     }

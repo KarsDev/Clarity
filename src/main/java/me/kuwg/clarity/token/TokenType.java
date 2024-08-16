@@ -6,7 +6,7 @@ public enum TokenType {
     COMMENT("^//.*"),
     NEWLINE("\r\n|\n|\r"),
     WHITESPACE("\\s+"),
-    KEYWORD("\\b(TODO)\\b"), // TODO
+    KEYWORD("\\b(class|var|constructor|local|fn|native|if|else|return)\\b"), // TODO
     STRING("^(['\"])(.*?)(?<!\\\\)\\1$"),
     OPERATOR("\\+|\\-|\\*|\\/|%|==|!=|\\+=|\\-=|\\*=|\\/=|%="),
     DIVIDER("[\\{\\}\\[\\]\\(\\),]"),
