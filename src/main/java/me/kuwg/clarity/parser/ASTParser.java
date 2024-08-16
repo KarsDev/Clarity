@@ -3,6 +3,8 @@ package me.kuwg.clarity.parser;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.ast.nodes.function.FunctionDeclarationNode;
+import me.kuwg.clarity.ast.nodes.function.ParameterNode;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.TokenType;
 
@@ -10,12 +12,12 @@ import java.util.*;
 
 import static me.kuwg.clarity.token.TokenType.*;
 
-public final class Parser {
+public final class ASTParser {
     private final List<Token> tokens;
     private int currentTokenIndex = 0;
 
 
-    public Parser(final List<Token> tokens) {
+    public ASTParser(final List<Token> tokens) {
         this.tokens = tokens;
     }
 
@@ -31,7 +33,6 @@ public final class Parser {
     @SuppressWarnings("SwitchStatementWithTooFewBranches")
     private ASTNode parseStatement() {
         final Token current = current();
-
         switch (current.getType()) {
             case KEYWORD:
                 return parseKeyword();
@@ -55,11 +56,39 @@ public final class Parser {
         final Keyword keyword = Keyword.keyword(current);
 
         switch (keyword) {
+            case VAR: return parseVariableDeclaration();
+            case FN: return parseFunctionDeclaration();
         }
 
         throw new UnsupportedOperationException("Unsupported keyword: " + keyword);
     }
 
+    private ASTNode parseVariableDeclaration() {
+        consume(); // consume "var"
+
+        final String name = "";
+        return null;
+    }
+
+    private FunctionDeclarationNode parseFunctionDeclaration() {
+        consume(); // consume fn keyword
+
+        final String name = consume(VARIABLE).getValue();
+
+        final List<ParameterNode> params = new ArrayList<>();
+
+        // yummy consume food
+        consume(DIVIDER, "(");
+
+        while (!matchAndConsume(DIVIDER, ")")) params.add(new ParameterNode(consume(VARIABLE).getValue()));
+
+        final BlockNode block = parseBlock();
+        return new FunctionDeclarationNode(name, params, block);
+    }
+
+    private ASTNode parseExpression() {
+        return null;
+    }
 
     private Token consume() {
         if (currentTokenIndex >= tokens.size()) {

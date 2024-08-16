@@ -2,6 +2,7 @@ package me.kuwg.clarity.ast.nodes.function;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.util.List;
 
@@ -46,5 +47,10 @@ public class FunctionDeclarationNode extends ASTNode {
 
         sb.append(indent).append("Body:\n");
         block.print(sb, indent + "    ");
+    }
+
+    @Override
+    public void save(final ASTOutputStream out) {
+
     }
 }

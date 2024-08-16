@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.block;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 public class ReturnNode extends ASTNode {
     private final ASTNode value;
@@ -15,6 +16,11 @@ public class ReturnNode extends ASTNode {
 
     @Override
     public void print(final StringBuilder sb, final String indent) {
+
+    }
+
+    @Override
+    public void save(final ASTOutputStream out) {
 
     }
 }

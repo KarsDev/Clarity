@@ -3,16 +3,16 @@ package me.kuwg.clarity.token;
 import java.util.regex.Pattern;
 
 public enum TokenType {
-    COMMENT("^//.*"),
-    NEWLINE("\r\n|\n|\r"),
-    WHITESPACE("\\s+"),
-    KEYWORD("\\b(class|var|constructor|local|fn|native|if|else|return)\\b"), // TODO
-    STRING("^(['\"])(.*?)(?<!\\\\)\\1$"),
-    OPERATOR("\\+|\\-|\\*|\\/|%|==|!=|\\+=|\\-=|\\*=|\\/=|%="),
-    DIVIDER("[\\{\\}\\[\\]\\(\\),]"),
-    NUMBER("\\b\\d[\\d_]*\\d\\b|\\b\\d\\b"),
-    VARIABLE("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b");
-    ;
+    COMMENT("^//.*"), // Matches single-line comments (//...)
+    NEWLINE("\r\n|\n|\r"), // Matches newlines
+    WHITESPACE("\\s+"), // Matches any whitespace characters
+    KEYWORD("\\b(class|var|constructor|local|fn|native|if|else|return)\\b"), // All keywords
+    BOOLEAN("\\b(true|false)\\b"), // Matches booleans
+    LITERAL("\"[^\"]*\"|'[^']*'"), // Matches anything between " and " or ' and '
+    OPERATOR("\\+\\+|--|[+\\-*/%=<>!]=?|==|\\.|\\|\\||&&|\\?|:"), // Ensure ++ and -- are matched first
+    NUMBER("\\b\\d[_\\d]*(\\.\\d[_\\d]*)?([eE][+-]?\\d[_\\d]*)?\\b"), // Matches integer and floating-point numbers with optional underscores and scientific notation
+    DIVIDER("[\\(\\)\\[\\]\\{\\},]"), // Matches dividers like ( ) [ ] { }
+    VARIABLE("\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"); // Matches valid variable names;
 
     public static final TokenType[] VALUES = values();
 

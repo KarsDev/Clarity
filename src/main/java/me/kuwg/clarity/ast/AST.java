@@ -18,4 +18,10 @@ public class AST extends ASTNode {
     public void print(final StringBuilder sb, final String indent) {
         root.print(sb, indent);
     }
+
+    @Override
+    public void save(final ASTOutputStream out) {
+        // Root should only be saved
+        throw new RuntimeException("Cannot save AST");
+    }
 }

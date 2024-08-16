@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.expression;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 public class BinaryExpressionNode extends ASTNode {
 
@@ -45,5 +46,10 @@ public class BinaryExpressionNode extends ASTNode {
         } else {
             sb.append(indent).append("    (no right operand)\n");
         }
+    }
+
+    @Override
+    public void save(final ASTOutputStream out) {
+
     }
 }
