@@ -2,6 +2,7 @@ package me.kuwg.clarity.ast.nodes.function;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
@@ -9,14 +10,17 @@ import java.util.List;
 
 public class FunctionDeclarationNode extends ASTNode {
 
-    private final String functionName;
-    private final List<ParameterNode> parameterNodes;
-    private final BlockNode block;
+    private String functionName;
+    private List<ParameterNode> parameterNodes;
+    private BlockNode block;
 
     public FunctionDeclarationNode(final String functionName, final List<ParameterNode> parameterNodes, final BlockNode block) {
         this.functionName = functionName;
         this.parameterNodes = parameterNodes;
         this.block = block;
+    }
+
+    public FunctionDeclarationNode() {
     }
 
     public final String getFunctionName() {
@@ -55,5 +59,13 @@ public class FunctionDeclarationNode extends ASTNode {
         out.writeString(functionName);
         out.writeNodeList(parameterNodes);
         out.writeNode(block);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void load(final ASTInputStream in) throws IOException {
+        this.functionName = in.readString();
+        this.parameterNodes = (List<ParameterNode>) in.readNodeList();
+        this.block = (BlockNode) in.readNode();
     }
 }

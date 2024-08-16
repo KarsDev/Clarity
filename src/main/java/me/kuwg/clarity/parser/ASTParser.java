@@ -3,8 +3,14 @@ package me.kuwg.clarity.parser;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.ParameterNode;
+import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
+import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
+import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
+import me.kuwg.clarity.ast.nodes.variable.VariableDeclarationNode;
+import me.kuwg.clarity.ast.nodes.variable.VariableReferenceNode;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.TokenType;
 
@@ -66,8 +72,14 @@ public final class ASTParser {
     private ASTNode parseVariableDeclaration() {
         consume(); // consume "var"
 
-        final String name = "";
-        return null;
+        final String name = consume(VARIABLE).getValue();
+
+        if (matchAndConsume(OPERATOR, "=")) {
+            // assign
+            return new VariableDeclarationNode(name, parseExpression());
+        }
+
+        return new VariableDeclarationNode(name, null);
     }
 
     private FunctionDeclarationNode parseFunctionDeclaration() {
@@ -87,7 +99,53 @@ public final class ASTParser {
     }
 
     private ASTNode parseExpression() {
-        return null;
+        // Start with the left operand (could be a literal or variable)
+        ASTNode left = parsePrimary();
+
+        // Continue parsing the expression while operators are present
+        while (isOperator(current())) {
+            Token operatorToken = consume(); // consume the operator
+            ASTNode right = parsePrimary(); // parse the right operand
+            left = new BinaryExpressionNode(left, operatorToken.getValue(), right); // create a binary expression node
+        }
+
+        return left;
+    }
+
+    private ASTNode parsePrimary() {
+        Token token = consume();
+
+        switch (token.getType()) {
+            case VARIABLE:
+                return new VariableReferenceNode(token.getValue());
+            case NUMBER:
+                final String value = token.getValue();
+
+                try {
+                    return new IntegerNode(Integer.parseInt(value));
+                } catch (final NumberFormatException e) {
+                    try {
+                        return new DecimalNode(Double.parseDouble(value));
+                    } catch (final NumberFormatException e1) {
+                        throw new RuntimeException(e1);
+                    }
+                }
+            case STRING:
+                return new LiteralNode(consume().getValue());
+            case DIVIDER:
+                if (token.getValue().equals("(")) {
+                    ASTNode expression = parseExpression();
+                    consume(DIVIDER, ")");
+                    return expression;
+                }
+                break;
+        }
+
+        throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " at line " + token.getLine());
+    }
+
+    private boolean isOperator(Token token) {
+        return token.getType() == OPERATOR;
     }
 
     private Token consume() {

@@ -8,7 +8,7 @@ public enum TokenType {
     WHITESPACE("\\s+"), // Matches any whitespace characters
     KEYWORD("\\b(class|var|constructor|local|fn|native|if|else|return)\\b"), // All keywords
     BOOLEAN("\\b(true|false)\\b"), // Matches booleans
-    LITERAL("\"[^\"]*\"|'[^']*'"), // Matches anything between " and " or ' and '
+    STRING("\"[^\"]*\"|'[^']*'"), // Matches anything between " and " or ' and '
     OPERATOR("\\+\\+|--|[+\\-*/%=<>!]=?|==|\\.|\\|\\||&&|\\?|:"), // Ensure ++ and -- are matched first
     NUMBER("\\b\\d[_\\d]*(\\.\\d[_\\d]*)?([eE][+-]?\\d[_\\d]*)?\\b"), // Matches integer and floating-point numbers with optional underscores and scientific notation
     DIVIDER("[\\(\\)\\[\\]\\{\\},]"), // Matches dividers like ( ) [ ] { }

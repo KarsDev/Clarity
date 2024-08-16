@@ -1,0 +1,33 @@
+class Person {
+    var name
+    var age
+
+    constructor(name, age) {
+        local.name = name
+        local.age = age
+    }
+
+    fn greet() {
+        native.println("My name is" + local.name + " and i'm " + local.age + " years old)
+    }
+}
+
+fn factorial(n) {
+    // You can also do
+    // if n == 0 || n == 1 return 1
+    
+    if n == 0 || n == 1 {
+        return 1
+    } else {
+        return n * factorial(n - 1)
+    }
+}
+
+fn main() {
+
+    var number = 5
+
+    var fact = factorial(5)
+    
+    native.println("Factorial of " + number + " equals to " + fact)
+}

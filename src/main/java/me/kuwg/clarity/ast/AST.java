@@ -1,7 +1,10 @@
 package me.kuwg.clarity.ast;
 
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
+
+import java.io.IOException;
 
 public class AST extends ASTNode {
 
@@ -22,7 +25,18 @@ public class AST extends ASTNode {
 
     @Override
     public void save(final ASTOutputStream out) {
-        // Root should only be saved
         throw new RuntimeException("Cannot save AST");
+    }
+
+    @Override
+    public void load(final ASTInputStream in) throws IOException {
+        throw new RuntimeException("Cannot load AST");
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        print(sb, "");
+        return sb.toString();
     }
 }

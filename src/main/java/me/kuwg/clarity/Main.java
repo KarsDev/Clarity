@@ -1,6 +1,8 @@
 package me.kuwg.clarity;
 
 import me.kuwg.clarity.ast.AST;
+import me.kuwg.clarity.compiler.ASTLoader;
+import me.kuwg.clarity.compiler.ASTSaver;
 import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.Tokenizer;
@@ -20,5 +22,13 @@ public class Main {
 
         final AST ast = parser.parse();
         System.out.println(ast);
+        ASTSaver saver = new ASTSaver(ast);
+
+        final File out = new File("OUTPUT.cclr");
+
+        saver.save(out);
+
+        ASTLoader loader = new ASTLoader(out);
+        System.out.println(loader.load());
     }
 }

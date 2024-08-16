@@ -1,20 +1,24 @@
 package me.kuwg.clarity.ast.nodes.expression;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
 
 public class BinaryExpressionNode extends ASTNode {
 
-    private final ASTNode left;
-    private final String operator;
-    private final ASTNode right;
+    private ASTNode left;
+    private String operator;
+    private ASTNode right;
 
     public BinaryExpressionNode(final ASTNode left, final String operator, final ASTNode right) {
         this.left = left;
         this.operator = operator;
         this.right = right;
+    }
+
+    public BinaryExpressionNode() {
     }
 
     public final ASTNode getLeft() {
@@ -55,5 +59,12 @@ public class BinaryExpressionNode extends ASTNode {
         out.writeNode(left);
         out.writeString(operator);
         out.writeNode(right);
+    }
+
+    @Override
+    public void load(final ASTInputStream in) throws IOException {
+        this.left = in.readNode();
+        this.operator = in.readString();
+        this.right = in.readNode();
     }
 }

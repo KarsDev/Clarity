@@ -1,8 +1,3 @@
 fn main() {
-
-    var number = 5
-
-    var fact = 120
-
-    native.println("Factorial of " + number + " equals to " + fact)
+    var x = 1 + 2
 }

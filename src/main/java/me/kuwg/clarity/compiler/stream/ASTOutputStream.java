@@ -27,7 +27,7 @@ public class ASTOutputStream extends DataOutputStream {
         }
 
         // Write short id
-        writeShort(id);
+        writeInt(id);
         node.save(this);
     }
 

@@ -1,20 +1,19 @@
-package me.kuwg.clarity.ast.nodes.function;
+package me.kuwg.clarity.ast.nodes.variable;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
-import org.omg.CORBA.ParameterMode;
 
 import java.io.IOException;
 
-public class ParameterNode extends ASTNode {
+public class VariableReferenceNode extends ASTNode {
     private String name;
 
-    public ParameterNode(final String name) {
+    public VariableReferenceNode(final String name) {
         this.name = name;
     }
 
-    public ParameterNode() {
+    public VariableReferenceNode() {
     }
 
     public final String getName() {
@@ -23,7 +22,8 @@ public class ParameterNode extends ASTNode {
 
     @Override
     public void print(final StringBuilder sb, final String indent) {
-        sb.append(indent).append("Parameter: ").append(name).append("\n");
+        sb.append(indent).append("Variable Reference:\n");
+        sb.append(indent).append("  Name: ").append(name).append("\n");
     }
 
     @Override
