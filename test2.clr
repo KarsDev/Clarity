@@ -8,7 +8,7 @@ class Person {
     }
 
     fn greet() {
-        native.println("My name is" + local.name + " and i'm " + local.age + " years old)
+        native.println("My name is " + local.name + " and i'm " + local.age + " years old")
     }
 }
 

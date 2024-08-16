@@ -61,11 +61,10 @@ public class FunctionDeclarationNode extends ASTNode {
         out.writeNode(block);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void load(final ASTInputStream in) throws IOException {
         this.functionName = in.readString();
-        this.parameterNodes = (List<ParameterNode>) in.readNodeList();
+        this.parameterNodes = in.readNodeListNoCast();
         this.block = (BlockNode) in.readNode();
     }
 }

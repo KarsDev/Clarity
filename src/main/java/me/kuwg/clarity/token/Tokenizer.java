@@ -21,7 +21,8 @@ public class Tokenizer {
                     final String tokenValue = type.equals(TokenType.NUMBER) ? processNumber(matcher.group()).toString() : matcher.group();
 
                     if (type == TokenType.NEWLINE) line++;
-                    else if (type != TokenType.COMMENT && type != TokenType.WHITESPACE) tokens.add(new Token(type, tokenValue, line));
+
+                    if (type != TokenType.COMMENT && type != TokenType.WHITESPACE) tokens.add(new Token(type, tokenValue, line));
 
 
                     remainingSrc = remainingSrc.substring(tokenValue.length());

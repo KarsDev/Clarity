@@ -6,9 +6,11 @@ import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.MainFunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.ParameterNode;
+import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
 import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
+import me.kuwg.clarity.ast.nodes.nat.NativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.variable.VariableDeclarationNode;
 import me.kuwg.clarity.ast.nodes.variable.VariableReferenceNode;
 
@@ -30,6 +32,7 @@ public class ASTData {
         NODE_IDS.put(FunctionDeclarationNode.class, 0x300);
         NODE_IDS.put(MainFunctionDeclarationNode.class, 0x301);
         NODE_IDS.put(ParameterNode.class, 0x302);
+        NODE_IDS.put(NativeFunctionCallNode.class, 0x303);
 
         // Variable (0x400)
         NODE_IDS.put(VariableDeclarationNode.class, 0x400);
@@ -39,6 +42,9 @@ public class ASTData {
         NODE_IDS.put(LiteralNode.class, 0x500);
         NODE_IDS.put(IntegerNode.class, 0x501);
         NODE_IDS.put(DecimalNode.class, 0x502);
+
+        // Inclusion (0x600)
+        NODE_IDS.put(IncludeNode.class, 0x600);
     }
 
     public static int getNodeId(Class<? extends ASTNodeCompiler> clazz) {

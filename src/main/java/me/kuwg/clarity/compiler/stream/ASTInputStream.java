@@ -34,7 +34,7 @@ public class ASTInputStream extends DataInputStream {
         ASTNodeCompiler node;
         try {
             node = clazz.newInstance();
-        } catch (final IllegalAccessException | InstantiationException e) {
+        } catch (final IllegalAccessException | InstantiationException | NullPointerException e) {
             throw new RuntimeException("Failed to create class");
         }
 
@@ -50,5 +50,10 @@ public class ASTInputStream extends DataInputStream {
             list.add(readNode());
         }
         return list;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends ASTNode> List<T> readNodeListNoCast() throws IOException {
+        return (List<T>) readNodeList();
     }
 }

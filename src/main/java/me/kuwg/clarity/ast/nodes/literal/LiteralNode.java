@@ -10,7 +10,7 @@ public class LiteralNode extends ASTNode {
     private String value;
 
     public LiteralNode(final String value) {
-        this.value = value;
+        this.value = value == null ? null : value.length() > 2 ? value.substring(1, value.length() - 1) : "";
     }
 
     public LiteralNode() {
