@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast;
 
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 public class AST extends ASTNode {
 

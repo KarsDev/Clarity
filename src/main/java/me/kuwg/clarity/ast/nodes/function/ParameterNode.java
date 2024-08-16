@@ -3,6 +3,8 @@ package me.kuwg.clarity.ast.nodes.function;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
+import java.io.IOException;
+
 public class ParameterNode extends ASTNode {
     private final String name;
 
@@ -20,7 +22,7 @@ public class ParameterNode extends ASTNode {
     }
 
     @Override
-    public void save(final ASTOutputStream out) {
-
+    public void save(final ASTOutputStream out) throws IOException {
+        out.writeString(name);
     }
 }

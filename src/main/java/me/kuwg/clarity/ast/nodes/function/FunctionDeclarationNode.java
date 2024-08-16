@@ -4,6 +4,7 @@ import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
+import java.io.IOException;
 import java.util.List;
 
 public class FunctionDeclarationNode extends ASTNode {
@@ -50,7 +51,9 @@ public class FunctionDeclarationNode extends ASTNode {
     }
 
     @Override
-    public void save(final ASTOutputStream out) {
-
+    public void save(final ASTOutputStream out) throws IOException {
+        out.writeString(functionName);
+        out.writeNodeList(parameterNodes);
+        out.writeNode(block);
     }
 }

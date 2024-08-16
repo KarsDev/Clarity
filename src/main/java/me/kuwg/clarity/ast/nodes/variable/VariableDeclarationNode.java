@@ -3,11 +3,11 @@ package me.kuwg.clarity.ast.nodes.variable;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
-public class VariableDeclarationNode extends ASTNode {
+import java.io.IOException;
 
+public class VariableDeclarationNode extends ASTNode {
     private final String name;
     private final ASTNode expression;
-
 
     public VariableDeclarationNode(final String name, final ASTNode expression) {
         this.name = name;
@@ -37,7 +37,8 @@ public class VariableDeclarationNode extends ASTNode {
     }
 
     @Override
-    public void save(final ASTOutputStream out) {
-
+    public void save(final ASTOutputStream out) throws IOException {
+        out.writeString(name);
+        out.writeNode(expression);
     }
 }

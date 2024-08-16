@@ -1,6 +1,9 @@
 package me.kuwg.clarity.ast.nodes.block;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.stream.ASTOutputStream;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,5 +25,10 @@ public class BlockNode extends ASTNode {
         for (ASTNode child : children) {
             child.print(sb, indent + "    ");
         }
+    }
+
+    @Override
+    public void save(ASTOutputStream out) throws IOException {
+        out.writeNodeList(children);
     }
 }
