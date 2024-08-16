@@ -7,7 +7,7 @@ public final class Token {
 
     public Token(final TokenType type, final String value, final int line) {
         this.type = type;
-        this.value = value;
+        this.value = type == TokenType.NEWLINE ? "\\n" : value;
         this.line = line;
     }
 
@@ -21,5 +21,14 @@ public final class Token {
 
     public int getLine() {
         return line;
+    }
+
+    @Override
+    public String toString() {
+        return "Token{" +
+                "type=" + type +
+                ", value='" + value + '\'' +
+                ", line=" + line +
+                '}';
     }
 }

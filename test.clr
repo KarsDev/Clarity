@@ -1,0 +1,9 @@
+define fn add with x, y {
+    return x + y
+}
+
+define fn main {
+    define var x with call add with 1, 2
+
+    call native println with x
+}

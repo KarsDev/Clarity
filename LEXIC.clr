@@ -1,0 +1,33 @@
+define class Person {
+
+    define var name
+    define var age
+
+    define constructor with name, age {
+        set local name with name
+        set local age with age
+    }
+
+    define fn greet {
+        call native println with "Hello! My name is " + name + " and I am " + age + " years old!"
+    }
+}
+
+define fn factorial with n {
+    if n == 0 or n == 1 {
+        return 1
+    } else {
+        return n * factorial with n - 1
+    }
+}
+
+define fn main {
+
+    define var number with 5
+
+    define var fact with call factorial with 5
+
+    call native println with "Factorial of " + number + " equals to " + fact
+}
+
+include, define, class, var, constructor, with, set, local, fn, call, native, if, or, return, else
