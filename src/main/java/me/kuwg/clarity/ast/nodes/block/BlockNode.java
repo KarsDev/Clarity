@@ -28,7 +28,7 @@ public class BlockNode extends ASTNode {
     }
 
     @Override
-    public void save(ASTOutputStream out) throws IOException {
+    public void save(final ASTOutputStream out) throws IOException {
         out.writeNodeList(children);
     }
 }

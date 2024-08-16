@@ -1,7 +1,6 @@
 package me.kuwg.clarity.compiler.stream;
 
 import me.kuwg.clarity.ast.ASTNode;
-import me.kuwg.clarity.ast.nodes.function.ParameterNode;
 import me.kuwg.clarity.compiler.ASTData;
 import me.kuwg.clarity.compiler.ASTNodeCompiler;
 

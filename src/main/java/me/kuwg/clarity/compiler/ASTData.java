@@ -20,6 +20,7 @@ public class ASTData {
          0x200 = Expression
          0x300 = Function
          0x400 = Variable
+         0x500 = Literal
 
          Each node type has its own range, so you can add more
          **/
