@@ -1,0 +1,4 @@
+fn main() {
+  var value = native.input("Name: ")
+  native.println("Your name: " + value)
+}
