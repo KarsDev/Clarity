@@ -28,7 +28,7 @@ public class ASTInputStream extends DataInputStream {
         int id = readInt();
         Class<? extends ASTNodeCompiler> clazz = ASTData.getClassFromId(id);
         if (clazz == null) {
-            throw new RuntimeException("Failed to read class id " + id);
+            return null;
         }
 
         ASTNodeCompiler node;

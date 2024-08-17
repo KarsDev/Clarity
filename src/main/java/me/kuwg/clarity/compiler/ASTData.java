@@ -24,52 +24,58 @@ import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ASTData {
-    private static final Map<Class<? extends ASTNodeCompiler>, Integer> NODE_IDS = new HashMap<>();
+    private static final Map<Class<? extends ASTNodeCompiler>, Integer> NODE_IDS = new ConcurrentHashMap<>();
+    private static final Map<Integer, Class<? extends ASTNodeCompiler>> ID_TO_NODE = new ConcurrentHashMap<>();
 
     static {
         // Block (0x100)
-        NODE_IDS.put(BlockNode.class, 0x100);
-        NODE_IDS.put(ReturnNode.class, 0x101);
+        registerNode(BlockNode.class, 0x100);
+        registerNode(ReturnNode.class, 0x101);
 
         // Expression (0x200)
-        NODE_IDS.put(BinaryExpressionNode.class, 0x200);
+        registerNode(BinaryExpressionNode.class, 0x200);
 
         // Function (0x300)
-        NODE_IDS.put(FunctionDeclarationNode.class, 0x300);
-        NODE_IDS.put(MainFunctionDeclarationNode.class, 0x301);
-        NODE_IDS.put(ParameterNode.class, 0x302);
-        NODE_IDS.put(NativeFunctionCallNode.class, 0x303);
-        NODE_IDS.put(FunctionCallNode.class, 0x304);
-        NODE_IDS.put(ObjectFunctionCallNode.class, 0x305);
-        NODE_IDS.put(LocalFunctionCallNode.class, 0x306);
+        registerNode(FunctionDeclarationNode.class, 0x300);
+        registerNode(MainFunctionDeclarationNode.class, 0x301);
+        registerNode(ParameterNode.class, 0x302);
+        registerNode(NativeFunctionCallNode.class, 0x303);
+        registerNode(FunctionCallNode.class, 0x304);
+        registerNode(ObjectFunctionCallNode.class, 0x305);
+        registerNode(LocalFunctionCallNode.class, 0x306);
 
         // Variable (0x400)
-        NODE_IDS.put(VariableDeclarationNode.class, 0x400);
-        NODE_IDS.put(VariableReferenceNode.class, 0x401);
-        NODE_IDS.put(VariableReassignmentNode.class, 0x402);
-        NODE_IDS.put(ObjectVariableReferenceNode.class, 0x403);
-        NODE_IDS.put(ObjectVariableReassignmentNode.class, 0x404);
-        NODE_IDS.put(LocalVariableReferenceNode.class, 0x405);
-
+        registerNode(VariableDeclarationNode.class, 0x400);
+        registerNode(VariableReferenceNode.class, 0x401);
+        registerNode(VariableReassignmentNode.class, 0x402);
+        registerNode(ObjectVariableReferenceNode.class, 0x403);
+        registerNode(ObjectVariableReassignmentNode.class, 0x404);
+        registerNode(LocalVariableReferenceNode.class, 0x405);
 
         // Literal (0x500)
-        NODE_IDS.put(LiteralNode.class, 0x500);
-        NODE_IDS.put(IntegerNode.class, 0x501);
-        NODE_IDS.put(DecimalNode.class, 0x502);
+        registerNode(LiteralNode.class, 0x500);
+        registerNode(IntegerNode.class, 0x501);
+        registerNode(DecimalNode.class, 0x502);
 
         // Inclusion (0x600)
-        NODE_IDS.put(IncludeNode.class, 0x600);
+        registerNode(IncludeNode.class, 0x600);
 
         // Class (0x700)
-        NODE_IDS.put(ClassDeclarationNode.class, 0x700);
-        NODE_IDS.put(ClassInstantiationNode.class, 0x701);
+        registerNode(ClassDeclarationNode.class, 0x700);
+        registerNode(ClassInstantiationNode.class, 0x701);
 
         // Context (0x800)
-        NODE_IDS.put(ContextReferenceNode.class, 0x800);
+        registerNode(ContextReferenceNode.class, 0x800);
+    }
+
+    private static void registerNode(Class<? extends ASTNodeCompiler> clazz, int id) {
+        NODE_IDS.put(clazz, id);
+        ID_TO_NODE.put(id, clazz);
     }
 
     public static int getNodeId(Class<? extends ASTNodeCompiler> clazz) {
@@ -77,11 +83,6 @@ public class ASTData {
     }
 
     public static Class<? extends ASTNodeCompiler> getClassFromId(int id) {
-        for (final Map.Entry<Class<? extends ASTNodeCompiler>, Integer> entry : NODE_IDS.entrySet()) {
-            if (entry.getValue() == id) {
-                return entry.getKey();
-            }
-        }
-        return null;
+        return ID_TO_NODE.getOrDefault(id, null);
     }
 }

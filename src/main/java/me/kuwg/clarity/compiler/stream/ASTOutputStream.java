@@ -20,15 +20,17 @@ public class ASTOutputStream extends DataOutputStream {
      */
     public void writeNode(ASTNodeCompiler node) throws IOException {
         // Get node id
-        int id = ASTData.getNodeId(node.getClass());
+        int id = ASTData.getNodeId(node == null ? null : node.getClass());
 
         if (id == -1) {
-            throw new RuntimeException(node.getClass().getName() + " has no node id. Please add to ASTData");
+            throw new RuntimeException(node == null ? null : node.getClass().getName() + " has no node id. Please add to ASTData");
         }
 
         // Write short id
         writeInt(id);
-        node.save(this);
+        if (node != null) {
+            node.save(this);
+        }
     }
 
     /**

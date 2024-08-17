@@ -88,9 +88,11 @@ public class Clarity {
     }
 
     private static void runOrInterpretFile(File file) throws IOException {
+        final long start = System.nanoTime();
         AST ast = loadOrParseAST(file);
         Interpreter interpreter = new Interpreter(ast);
         int exitCode = interpreter.interpret();
+        System.out.println(System.nanoTime()-start);
         System.exit(exitCode);
     }
 
