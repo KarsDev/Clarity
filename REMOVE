@@ -1,18 +1,43 @@
-FUNC main:
-CONST "Hello"
-CONST " "
-CONST "World"
-CALL get T0 T1 T2
-STORE x
-LOAD x
-SYSCALL println x
+CLASS Person
+FUNC constructor:
+CONTEXT LOCAL LOAD name
+STORE name
+CONTEXT LOCAL LOAD age
+STORE age
 STOP
 
-FUNC get:
-LOAD a
-LOAD b
-OP + a, b, T3
-LOAD c
-OP + T3, c, T4
-RETURN T4
+DECLARE name
+DECLARE age
+FUNC greet:
+CONST "My name is "
+CALL getName
+OP + T0, T1, T2
+CONST " and i'm "
+OP + T2, T3, T4
+CALL getAge
+OP + T4, T5, T6
+CONST " years old"
+OP + T6, T7, T8
+SYSCALL println T8
+STOP
+
+FUNC getName:
+LOAD name
+RETURN name
+STOP
+
+FUNC getAge:
+LOAD age
+RETURN age
+STOP
+
+CLASSEND
+
+FUNC main:
+CONST "John"
+CONST 16
+NEW Person T9 T10
+STORE john
+LOAD john
+CALL john#greet
 STOP

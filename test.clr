@@ -1,5 +1,5 @@
 class Person {
-    var name
+    var name = "x"
     var age
 
     constructor(name, age) {

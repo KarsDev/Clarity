@@ -2,7 +2,7 @@ package me.kuwg.clarity;
 
 import me.kuwg.clarity.cir.compiler.CIRCompiler;
 import me.kuwg.clarity.ast.AST;
-import me.kuwg.clarity.cir.interpreter.CIRInterpreter;
+import me.kuwg.clarity.cir.interpreter.CIRCodeExecutor;
 import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
 import me.kuwg.clarity.interpreter.Interpreter;
@@ -83,8 +83,8 @@ public class Clarity {
         AST ast = parseASTFromSource(file);
         CIRCompiler compiler = new CIRCompiler(ast);
         String IRCompiledAST = compiler.compile();
-        CIRInterpreter cirInterpreter = new CIRInterpreter(IRCompiledAST.split("\n"));
-        cirInterpreter.interpret();
+        CIRCodeExecutor cirInterpreter = new CIRCodeExecutor(IRCompiledAST.split("\r\n|\n|\r"));
+        System.exit(cirInterpreter.interpret());
     }
 
     private static void runOrInterpretFile(File file) throws IOException {
