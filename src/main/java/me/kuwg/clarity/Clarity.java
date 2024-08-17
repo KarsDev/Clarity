@@ -165,7 +165,7 @@ public class Clarity {
         try {
             saver.save(new File(output));
         } catch (IOException e) {
-            System.err.println("Failed to save the AST:");
+            System.err.println("Failed to save the AST: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }

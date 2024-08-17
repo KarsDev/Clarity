@@ -7,6 +7,7 @@ import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.FunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.call.LocalFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.function.call.NativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.call.ObjectFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
@@ -15,24 +16,29 @@ import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
 import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
-import me.kuwg.clarity.ast.nodes.function.call.NativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
+import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
-import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 
-import java.util.Map;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 
 public class ASTData {
-    private static final Map<Class<? extends ASTNodeCompiler>, Integer> NODE_IDS = new ConcurrentHashMap<>();
-    private static final Map<Integer, Class<? extends ASTNodeCompiler>> ID_TO_NODE = new ConcurrentHashMap<>();
+    // Data for VarInt and VarLong
+    public static final int SEGMENT_BITS = 0x7F;
+    public static final int CONTINUE_BIT = 0x80;
+
+    private static final Map<Class<? extends ASTNodeCompiler>, Integer> NODE_IDS = new HashMap<>();
+    private static final Map<Integer, Class<? extends ASTNodeCompiler>> ID_TO_NODE = new HashMap<>();
 
     static {
+        // Null
+        registerNode(null, 0x00);
+
         // Block (0x100)
         registerNode(BlockNode.class, 0x100);
         registerNode(ReturnNode.class, 0x101);

@@ -10,6 +10,9 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static me.kuwg.clarity.compiler.ASTData.CONTINUE_BIT;
+import static me.kuwg.clarity.compiler.ASTData.SEGMENT_BITS;
+
 public class ASTOutputStream extends DataOutputStream {
     public ASTOutputStream(OutputStream outputStream) {
         super(outputStream);
@@ -23,11 +26,11 @@ public class ASTOutputStream extends DataOutputStream {
         int id = ASTData.getNodeId(node == null ? null : node.getClass());
 
         if (id == -1) {
-            throw new RuntimeException(node == null ? null : node.getClass().getName() + " has no node id. Please add to ASTData");
+            throw new IOException((node == null ? null : node.getClass().getName()) + " has no node id. Please add to ASTData");
         }
 
         // Write short id
-        writeInt(id);
+        writeVarInt(id);
         if (node != null) {
             node.save(this);
         }
@@ -37,7 +40,7 @@ public class ASTOutputStream extends DataOutputStream {
      * Writes a list of {@link me.kuwg.clarity.ast.ASTNode} to the output stream
      */
     public void writeNodeList(List<? extends ASTNode> list) throws IOException {
-        writeInt(list.size());
+        writeVarInt(list.size());
         for (ASTNode astNode : list) {
             writeNode(astNode);
         }
@@ -47,7 +50,43 @@ public class ASTOutputStream extends DataOutputStream {
      * Writes a UTF-8 encode string to the output stream
      */
     public void writeString(String string) throws IOException {
-        writeInt(string.length());
+        writeVarInt(string.length());
         write(string.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /***
+     * Writes a VarInt, a dynamic sized integer
+     * From <a href="https://wiki.vg/index.php?title=Protocol&oldid=7368#VarInt_and_VarLong">wiki.vg</a>
+     */
+    public void writeVarInt(int value) throws IOException {
+        while (true) {
+            if ((value & ~SEGMENT_BITS) == 0) {
+                writeByte(value);
+                return;
+            }
+
+            writeByte((value & SEGMENT_BITS) | CONTINUE_BIT);
+
+            // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
+            value >>>= 7;
+        }
+    }
+
+    /***
+     * Writes a VarLong, a dynamic sized long
+     * From <a href="https://wiki.vg/index.php?title=Protocol&oldid=7368#VarInt_and_VarLong">wiki.vg</a>
+     */
+    public void writeVarLong(long value) throws IOException {
+        while (true) {
+            if ((value & ~((long) SEGMENT_BITS)) == 0) {
+                writeByte((int) value);
+                return;
+            }
+
+            writeByte((int) ((value & SEGMENT_BITS) | CONTINUE_BIT));
+
+            // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
+            value >>>= 7;
+        }
     }
 }
