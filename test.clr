@@ -8,10 +8,19 @@ class Person {
     }
 
     fn greet() {
-        native.println("My name is " + local.name + " and i'm " + local.age + " years old")
+        native.println("My name is " + local.getName() + " and i'm " + local.getAge() + " years old")
+    }
+
+    fn getName() {
+        return name
+    }
+
+    fn getAge() {
+        return age
     }
 }
 
 fn main() {
     var john = new Person("John", 16)
+    john.greet()
 }

@@ -8,6 +8,8 @@ import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.FunctionCallNode;
+import me.kuwg.clarity.ast.nodes.function.call.LocalFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.function.call.ObjectFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
@@ -16,9 +18,11 @@ import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
 import me.kuwg.clarity.ast.nodes.function.call.NativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
-import me.kuwg.clarity.ast.nodes.variable.VariableDeclarationNode;
-import me.kuwg.clarity.ast.nodes.variable.VariableReassignmentNode;
-import me.kuwg.clarity.ast.nodes.variable.VariableReferenceNode;
+import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
+import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
+import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
+import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
+import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.TokenType;
 
@@ -212,6 +216,20 @@ public final class ASTParser {
                 if (current().getValue().equals("=")) {
                     consume();
                     return new VariableReassignmentNode(token.getValue(), parseExpression());
+                } else if (current().getValue().equals(".")) {
+                    consume();
+                    final String name = consume(VARIABLE).getValue();
+
+                    if (matchAndConsume(DIVIDER, "(")) { // function
+                        final List<ASTNode> params = new ArrayList<>();
+                        do if (match(VARIABLE)) params.add(parseExpression());
+                        while (matchAndConsume(DIVIDER, ","));
+                        consume(DIVIDER, ")");
+                        return new ObjectFunctionCallNode(token.getValue(), name, params);
+                    } else {
+                        return new ObjectVariableReferenceNode(token.getValue(), name);
+                    }
+
                 }
                 return new VariableReferenceNode(token.getValue());
             case NUMBER:
@@ -237,7 +255,22 @@ public final class ASTParser {
 
                 break;
             case KEYWORD:
-                return parseKeyword();
+                if (token.getValue().equals("local")) {
+                    consume(); // consume "local"
+                    consume(OPERATOR, ".");
+                    final String name = consume(VARIABLE).getValue();
+                    if (matchAndConsume(DIVIDER, "(")) { // function
+                        final List<ASTNode> params = new ArrayList<>();
+                        do if (match(VARIABLE)) params.add(parseExpression());
+                        while (matchAndConsume(DIVIDER, ","));
+                        consume(DIVIDER, ")");
+                        return new LocalFunctionCallNode(name, params);
+                    } else {
+                        return new LocalVariableReferenceNode(name);
+                    }
+                } else {
+                    return parseKeyword();
+                }
         }
 
         throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " at line " + token.getLine());

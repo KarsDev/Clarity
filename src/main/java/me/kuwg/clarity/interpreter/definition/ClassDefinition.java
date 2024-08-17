@@ -25,4 +25,13 @@ public class ClassDefinition extends ObjectType {
     public final BlockNode getBody() {
         return body;
     }
+
+    @Override
+    public String toString() {
+        return "ClassDefinition{" +
+                "name='" + name + '\'' +
+                ", constructor=" + constructor +
+                ", body=" + body +
+                '}';
+    }
 }

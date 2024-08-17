@@ -1,4 +1,4 @@
-package me.kuwg.clarity.ast.nodes.variable;
+package me.kuwg.clarity.ast.nodes.variable.assign;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;

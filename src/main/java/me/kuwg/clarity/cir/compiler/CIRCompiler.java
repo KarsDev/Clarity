@@ -12,8 +12,8 @@ import me.kuwg.clarity.ast.nodes.function.call.NativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
 import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
-import me.kuwg.clarity.ast.nodes.variable.VariableDeclarationNode;
-import me.kuwg.clarity.ast.nodes.variable.VariableReferenceNode;
+import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
+import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 
 import java.util.List;
 import java.util.Stack;

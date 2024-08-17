@@ -1,4 +1,4 @@
-package me.kuwg.clarity.ast.nodes.variable;
+package me.kuwg.clarity.ast.nodes.variable.assign;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
@@ -6,21 +6,26 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
 
-public class VariableReassignmentNode extends ASTNode {
-
-    private String name;
+public class ObjectVariableReassignmentNode extends ASTNode {
+    private String caller;
+    private String called;
     private ASTNode value;
 
-    public VariableReassignmentNode(final String name, final ASTNode value) {
-        this.name = name;
+    public ObjectVariableReassignmentNode(final String caller, final String called, final ASTNode value) {
+        this.caller = caller;
+        this.called = called;
         this.value = value;
     }
 
-    public VariableReassignmentNode() {
+    public ObjectVariableReassignmentNode() {
     }
 
-    public final String getName() {
-        return name;
+    public final String getCaller() {
+        return caller;
+    }
+
+    public final String getCalled() {
+        return called;
     }
 
     public final ASTNode getValue() {
@@ -31,7 +36,8 @@ public class VariableReassignmentNode extends ASTNode {
     public void print(final StringBuilder sb, final String indent) {
         sb.append(indent).append("Variable Reassignment:\n");
 
-        sb.append(indent).append("  Name: ").append(name).append("\n");
+        sb.append(indent).append("  Caller: ").append(caller).append("\n");
+        sb.append(indent).append("  Called: ").append(called).append("\n");
 
         sb.append(indent).append("  Value:\n");
         value.print(sb, indent + "    ");
@@ -39,13 +45,15 @@ public class VariableReassignmentNode extends ASTNode {
 
     @Override
     public void save(final ASTOutputStream out) throws IOException {
-        out.writeString(name);
+        out.writeString(caller);
+        out.writeString(called);
         out.writeNode(value);
     }
 
     @Override
     public void load(final ASTInputStream in) throws IOException {
-        this.name = in.readString();
+        this.caller = in.readString();
+        this.called = in.readString();
         this.value = in.readNode();
     }
 }
