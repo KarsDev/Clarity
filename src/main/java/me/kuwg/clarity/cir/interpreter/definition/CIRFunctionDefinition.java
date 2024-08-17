@@ -1,8 +1,10 @@
 package me.kuwg.clarity.cir.interpreter.definition;
 
+import me.kuwg.clarity.interpreter.types.ObjectType;
+
 import java.util.List;
 
-public class CIRFunctionDefinition {
+public class CIRFunctionDefinition extends ObjectType {
 
     private final String name;
     private final List<String> params;

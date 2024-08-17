@@ -1,5 +1,7 @@
 package me.kuwg.clarity.cir.interpreter.tokens;
 
+import java.util.Arrays;
+
 public class CIRToken {
 
     private final String command;
@@ -12,15 +14,24 @@ public class CIRToken {
         this.line = line;
     }
 
-    public final String getCommand() {
+    public final String cmd() {
         return command;
     }
 
-    public final String[] getParameters() {
+    public final String[] params() {
         return parameters;
     }
 
     public final int getLine() {
         return line;
+    }
+
+    @Override
+    public String toString() {
+        return "CIRToken{" +
+                "command='" + command + '\'' +
+                ", parameters=" + Arrays.toString(parameters) +
+                ", line=" + line +
+                '}';
     }
 }
