@@ -15,6 +15,7 @@ public class DecimalNode extends ASTNode {
     }
 
     public DecimalNode() {
+        super();
     }
 
     public final double getValue() {

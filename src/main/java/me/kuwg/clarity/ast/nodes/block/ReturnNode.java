@@ -14,6 +14,7 @@ public class ReturnNode extends ASTNode {
     }
 
     public ReturnNode() {
+        super();
     }
 
     public final ASTNode getValue() {
@@ -22,7 +23,12 @@ public class ReturnNode extends ASTNode {
 
     @Override
     public void print(final StringBuilder sb, final String indent) {
-
+        sb.append(indent).append("Return:\n");
+        if (value != null) {
+            value.print(sb, indent + "    ");
+        } else {
+            sb.append(indent).append("    None\n");
+        }
     }
 
     @Override

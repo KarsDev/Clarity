@@ -11,6 +11,7 @@ public class AST extends ASTNode {
     private final BlockNode root;
 
     public AST(final BlockNode root) {
+        super();
         this.root = root;
     }
 

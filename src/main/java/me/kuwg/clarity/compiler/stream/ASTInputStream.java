@@ -35,7 +35,7 @@ public class ASTInputStream extends DataInputStream {
         try {
             node = clazz.newInstance();
         } catch (final IllegalAccessException | InstantiationException | NullPointerException e) {
-            throw new RuntimeException("Failed to create class");
+            throw new RuntimeException("Failed to create class: " + clazz);
         }
 
         node.load(this);

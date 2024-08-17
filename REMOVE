@@ -1,0 +1,18 @@
+FUNC main:
+CONST "Hello"
+CONST " "
+CONST "World"
+CALL get T0 T1 T2
+STORE x
+LOAD x
+SYSCALL println x
+STOP
+
+FUNC get:
+LOAD a
+LOAD b
+OP + a, b, T3
+LOAD c
+OP + T3, c, T4
+RETURN T4
+STOP

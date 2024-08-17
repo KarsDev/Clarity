@@ -14,6 +14,7 @@ public class LiteralNode extends ASTNode {
     }
 
     public LiteralNode() {
+        super();
     }
 
     public final String getValue() {

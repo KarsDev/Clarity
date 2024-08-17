@@ -1,6 +1,5 @@
 package me.kuwg.clarity.ast.nodes.include;
 
-import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
@@ -16,6 +15,7 @@ public class IncludeNode extends ASTNode {
     }
 
     public IncludeNode() {
+        super();
     }
 
     public final BlockNode getIncluded() {

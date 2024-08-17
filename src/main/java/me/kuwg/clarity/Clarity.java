@@ -1,6 +1,8 @@
 package me.kuwg.clarity;
 
+import me.kuwg.clarity.cir.compiler.CIRCompiler;
 import me.kuwg.clarity.ast.AST;
+import me.kuwg.clarity.cir.interpreter.CIRInterpreter;
 import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
 import me.kuwg.clarity.interpreter.Interpreter;
@@ -13,7 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
-public class Main {
+public class Clarity {
     public static void main(final String[] args) throws IOException {
         if (args.length == 0) {
             printUsage();
@@ -33,12 +35,27 @@ public class Main {
         }
 
         switch (args[0]) {
-            case "run":
             case "interpret":
+                System.out.println("Interpreting and running the file: " + file.getName());
                 runOrInterpretFile(file);
                 break;
             case "compile":
+                System.out.println("Compiling the file: " + file.getName());
                 compileFile(args, file);
+                break;
+            case "test":
+                System.out.println("Interpreting and running the file: " + file.getName());
+                runOrInterpretFile(file);
+                System.out.println("Compiling the file: " + file.getName());
+                compileFile(args, file);
+                break;
+            case "run":
+                System.out.println("Running the compiled file: " + file.getName());
+                runCompiledFile(file);
+                break;
+            case "ir":
+                System.out.println("Compiling to the intermediate language the file: " + file.getName());
+                compileToIR(file);
                 break;
             default:
                 printUsage();
@@ -48,8 +65,10 @@ public class Main {
 
     private static void printUsage() {
         System.out.println("Usage:");
-        System.out.println("  run <source.clr>      - Interpret and run the source file");
+        System.out.println("  interpret <source.clr>      - Interpret and run the source file");
+        System.out.println("  run <compiled.cclr>         - Interpret the compiled source file");
         System.out.println("  compile <source.clr> [output.cclr] - Compile the source file to AST format");
+        System.out.println("  test <source.clr> [output.cclr] - Interpret, run, and then compile the source file");
     }
 
     private static void printInputFileRequired() {
@@ -60,10 +79,26 @@ public class Main {
         System.err.println("File not found: " + file);
     }
 
+    private static void compileToIR(File file) throws IOException {
+        AST ast = parseASTFromSource(file);
+        CIRCompiler compiler = new CIRCompiler(ast);
+        String IRCompiledAST = compiler.compile();
+        CIRInterpreter cirInterpreter = new CIRInterpreter(IRCompiledAST.split("\n"));
+        cirInterpreter.interpret();
+    }
+
     private static void runOrInterpretFile(File file) throws IOException {
         AST ast = loadOrParseAST(file);
         Interpreter interpreter = new Interpreter(ast);
-        System.exit(interpreter.interpret());
+        int exitCode = interpreter.interpret();
+        System.exit(exitCode);
+    }
+
+    private static void runCompiledFile(File file) {
+        AST ast = loadASTFromFile(file);
+        Interpreter interpreter = new Interpreter(ast);
+        int exitCode = interpreter.interpret();
+        System.exit(exitCode);
     }
 
     private static AST loadOrParseAST(File file) throws IOException {
@@ -98,6 +133,7 @@ public class Main {
         if (output == null) return;
 
         AST ast = parseASTFromSource(file);
+        System.out.println("Saving the compiled AST to: " + output);
         saveASTToFile(ast, output);
     }
 
@@ -127,7 +163,7 @@ public class Main {
         try {
             saver.save(new File(output));
         } catch (IOException e) {
-            System.err.println("Failed to save the AST: ");
+            System.err.println("Failed to save the AST:");
             throw new RuntimeException(e);
         }
     }

@@ -6,34 +6,46 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
 
-public class VariableReferenceNode extends ASTNode {
-    private String name;
+public class VariableReassignmentNode extends ASTNode {
 
-    public VariableReferenceNode(final String name) {
+    private String name;
+    private ASTNode value;
+
+    public VariableReassignmentNode(final String name, final ASTNode value) {
         this.name = name;
+        this.value = value;
     }
 
-    public VariableReferenceNode() {
-        super();
+    public VariableReassignmentNode() {
     }
 
     public final String getName() {
         return name;
     }
 
+    public final ASTNode getValue() {
+        return value;
+    }
+
     @Override
     public void print(final StringBuilder sb, final String indent) {
-        sb.append(indent).append("Variable Reference:\n");
+        sb.append(indent).append("Variable Reassignment:\n");
+
         sb.append(indent).append("  Name: ").append(name).append("\n");
+
+        sb.append(indent).append("  Value:\n");
+        value.print(sb, indent + "    ");
     }
 
     @Override
     public void save(final ASTOutputStream out) throws IOException {
         out.writeString(name);
+        out.writeNode(value);
     }
 
     @Override
     public void load(final ASTInputStream in) throws IOException {
         this.name = in.readString();
+        this.value = in.readNode();
     }
 }

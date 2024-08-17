@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 public class Tokenizer {
 
     public static List<Token> tokenize(final String src) {
-        final long start = System.nanoTime();
         final List<Token> tokens = new ArrayList<>();
         String remainingSrc = src;
         int line = 1;
@@ -21,8 +20,7 @@ public class Tokenizer {
                     final String tokenValue = type.equals(TokenType.NUMBER) ? processNumber(matcher.group()).toString() : matcher.group();
 
                     if (type == TokenType.NEWLINE) line++;
-
-                    if (type != TokenType.COMMENT && type != TokenType.WHITESPACE) tokens.add(new Token(type, tokenValue, line));
+                    else if (type != TokenType.COMMENT && type != TokenType.WHITESPACE) tokens.add(new Token(type, tokenValue, line));
 
 
                     remainingSrc = remainingSrc.substring(tokenValue.length());

@@ -25,4 +25,12 @@ public class VariableDefinition extends ObjectType {
     public final void setValue(final Object value) {
         this.value = value;
     }
+
+    @Override
+    public String toString() {
+        return "VariableDefinition{" +
+                "name='" + name + '\'' +
+                ", value=" + value +
+                '}';
+    }
 }

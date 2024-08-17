@@ -16,6 +16,7 @@ public class VariableDeclarationNode extends ASTNode {
     }
 
     public VariableDeclarationNode() {
+        super();
     }
 
     public final String getName() {
@@ -24,6 +25,14 @@ public class VariableDeclarationNode extends ASTNode {
 
     public final ASTNode getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        return "VariableDeclarationNode{" +
+                "name='" + name + '\'' +
+                ", value=" + value +
+                '}';
     }
 
     @Override

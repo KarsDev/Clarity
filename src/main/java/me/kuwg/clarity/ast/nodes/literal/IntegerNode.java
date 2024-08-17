@@ -15,6 +15,7 @@ public class IntegerNode extends ASTNode {
     }
 
     public IntegerNode() {
+        super();
     }
 
     public final int getValue() {

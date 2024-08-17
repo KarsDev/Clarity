@@ -2,17 +2,22 @@ package me.kuwg.clarity.compiler;
 
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.block.ReturnNode;
+import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
-import me.kuwg.clarity.ast.nodes.function.FunctionDeclarationNode;
-import me.kuwg.clarity.ast.nodes.function.MainFunctionDeclarationNode;
-import me.kuwg.clarity.ast.nodes.function.ParameterNode;
+import me.kuwg.clarity.ast.nodes.function.call.FunctionCallNode;
+import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
+import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
+import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
 import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
-import me.kuwg.clarity.ast.nodes.nat.NativeFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.function.call.NativeFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.VariableDeclarationNode;
 import me.kuwg.clarity.ast.nodes.variable.VariableReferenceNode;
+import me.kuwg.clarity.ast.nodes.variable.VariableReassignmentNode;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,10 +38,12 @@ public class ASTData {
         NODE_IDS.put(MainFunctionDeclarationNode.class, 0x301);
         NODE_IDS.put(ParameterNode.class, 0x302);
         NODE_IDS.put(NativeFunctionCallNode.class, 0x303);
+        NODE_IDS.put(FunctionCallNode.class, 0x304);
 
         // Variable (0x400)
         NODE_IDS.put(VariableDeclarationNode.class, 0x400);
         NODE_IDS.put(VariableReferenceNode.class, 0x401);
+        NODE_IDS.put(VariableReassignmentNode.class, 0x402);
 
         // Literal (0x500)
         NODE_IDS.put(LiteralNode.class, 0x500);
@@ -45,6 +52,13 @@ public class ASTData {
 
         // Inclusion (0x600)
         NODE_IDS.put(IncludeNode.class, 0x600);
+
+        // Class (0x700)
+        NODE_IDS.put(ClassDeclarationNode.class, 0x700);
+        NODE_IDS.put(ClassInstantiationNode.class, 0x701);
+
+        // Context (0x800)
+        NODE_IDS.put(ContextReferenceNode.class, 0x800);
     }
 
     public static int getNodeId(Class<? extends ASTNodeCompiler> clazz) {

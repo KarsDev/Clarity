@@ -1,9 +1,8 @@
-package me.kuwg.clarity.ast.nodes.function;
+package me.kuwg.clarity.ast.nodes.function.declare;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
-import org.omg.CORBA.ParameterMode;
 
 import java.io.IOException;
 
@@ -15,10 +14,18 @@ public class ParameterNode extends ASTNode {
     }
 
     public ParameterNode() {
+        super();
     }
 
     public final String getName() {
         return name;
+    }
+
+    @Override
+    public String toString() {
+        return "ParameterNode{" +
+                "name='" + name + '\'' +
+                '}';
     }
 
     @Override

@@ -1,4 +1,4 @@
-package me.kuwg.clarity.ast.nodes.function;
+package me.kuwg.clarity.ast.nodes.function.declare;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
@@ -10,9 +10,9 @@ import java.util.List;
 
 public class FunctionDeclarationNode extends ASTNode {
 
-    private String functionName;
-    private List<ParameterNode> parameterNodes;
-    private BlockNode block;
+    protected String functionName;
+    protected List<ParameterNode> parameterNodes;
+    protected BlockNode block;
 
     public FunctionDeclarationNode(final String functionName, final List<ParameterNode> parameterNodes, final BlockNode block) {
         this.functionName = functionName;
@@ -21,6 +21,7 @@ public class FunctionDeclarationNode extends ASTNode {
     }
 
     public FunctionDeclarationNode() {
+        super();
     }
 
     public final String getFunctionName() {

@@ -1,4 +1,17 @@
+class Person {
+    var name
+    var age
+
+    constructor(name, age) {
+        local.name = name
+        local.age = age
+    }
+
+    fn greet() {
+        native.println("My name is " + local.name + " and i'm " + local.age + " years old")
+    }
+}
+
 fn main() {
-    var x = 1 + 2 * 2 * ( 5+5)
-    native.println(x)
+    var john = new Person("John", 16)
 }

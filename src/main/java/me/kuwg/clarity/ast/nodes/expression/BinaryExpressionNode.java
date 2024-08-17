@@ -19,6 +19,7 @@ public class BinaryExpressionNode extends ASTNode {
     }
 
     public BinaryExpressionNode() {
+        super();
     }
 
     public final ASTNode getLeft() {
@@ -31,6 +32,15 @@ public class BinaryExpressionNode extends ASTNode {
 
     public final ASTNode getRight() {
         return right;
+    }
+
+    @Override
+    public String toString() {
+        return "BinaryExpressionNode{" +
+                "left=" + left +
+                ", operator='" + operator + '\'' +
+                ", right=" + right +
+                '}';
     }
 
     @Override
