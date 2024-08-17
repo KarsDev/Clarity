@@ -1,6 +1,7 @@
 package me.kuwg.clarity.interpreter.nmh;
 
 import me.kuwg.clarity.interpreter.nmh.natives.NativeMethod;
+import me.kuwg.clarity.interpreter.nmh.natives.io.InputNative;
 import me.kuwg.clarity.interpreter.nmh.natives.io.PrintlnNative;
 
 import java.util.List;
@@ -9,6 +10,7 @@ public class NativeMethodHandler {
 
     private final NativeMethod<?>[] methods = new NativeMethod[] {
         new PrintlnNative(),
+        new InputNative()
     };
 
     public Object call(final String name, final List<Object> params) {
