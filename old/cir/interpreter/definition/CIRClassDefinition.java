@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class CIRClassDefinition extends ObjectType {
     private final String name;
-    private final CIRFunctionDefinition constructor;
+    private CIRFunctionDefinition constructor;
     private final Map<String, CIRFunctionDefinition> methods;
     private final Map<String, Object> variables;
 
@@ -26,6 +26,10 @@ public class CIRClassDefinition extends ObjectType {
 
     public final CIRFunctionDefinition getConstructor() {
         return constructor;
+    }
+
+    public final void setConstructor(final CIRFunctionDefinition constructor) {
+        this.constructor = constructor;
     }
 
     public final Map<String, CIRFunctionDefinition> getMethods() {

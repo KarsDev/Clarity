@@ -1,20 +1,22 @@
 package me.kuwg.clarity.cir.interpreter.tokens;
 
+import me.kuwg.clarity.cir.interpreter.CIRCommand;
+
 import java.util.Arrays;
 
 public class CIRToken {
 
-    private final String command;
+    private final CIRCommand command;
     private final String[] parameters;
     private final int line;
 
-    public CIRToken(final String command, final String[] parameters, final int line) {
+    public CIRToken(final CIRCommand command, final String[] parameters, final int line) {
         this.command = command;
         this.parameters = parameters;
         this.line = line;
     }
 
-    public final String cmd() {
+    public final CIRCommand command() {
         return command;
     }
 
@@ -22,7 +24,7 @@ public class CIRToken {
         return parameters;
     }
 
-    public final int getLine() {
+    public final int line() {
         return line;
     }
 

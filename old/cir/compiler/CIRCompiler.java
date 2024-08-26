@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Stack;
 import java.util.StringJoiner;
 
+import static me.kuwg.clarity.cir.interpreter.CIRCommand.*;
+
 public class CIRCompiler {
     private final AST ast;
     private final StringBuilder irBuilder = new StringBuilder();
@@ -39,7 +41,6 @@ public class CIRCompiler {
 
     public String compile() {
         generateIRFromAST(ast.getRoot());
-        System.out.println(irBuilder);
         return irBuilder.toString();
     }
 
@@ -96,21 +97,21 @@ public class CIRCompiler {
     private void generateIRFromVariableDeclaration(VariableDeclarationNode node) {
         if (node.getValue() != null) {
             generateIRFromAST(node.getValue());
-            irBuilder.append("STORE ").append(node.getName()).append("\n");
+            irBuilder.append(STORE).append(" ").append(node.getName()).append("\n");
         } else {
-            irBuilder.append("DECLARE ").append(node.getName()).append("\n");
+            irBuilder.append(DECLARE).append(" ").append(node.getName()).append("\n");
         }
     }
 
     private void generateIRFromFunctionDeclaration(FunctionDeclarationNode node) {
         clearTempVars();
         if (node instanceof MainFunctionDeclarationNode) {
-            irBuilder.append("FUNC main:\n");
+            irBuilder.append(FUNC).append(" main\n");
         } else {
-            irBuilder.append("FUNC ").append(node.getFunctionName()).append(":\n");
+            irBuilder.append(FUNC).append(" ").append(node.getFunctionName()).append("\n");
         }
         generateIRFromAST(node.getBlock());
-        irBuilder.append("STOP\n\n");
+        irBuilder.append(STOP).append("\n\n");
     }
 
     private void generateIRFromNativeFunctionCall(NativeFunctionCallNode node) {
@@ -120,7 +121,7 @@ public class CIRCompiler {
             generateIRFromAST(param);
             joiner.add(tempVarStack.peek());
         }
-        irBuilder.append("SYSCALL").append(" ").append(node.getName()).append(" ")
+        irBuilder.append(SYSCALL).append(" ").append(node.getName()).append(" ")
                 .append(joiner).append("\n");
     }
 
@@ -131,7 +132,7 @@ public class CIRCompiler {
             generateIRFromAST(param);
             joiner.add(tempVarStack.peek());  // Use the last temp variable used
         }
-        irBuilder.append("CALL ").append(node.getFunctionName()).append(" ")
+        irBuilder.append(CALL).append(" ").append(node.getFunctionName()).append(" ")
                 .append(joiner).append("\n");
     }
 
@@ -143,7 +144,7 @@ public class CIRCompiler {
         String rightTempVar = tempVarStack.peek(); // Get the last used temp variable
 
         String resultTempVar = generateTempVar();
-        irBuilder.append("OP ").append(node.getOperator())
+        irBuilder.append(OP).append(" ").append(node.getOperator())
                 .append(" ").append(leftTempVar)
                 .append(" ").append(rightTempVar)
                 .append(" ").append(resultTempVar)
@@ -154,34 +155,34 @@ public class CIRCompiler {
 
     private void generateIRFromIntegerNode(IntegerNode node) {
         String tempVar = generateTempVar();
-        irBuilder.append("CONST ").append(node.getValue()).append("\n");
+        irBuilder.append(CONST).append(" ").append(node.getValue()).append("\n");
         tempVarStack.push(tempVar); // Track the last temp variable used
     }
 
     private void generateIRFromDecimalNode(DecimalNode node) {
         String tempVar = generateTempVar();
-        irBuilder.append("CONST ").append(node.getValue()).append("\n");
+        irBuilder.append(CONST).append(" ").append(node.getValue()).append("\n");
         tempVarStack.push(tempVar); // Track the last temp variable used
     }
 
     private void generateIRFromLiteralNode(LiteralNode node) {
         String tempVar = generateTempVar();
-        irBuilder.append("CONST \"").append(node.getValue()).append("\"\n");
+        irBuilder.append(CONST).append(" ").append(node.getValue()).append("\n");
         tempVarStack.push(tempVar);
     }
 
     private void generateIRFromVariableReference(VariableReferenceNode node) {
-        irBuilder.append("LOAD ").append(node.getName()).append("\n");
+        irBuilder.append(LOAD).append(" ").append(node.getName()).append("\n");
         tempVarStack.push(node.getName());
     }
 
     private void generateIRFromReturn(ReturnNode node) {
         generateIRFromAST(node.getValue());
-        irBuilder.append("RETURN ").append(tempVarStack.peek()).append("\n");
+        irBuilder.append(RETURN).append(" ").append(tempVarStack.peek()).append("\n");
     }
 
     private void generateIRFromClassDeclaration(ClassDeclarationNode node) {
-        irBuilder.append("CLASS ").append(node.getName()).append("\n");
+        irBuilder.append(CLASS).append(" ").append(node.getName()).append("\n");
 
         if (node.getConstructor() != null) {
             generateIRFromFunctionDeclaration(node.getConstructor());
@@ -189,16 +190,16 @@ public class CIRCompiler {
 
         generateIRFromAST(node.getBody());
 
-        irBuilder.append("CLASSEND\n\n");
+        irBuilder.append(CLASSEND).append("\n\n");
     }
 
     private void generateIRFromContextReference(ContextReferenceNode node) {
-        irBuilder.append("CONTEXT").append(" ").append(node.getType()).append(" ");
+        irBuilder.append(CONTEXT).append(" ").append(node.getType()).append(" ");
     }
 
     private void generateIRFromVariableReassignment(VariableReassignmentNode node) {
         generateIRFromAST(node.getValue());
-        irBuilder.append("STORE ").append(node.getName()).append("\n");
+        irBuilder.append(STORE).append(" ").append(node.getName()).append("\n");
     }
 
     private void generateIRFromLocalFunctionCall(LocalFunctionCallNode node) {
@@ -210,7 +211,7 @@ public class CIRCompiler {
             joiner.add(tempVarStack.peek());
         }
 
-        irBuilder.append("CALL ").append(node.getFunctionName()).append(" ")
+        irBuilder.append(CALL).append(" ").append(node.getFunctionName()).append(" ")
                 .append(joiner).append("\n");
 
         String resultTempVar = generateTempVar();
@@ -218,7 +219,7 @@ public class CIRCompiler {
     }
 
     private void generateIRFromLocalVariableReference(LocalVariableReferenceNode node) {
-        irBuilder.append("LOAD ").append(node.getName()).append("\n");
+        irBuilder.append(LOAD).append(" ").append(node.getName()).append("\n");
         tempVarStack.push(node.getName());
     }
 
@@ -233,7 +234,7 @@ public class CIRCompiler {
             }
         }
 
-        irBuilder.append("NEW ").append(node.getName()).append(" ")
+        irBuilder.append(NEW).append(" ").append(node.getName()).append(" ")
                 .append(joiner).append("\n");
 
         String resultTempVar = generateTempVar();
@@ -241,7 +242,7 @@ public class CIRCompiler {
     }
 
     private void generateIRFromObjectFunctionCall(ObjectFunctionCallNode node) {
-        irBuilder.append("LOAD ").append(node.getCaller()).append("\n");
+        irBuilder.append(LOAD).append(" ").append(node.getCaller()).append("\n");
         tempVarStack.push(node.getCaller());
 
         StringJoiner joiner = new StringJoiner(" ");
@@ -251,7 +252,7 @@ public class CIRCompiler {
             joiner.add(tempVarStack.peek());
         }
 
-        irBuilder.append("CALL ").append(node.getCaller()).append("#").append(node.getCalled()).append(" ")
+        irBuilder.append(CALL).append(" ").append(node.getCaller()).append("#").append(node.getCalled()).append(" ")
                 .append(joiner).append("\n");
 
         String resultTempVar = generateTempVar();
@@ -259,11 +260,11 @@ public class CIRCompiler {
     }
 
     private void generateIRFromObjectVariableReference(ObjectVariableReferenceNode node) {
-        irBuilder.append("LOAD ").append(node.getCaller()).append("\n");
+        irBuilder.append(LOAD).append(" ").append(node.getCaller()).append("\n");
         tempVarStack.push(node.getCaller());
 
         String tempVar = generateTempVar();
-        irBuilder.append("GET ").append(tempVar).append(" ").append(node.getCaller()).append("#").append(node.getCalled()).append("\n");
+        irBuilder.append(GET).append(" ").append(tempVar).append(" ").append(node.getCaller()).append("#").append(node.getCalled()).append("\n");
 
         tempVarStack.push(tempVar);
     }

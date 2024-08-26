@@ -1,8 +1,6 @@
 package me.kuwg.clarity;
 
-import me.kuwg.clarity.cir.compiler.CIRCompiler;
 import me.kuwg.clarity.ast.AST;
-import me.kuwg.clarity.cir.interpreter.CIRCodeExecutor;
 import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
 import me.kuwg.clarity.interpreter.Interpreter;
@@ -10,8 +8,7 @@ import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.Tokenizer;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.List;
 
@@ -53,10 +50,6 @@ public class Clarity {
                 System.out.println("Running the compiled file: " + file.getName());
                 runCompiledFile(file);
                 break;
-            case "ir":
-                System.out.println("Compiling to the intermediate language the file: " + file.getName());
-                compileToIR(file);
-                break;
             default:
                 printUsage();
                 break;
@@ -79,21 +72,10 @@ public class Clarity {
         System.err.println("File not found: " + file);
     }
 
-    private static void compileToIR(File file) throws IOException {
-        AST ast = parseASTFromSource(file);
-        CIRCompiler compiler = new CIRCompiler(ast);
-        String IRCompiledAST = compiler.compile();
-        CIRCodeExecutor cirInterpreter = new CIRCodeExecutor(IRCompiledAST.split("\r\n|\n|\r"));
-        System.exit(cirInterpreter.interpret());
-    }
-
     private static void runOrInterpretFile(File file) throws IOException {
-        final long start = System.nanoTime();
         AST ast = loadOrParseAST(file);
         Interpreter interpreter = new Interpreter(ast);
-        int exitCode = interpreter.interpret();
-        System.out.println(System.nanoTime()-start);
-        System.exit(exitCode);
+        System.exit(interpreter.interpret());
     }
 
     private static void runCompiledFile(File file) {
