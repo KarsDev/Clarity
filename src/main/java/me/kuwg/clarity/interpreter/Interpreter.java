@@ -106,7 +106,7 @@ public class Interpreter {
     }
 
     private Object interpretBlock(final BlockNode block, final Context context) {
-        Object result = null;
+        Object result = NULL;
         for (final ASTNode node : block) {
             result = interpretNode(node, context);
             if (result == NULL) continue;
