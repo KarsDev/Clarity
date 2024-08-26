@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Scanner;
 
 public class InputNative extends NativeMethod<String> {
+    private static final Scanner scanner;
     public InputNative() {
         super("input");
+        this.scanner = new Scanner(System.in);
     }
 
     @Override
@@ -15,14 +17,15 @@ public class InputNative extends NativeMethod<String> {
         if (!params.isEmpty()) {
             System.out.print(params.get(0));
         }
-        Scanner scanner = new Scanner(System.in);
-        String nextLine = scanner.nextLine();
-        scanner.close();
-        return nextLine;
+        return scanner.nextLine();
     }
 
     @Override
     protected boolean applies0(List<Object> params) {
-        return true;
+        return params.size() <= 1;
+    }
+
+    protected void finalize() throws Throwable {
+        scanner.close();
     }
 }
