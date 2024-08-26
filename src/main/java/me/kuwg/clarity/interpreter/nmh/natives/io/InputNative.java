@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Scanner;
 
 public class InputNative extends NativeMethod<String> {
-    private static final Scanner scanner;
+
+    private static final Scanner scanner = new Scanner(System.in);
+
     public InputNative() {
         super("input");
-        this.scanner = new Scanner(System.in);
     }
 
     @Override

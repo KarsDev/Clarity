@@ -14,30 +14,38 @@ import static me.kuwg.clarity.compiler.ASTData.CONTINUE_BIT;
 import static me.kuwg.clarity.compiler.ASTData.SEGMENT_BITS;
 
 public class ASTOutputStream extends DataOutputStream {
+
     public ASTOutputStream(OutputStream outputStream) {
         super(outputStream);
     }
 
     /**
-     * Writes a {@link me.kuwg.clarity.ast.ASTNode} to the output stream
+     * Writes an {@link ASTNodeCompiler} to the output stream.
+     *
+     * @param node The ASTNodeCompiler to be written.
+     * @throws IOException If an I/O error occurs.
      */
     public void writeNode(ASTNodeCompiler node) throws IOException {
         // Get node id
         int id = ASTData.getNodeId(node == null ? null : node.getClass());
 
         if (id == -1) {
-            throw new IOException((node == null ? null : node.getClass().getName()) + " has no node id. Please add to ASTData");
+            throw new IOException((node == null ? "null" : node.getClass().getName()) + " has no node id. Please add to ASTData.");
         }
 
         // Write short id
         writeVarInt(id);
+
         if (node != null) {
             node.save(this);
         }
     }
 
     /**
-     * Writes a list of {@link me.kuwg.clarity.ast.ASTNode} to the output stream
+     * Writes a list of {@link ASTNode} to the output stream.
+     *
+     * @param list The list of ASTNodes to be written.
+     * @throws IOException If an I/O error occurs.
      */
     public void writeNodeList(List<? extends ASTNode> list) throws IOException {
         writeVarInt(list.size());
@@ -47,16 +55,23 @@ public class ASTOutputStream extends DataOutputStream {
     }
 
     /**
-     * Writes a UTF-8 encode string to the output stream
+     * Writes a UTF-8 encoded string to the output stream.
+     *
+     * @param string The string to be written.
+     * @throws IOException If an I/O error occurs.
      */
     public void writeString(String string) throws IOException {
-        writeVarInt(string.length());
-        write(string.getBytes(StandardCharsets.UTF_8));
+        byte[] bytes = string.getBytes(StandardCharsets.UTF_8);
+        writeVarInt(bytes.length);
+        write(bytes);
     }
 
-    /***
-     * Writes a VarInt, a dynamic sized integer
+    /**
+     * Writes a VarInt, a variable-length integer.
      * From <a href="https://wiki.vg/index.php?title=Protocol&oldid=7368#VarInt_and_VarLong">wiki.vg</a>
+     *
+     * @param value The integer value to be written.
+     * @throws IOException If an I/O error occurs.
      */
     public void writeVarInt(int value) throws IOException {
         while (true) {
@@ -64,17 +79,17 @@ public class ASTOutputStream extends DataOutputStream {
                 writeByte(value);
                 return;
             }
-
             writeByte((value & SEGMENT_BITS) | CONTINUE_BIT);
-
-            // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
             value >>>= 7;
         }
     }
 
-    /***
-     * Writes a VarLong, a dynamic sized long
+    /**
+     * Writes a VarLong, a variable-length long.
      * From <a href="https://wiki.vg/index.php?title=Protocol&oldid=7368#VarInt_and_VarLong">wiki.vg</a>
+     *
+     * @param value The long value to be written.
+     * @throws IOException If an I/O error occurs.
      */
     public void writeVarLong(long value) throws IOException {
         while (true) {
@@ -82,10 +97,7 @@ public class ASTOutputStream extends DataOutputStream {
                 writeByte((int) value);
                 return;
             }
-
             writeByte((int) ((value & SEGMENT_BITS) | CONTINUE_BIT));
-
-            // Note: >>> means that the sign bit is shifted with the rest of the number rather than being left alone
             value >>>= 7;
         }
     }
