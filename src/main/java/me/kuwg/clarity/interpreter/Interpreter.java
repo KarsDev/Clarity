@@ -106,16 +106,14 @@ public class Interpreter {
     }
 
     private Object interpretBlock(final BlockNode block, final Context context) {
-        Object result = NULL;
         for (final ASTNode node : block) {
-            result = interpretNode(node, context);
-            if (result == NULL) continue;
+            Object result = interpretNode(node, context);
             if (result instanceof ReturnValue) {
                 return ((ReturnValue) result).getValue();
             }
         }
 
-        return result;
+        return NULL;
     }
 
     private Object interpretVariableDeclaration(final VariableDeclarationNode node, final Context context) {
