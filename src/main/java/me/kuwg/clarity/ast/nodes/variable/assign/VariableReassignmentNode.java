@@ -48,4 +48,12 @@ public class VariableReassignmentNode extends ASTNode {
         this.name = in.readString();
         this.value = in.readNode();
     }
+
+    @Override
+    public String toString() {
+        return "VariableReassignmentNode{" +
+                "name='" + name + '\'' +
+                ", value=" + value +
+                '}';
+    }
 }

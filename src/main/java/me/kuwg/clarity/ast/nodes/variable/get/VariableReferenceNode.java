@@ -36,4 +36,11 @@ public class VariableReferenceNode extends ASTNode {
     public void load(final ASTInputStream in) throws IOException {
         this.name = in.readString();
     }
+
+    @Override
+    public String toString() {
+        return "VariableReferenceNode{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }

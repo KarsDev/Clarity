@@ -56,4 +56,13 @@ public class ObjectVariableReassignmentNode extends ASTNode {
         this.called = in.readString();
         this.value = in.readNode();
     }
+
+    @Override
+    public String toString() {
+        return "ObjectVariableReassignmentNode{" +
+                "caller='" + caller + '\'' +
+                ", called='" + called + '\'' +
+                ", value=" + value +
+                '}';
+    }
 }

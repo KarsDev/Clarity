@@ -18,6 +18,7 @@ import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
 import me.kuwg.clarity.ast.nodes.function.call.NativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
+import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
@@ -28,6 +29,7 @@ import me.kuwg.clarity.token.TokenType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static me.kuwg.clarity.token.TokenType.*;
 
@@ -50,13 +52,7 @@ public final class ASTParser {
     }
 
     private ASTNode parseStatement() {
-        final Token current = current();
-        switch (current.getType()) {
-            case KEYWORD:
-                return parseKeyword();
-            default:
-                return parseExpression();
-        }
+        return Objects.requireNonNull(current().getType()) == KEYWORD ? parseKeyword() : parseExpression();
     }
 
     private BlockNode parseBlock() {
@@ -165,15 +161,13 @@ public final class ASTParser {
             final List<ASTNode> params = new ArrayList<>();
 
             while (true) {
-                params.add(parseExpression());
-                if (match(DIVIDER, ",")) {
-                    consume(DIVIDER, ",");
-                } else {
-                    consume(DIVIDER, ")");
+                if (matchAndConsume(DIVIDER, ")")){
                     break;
+                } else {
+                    params.add(parseExpression());
+                    if (!matchAndConsume(DIVIDER, ",")) break;
                 }
             }
-
             return new FunctionCallNode(token.getValue(), params);
         }
 
@@ -213,14 +207,20 @@ public final class ASTParser {
         if (!token.getType().equals(KEYWORD)) consume();
         switch (token.getType()) {
             case VARIABLE:
-                if (current().getValue().equals("=")) {
-                    consume();
-                    return new VariableReassignmentNode(token.getValue(), parseExpression());
-                } else if (current().getValue().equals(".")) {
-                    consume();
+                if (matchAndConsume(OPERATOR, "=")) {
+                    if (match(OPERATOR, ".")) {
+                        consume();
+                        final String called = consume(VARIABLE).getValue();
+                        return new ObjectVariableReassignmentNode(token.getValue(), called, parseExpression());
+                    } else {
+                        return new VariableReassignmentNode(token.getValue(), parseExpression());
+                    }
+                } else if (matchAndConsume(OPERATOR, ".")) {
                     final String name = consume(VARIABLE).getValue();
 
-                    if (matchAndConsume(DIVIDER, "(")) { // function
+                    if (matchAndConsume(OPERATOR, "=")) {
+                        return new ObjectVariableReassignmentNode(token.getValue(), name, parseStatement());
+                    } else if (matchAndConsume(DIVIDER, "(")) {
                         final List<ASTNode> params = new ArrayList<>();
                         do if (match(VARIABLE)) params.add(parseExpression());
                         while (matchAndConsume(DIVIDER, ","));
@@ -229,12 +229,10 @@ public final class ASTParser {
                     } else {
                         return new ObjectVariableReferenceNode(token.getValue(), name);
                     }
-
                 }
                 return new VariableReferenceNode(token.getValue());
             case NUMBER:
                 final String value = token.getValue();
-
                 try {
                     return new IntegerNode(Integer.parseInt(value));
                 } catch (final NumberFormatException e) {
@@ -252,14 +250,13 @@ public final class ASTParser {
                     consume(DIVIDER, ")");
                     return expression;
                 }
-
                 break;
             case KEYWORD:
                 if (token.getValue().equals("local")) {
                     consume(); // consume "local"
                     consume(OPERATOR, ".");
                     final String name = consume(VARIABLE).getValue();
-                    if (matchAndConsume(DIVIDER, "(")) { // function
+                    if (matchAndConsume(DIVIDER, "(")) { // Function call
                         final List<ASTNode> params = new ArrayList<>();
                         do if (match(VARIABLE)) params.add(parseExpression());
                         while (matchAndConsume(DIVIDER, ","));
@@ -272,7 +269,6 @@ public final class ASTParser {
                     return parseKeyword();
                 }
         }
-
         throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " at line " + token.getLine());
     }
 

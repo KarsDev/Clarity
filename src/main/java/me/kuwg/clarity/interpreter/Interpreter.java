@@ -17,9 +17,11 @@ import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
 import me.kuwg.clarity.ast.nodes.function.call.NativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
+import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
+import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
@@ -101,8 +103,10 @@ public class Interpreter {
         if (node instanceof ObjectFunctionCallNode) return interpretObjectFunctionCall((ObjectFunctionCallNode) node, context);
         if (node instanceof LocalVariableReferenceNode) return interpretLocalVariableReferenceNode((LocalVariableReferenceNode) node, context);
         if (node instanceof LocalFunctionCallNode) return interpretLocalFunctionCallNode((LocalFunctionCallNode) node, context);
+        if (node instanceof ObjectVariableReferenceNode) return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
+        if (node instanceof ObjectVariableReassignmentNode) return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
 
-        throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()));
+        throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
 
     private Object interpretBlock(final BlockNode block, final Context context) {
@@ -112,7 +116,6 @@ public class Interpreter {
                 return ((ReturnValue) result).getValue();
             }
         }
-
         return NULL;
     }
 
@@ -245,7 +248,6 @@ public class Interpreter {
 
     private Object interpretNativeFunctionCall(final NativeFunctionCallNode node, final Context context) {
         final List<Object> params = new ArrayList<>();
-
         for (final ASTNode param : node.getParams()) {
             params.add(interpretNode(param, context));
         }
@@ -302,7 +304,11 @@ public class Interpreter {
     }
 
     private Object interpretReturnNode(final ReturnNode node, final Context context) {
-        return interpretNode(node.getValue(), context);
+        final Object val = interpretNode(node.getValue(), context);
+        if (val == NULL) {
+            throw new UnsupportedOperationException("None return.");
+        }
+        return new ReturnValue(val);
     }
 
     private Object interpretClassInstantiation(final ClassInstantiationNode node, final Context context) {
@@ -422,5 +428,22 @@ public class Interpreter {
         }
 
         return interpretBlock(definition.getBlock(), functionContext);
+    }
+
+    private Object interpretObjectVariableReference(final ObjectVariableReferenceNode node, final Context context) {
+        final String callerObjectName = node.getCaller();
+        final Object callerObjectRaw = context.getVariable(callerObjectName);
+        if (!(callerObjectRaw instanceof ClassObject)) throw new IllegalStateException("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object");
+        final ClassObject callerObject = (ClassObject) callerObjectRaw;
+        return callerObject.getContext().getVariable(node.getCalled());
+    }
+
+    private Object interpretObjectVariableReassignment(final ObjectVariableReassignmentNode node, final Context context) {
+        final String callerObjectName = node.getCaller();
+        final Object callerObjectRaw = context.getVariable(callerObjectName);
+        if (!(callerObjectRaw instanceof ClassObject)) throw new IllegalStateException("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object");
+        final ClassObject callerObject = (ClassObject) callerObjectRaw;
+        callerObject.getContext().setVariable(node.getCalled(), interpretNode(node.getValue(), context));
+        return NULL;
     }
 }

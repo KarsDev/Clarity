@@ -80,6 +80,7 @@ public class Clarity {
 
     private static void runCompiledFile(File file) {
         AST ast = loadASTFromFile(file);
+
         Interpreter interpreter = new Interpreter(ast);
         int exitCode = interpreter.interpret();
         System.exit(exitCode);

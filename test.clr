@@ -22,5 +22,11 @@ class Person {
 
 fn main() {
     var john = new Person("John", 16)
+
+    john.age = get()
     john.greet()
+}
+
+fn get() {
+    return 1 + 9
 }

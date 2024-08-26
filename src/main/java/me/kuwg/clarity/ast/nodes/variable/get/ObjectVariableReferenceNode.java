@@ -43,4 +43,12 @@ public class ObjectVariableReferenceNode extends ASTNode {
         this.caller = in.readString();
         this.called = in.readString();
     }
+
+    @Override
+    public String toString() {
+        return "ObjectVariableReferenceNode{" +
+                "caller='" + caller + '\'' +
+                ", called='" + called + '\'' +
+                '}';
+    }
 }
