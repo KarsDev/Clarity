@@ -1,5 +1,12 @@
-include native compiled system
+include native system
 
 fn main() {
-
+    var x = 0
+    var start = native.now()
+    for var i = 0, i < 5000000, i = i + 1 {
+        x = x + 1
+        native.println(x)
+    }
+    var end = native.now()
+    native.println(end - start)
 }

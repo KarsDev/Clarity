@@ -21,4 +21,8 @@ public abstract class PackagedNativeMethod<R> extends NativeMethod<R> {
     public boolean applies(final String name, final List<Object> params) {
         return super.applies(name, params);
     }
+
+    public final String getFullyQualifiedName() {
+        return this.pkg + "." + getName();
+    }
 }

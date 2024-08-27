@@ -6,9 +6,6 @@ public final class Register {
 
 
     public static void addElement(final String element, final int line) {
-        if (stack.isFull()) {
-            throw new IllegalStateException("Register is full");
-        }
         stack.push(element + " at line: " + line);
     }
 

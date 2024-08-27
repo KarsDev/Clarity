@@ -16,12 +16,18 @@ public final class RegisterStack {
     }
 
     public void push(final String element) {
-        if (size >= maxSize) throw new IllegalStateException("Stack is full");
-        elements[size++] = element;
+        if (size >= maxSize) {
+            System.arraycopy(elements, 1, elements, 0, maxSize - 1);
+            elements[maxSize - 1] = element;
+        } else {
+            elements[size++] = element;
+        }
     }
 
     public String pop() {
         if (size == 0) throw new IllegalStateException("Stack is empty");
+
+        // Remove the element from the end
         final String element = elements[--size];
         elements[size] = null;
         return element;
@@ -41,6 +47,6 @@ public final class RegisterStack {
 
     @Override
     public String toString() {
-        return Arrays.toString(elements);
+        return Arrays.toString(Arrays.copyOf(elements, size));
     }
 }

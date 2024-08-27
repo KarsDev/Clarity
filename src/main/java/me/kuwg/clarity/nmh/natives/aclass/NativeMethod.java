@@ -21,4 +21,8 @@ abstract class NativeMethod<R> {
     public boolean applies(final String name, final List<Object> params) {
         return this.name.equals(name) && applies0(params);
     }
+
+    public final String getName() {
+        return name;
+    }
 }

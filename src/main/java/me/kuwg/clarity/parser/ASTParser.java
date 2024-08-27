@@ -6,7 +6,8 @@ import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
-import me.kuwg.clarity.ast.nodes.condition.IfStatementNode;
+import me.kuwg.clarity.ast.nodes.statements.ForNode;
+import me.kuwg.clarity.ast.nodes.statements.IfNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
@@ -15,6 +16,7 @@ import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
+import me.kuwg.clarity.ast.nodes.statements.WhileNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
@@ -112,6 +114,10 @@ public final class ASTParser {
                 return parseIfDeclaration();
             case NULL:
                 return parseNullDeclaration();
+            case FOR:
+                return parseForDeclaration();
+            case WHILE:
+                return parseWhileDeclaration();
             default:
                 throw new UnsupportedOperationException("Unsupported keyword: " + keyword);
         }
@@ -465,58 +471,16 @@ public final class ASTParser {
     }
 
     private IncludeNode parseInclude() {
-        boolean isNative = false;
-        boolean isCompiled = false;
-        for (int i = 0; i < 2; i++) {
-            if (matchAndConsume(KEYWORD, "native")) isNative = true;
-            else if (matchAndConsume(KEYWORD, "compiled")) isCompiled = true;
-        }
+        boolean isNative = matchAndConsume(KEYWORD, "native");
+        boolean isCompiled = matchAndConsume(KEYWORD, "compiled");
+
+        if (isNative && isCompiled) throw new UnsupportedOperationException("Native compiled files do not exist, at line " + current().getLine());
 
         final String path = parseIncludePath(isCompiled);
 
-        final File file = isNative ? null : new File(path);
-        final String absolutePath = isNative ? path : file.getAbsolutePath();
-
-        if (!isNative && ORIGINAL.equals(absolutePath)) {
-            return null;
-        }
-
-        final String content;
-
         if (isCompiled) {
-            if (isNative) {
-                File result;
-                URL url = getClass().getClassLoader().getResource(path);
-                if (url == null) {
-                    try {
-                        throw new IOException("Resource not found: " + path);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
 
-                try {
-                    URI uri = url.toURI();
-                    result = new File(uri);
-                } catch (URISyntaxException e) {
-                    try {
-                        throw new IOException("Invalid URI syntax for resource: " + path, e);
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
-                    }
-                }
-                final File resFile = result;
-                ASTLoader loader = new ASTLoader(resFile);
-                try {
-                    return new IncludeNode(loader.load().getRoot(), false);
-                } catch (IOException e) {
-                    System.err.println("Failed to load the AST:");
-                    if (e instanceof NoSuchFileException) {
-                        System.err.println("No such file: " + resFile);
-                    }
-                    System.exit(1);
-                }
-            }
+            File file = new File(path);
             ASTLoader loader = new ASTLoader(file);
             try {
                 return new IncludeNode(loader.load().getRoot(), false);
@@ -527,22 +491,36 @@ public final class ASTParser {
                 }
                 System.exit(1);
             }
-
         }
 
         if (isNative) {
-            content = new BufferedReader(
-                    new InputStreamReader(
-                            Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(path),
-                                    "Native library not found: " + path), StandardCharsets.UTF_8
-                    )
-            ).lines().collect(Collectors.joining("\n"));
-        } else {
-            try {
-                content = new String(Files.readAllBytes(file.toPath()));
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(path);
+            if (inputStream == null) {
+                try {
+                    throw new IOException("Native library not found: " + path);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            String content;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                content = reader.lines().collect(Collectors.joining("\n"));
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+
+            final List<Token> tokens = Tokenizer.tokenize(content);
+            final ASTParser parser = new ASTParser(ORIGINAL, tokens);
+            final AST ast = parser.parse();
+            return new IncludeNode(ast.getRoot(), true).setLine(current().getLine());
+        }
+
+        final String content;
+        try {
+            content = new String(Files.readAllBytes(new File(path).toPath()), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
         final List<Token> tokens = Tokenizer.tokenize(content);
@@ -573,13 +551,13 @@ public final class ASTParser {
         final ASTNode condition = parseExpression();
         final BlockNode ifBlock = parseBlock();
 
-        final IfStatementNode node = new IfStatementNode(condition, ifBlock);
+        final IfNode node = new IfNode(condition, ifBlock);
 
         while (matchAndConsume(KEYWORD, "else")) {
             if (matchAndConsume(KEYWORD, "if")) {
                 final ASTNode elseIfCondition = parseExpression();
                 final BlockNode elseIfBlock = parseBlock();
-                node.addElseIfStatement(new IfStatementNode(elseIfCondition, elseIfBlock));
+                node.addElseIfStatement(new IfNode(elseIfCondition, elseIfBlock));
             } else {
                 final BlockNode elseBlock = parseBlock();
                 node.setElseBlock(elseBlock);
@@ -594,6 +572,31 @@ public final class ASTParser {
         consume(); // consume "null"
         return new NullNode();
     }
+
+    private ASTNode parseForDeclaration() {
+        consume(); // consume "for"
+
+        final ASTNode declaration = parseVariableDeclaration();
+        consume(DIVIDER, ",");
+        final ASTNode condition = parseExpression();
+        consume(DIVIDER, ",");
+        final ASTNode incrementation = parseExpression();
+
+        final BlockNode block = parseBlock();
+        return new ForNode(declaration, condition, incrementation, block);
+    }
+
+    private ASTNode parseWhileDeclaration(){
+        consume(); // consume "while"
+
+        final ASTNode condition = parseExpression();
+
+        final BlockNode block = parseBlock();
+        return new WhileNode(condition, block);
+    }
+
+
+
 
 
 

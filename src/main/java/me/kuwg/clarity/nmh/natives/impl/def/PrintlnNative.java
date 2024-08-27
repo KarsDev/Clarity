@@ -24,6 +24,8 @@ public class PrintlnNative extends DefaultNativeMethod<VoidObject> {
     }
 
     private String paramsToString(final List<Object> params) {
+        if (params.size() == 1)
+            return params.get(0).toString();
         StringBuilder s = new StringBuilder();
         for (final Object param : params) {
             if (param instanceof Object[]) s.append(Arrays.toString((Object[]) param));

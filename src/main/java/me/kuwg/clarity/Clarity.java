@@ -14,46 +14,59 @@ import java.util.List;
 
 public class Clarity {
     public static void main(final String[] args) throws IOException {
-        if (args.length == 0) {
-            printUsage();
-            return;
-        }
+        new Thread("Clarity Main Thread") {
+            @Override
+            public void run() {
+                try {
+                    exec();
+                } catch (final IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            void exec() throws IOException {
+                if (args.length == 0) {
+                    printUsage();
+                    return;
+                }
 
-        if (args.length == 1) {
-            printInputFileRequired();
-            return;
-        }
+                if (args.length == 1) {
+                    printInputFileRequired();
+                    return;
+                }
 
-        File file = new File(args[1]);
+                File file = new File(args[1]);
 
-        if (!file.exists()) {
-            printFileNotFound(file);
-            return;
-        }
+                if (!file.exists()) {
+                    printFileNotFound(file);
+                    return;
+                }
 
-        switch (args[0]) {
-            case "interpret":
-                System.out.println("Interpreting and running the file: " + file.getName());
-                runOrInterpretFile(file);
-                break;
-            case "compile":
-                System.out.println("Compiling the file: " + file.getName());
-                compileFile(args, file);
-                break;
-            case "test":
-                System.out.println("Interpreting and running the file: " + file.getName());
-                runOrInterpretFile(file);
-                System.out.println("Compiling the file: " + file.getName());
-                compileFile(args, file);
-                break;
-            case "run":
-                System.out.println("Running the compiled file: " + file.getName());
-                runCompiledFile(file);
-                break;
-            default:
-                printUsage();
-                break;
-        }
+                switch (args[0]) {
+                    case "interpret":
+                        System.out.println("Interpreting and running the file: " + file.getName());
+                        runOrInterpretFile(file);
+                        break;
+                    case "compile":
+                        System.out.println("Compiling the file: " + file.getName());
+                        compileFile(args, file);
+                        break;
+                    case "test":
+                        System.out.println("Interpreting and running the file: " + file.getName());
+                        runOrInterpretFile(file);
+                        System.out.println("Compiling the file: " + file.getName());
+                        compileFile(args, file);
+                        break;
+                    case "run":
+                        System.out.println("Running the compiled file: " + file.getName());
+                        runCompiledFile(file);
+                        break;
+                    default:
+                        printUsage();
+                        break;
+                }
+            }
+        }.start();
+
     }
 
     private static void printUsage() {
