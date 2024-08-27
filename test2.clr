@@ -1,5 +1,5 @@
-include native system
+include native compiled system
 
 fn main() {
-    System.exit(1)
+    System.except()
 }

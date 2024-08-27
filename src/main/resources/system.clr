@@ -1,11 +1,39 @@
+/#
+    System class.
+
+    You cannot instantiate this class.
+
+#/
+
 class System {
     constructor() {
+        throw("You cannot instantiate this class!")
     }
+
     static fn exit() {
         native.system.exit(status)
     }
 
     static fn exit(status) {
         native.system.exit(status)
+    }
+
+    static fn print(msg) {
+        native.def.print(msg)
+    }
+
+    static fn println(msg) {
+        native.def.print(msg + "\n")
+    }
+
+    static fn throw(error) {
+        native.error.except(error)
+    }
+
+    static fn except() {
+        fn getVoid() {
+            return void
+        }
+        var a = getVoid()
     }
 }

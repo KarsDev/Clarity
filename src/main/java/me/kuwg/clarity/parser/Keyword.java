@@ -4,7 +4,7 @@ import me.kuwg.clarity.token.Token;
 
 public enum Keyword {
 
-    CLASS, VAR, CONSTRUCTOR, LOCAL, FN, NATIVE, IF, ELSE, RETURN, NEW, VOID, INCLUDE, STATIC, CONST
+    CLASS, VAR, CONSTRUCTOR, LOCAL, FN, NATIVE, IF, ELSE, RETURN, NEW, VOID, INCLUDE, STATIC, CONST, COMPILED
     ;
 
     public static Keyword keyword(final Token token) {
@@ -23,6 +23,7 @@ public enum Keyword {
             case "include": return INCLUDE;
             case "static": return STATIC;
             case "const": return CONST;
+            case "compiled": return COMPILED;
 
             default:
                 throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());

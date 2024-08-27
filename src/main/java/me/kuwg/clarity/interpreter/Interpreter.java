@@ -135,7 +135,9 @@ public class Interpreter {
 
     private Object interpretVariableDeclaration(final VariableDeclarationNode node, final Context context) {
         VariableDefinition variableDefinition = new VariableDefinition(node.getName(), node.getValue() == null ? null : interpretNode(node.getValue(), context), node.isConstant(), node.isStatic());
-
+        if (variableDefinition.getValue() == VOID) {
+            Register.throwException("Creating a void variable: " + node.getName(), node.getLine());
+        }
         context.defineVariable(node.getName(), variableDefinition);
         return VOID;
     }
