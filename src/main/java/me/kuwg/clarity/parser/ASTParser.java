@@ -29,15 +29,11 @@ import me.kuwg.clarity.token.TokenType;
 import me.kuwg.clarity.token.Tokenizer;
 
 import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static me.kuwg.clarity.token.TokenType.*;
@@ -385,6 +381,8 @@ public final class ASTParser {
                 } else {
                     return parseKeyword().setLine(line);
                 }
+            case BOOLEAN:
+                return new BooleanNode(Boolean.parseBoolean(token.getValue()));
         }
 
         throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " (type=" + token.getType() + ") at line " + token.getLine());

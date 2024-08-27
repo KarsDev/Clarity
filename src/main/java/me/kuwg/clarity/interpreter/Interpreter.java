@@ -37,7 +37,6 @@ import me.kuwg.clarity.privilege.Privileges;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static me.kuwg.clarity.interpreter.types.VoidObject.VOID;
 
@@ -99,47 +98,34 @@ public class Interpreter {
     private Object interpretNode(final ASTNode node, final Context context) {
 
         if (node instanceof BlockNode) return interpretBlock((BlockNode) node, context);
-        if (node instanceof VariableDeclarationNode)
-            return interpretVariableDeclaration((VariableDeclarationNode) node, context);
-        if (node instanceof BinaryExpressionNode)
-            return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
-        if (node instanceof DefaultNativeFunctionCallNode)
-            return interpretDefaultNativeFunctionCall((DefaultNativeFunctionCallNode) node, context);
+        if (node instanceof VariableDeclarationNode) return interpretVariableDeclaration((VariableDeclarationNode) node, context);
+        if (node instanceof BinaryExpressionNode) return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
+        if (node instanceof DefaultNativeFunctionCallNode) return interpretDefaultNativeFunctionCall((DefaultNativeFunctionCallNode) node, context);
         if (node instanceof IntegerNode) return ((IntegerNode) node).getValue();
         if (node instanceof DecimalNode) return ((DecimalNode) node).getValue();
         if (node instanceof LiteralNode) return ((LiteralNode) node).getValue();
-        if (node instanceof VariableReferenceNode)
-            return interpretVariableReference((VariableReferenceNode) node, context);
+        if (node instanceof VariableReferenceNode) return interpretVariableReference((VariableReferenceNode) node, context);
         if (node instanceof FunctionCallNode) return interpretFunctionCall((FunctionCallNode) node, context);
         if (node instanceof ReturnNode) return interpretReturnNode((ReturnNode) node, context);
-        if (node instanceof ClassInstantiationNode)
-            return interpretClassInstantiation((ClassInstantiationNode) node, context);
-        if (node instanceof FunctionDeclarationNode)
-            return interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
-        if (node instanceof ClassDeclarationNode)
-            return interpretClassDeclaration((ClassDeclarationNode) node, context);
+        if (node instanceof ClassInstantiationNode) return interpretClassInstantiation((ClassInstantiationNode) node, context);
+        if (node instanceof FunctionDeclarationNode) return interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
+        if (node instanceof ClassDeclarationNode) return interpretClassDeclaration((ClassDeclarationNode) node, context);
         if (node instanceof ContextReferenceNode) return interpretContextReference(context);
-        if (node instanceof VariableReassignmentNode)
-            return interpretVariableReassignment((VariableReassignmentNode) node, context);
-        if (node instanceof ObjectFunctionCallNode)
-            return interpretObjectFunctionCall((ObjectFunctionCallNode) node, context);
-        if (node instanceof LocalVariableReferenceNode)
-            return interpretLocalVariableReferenceNode((LocalVariableReferenceNode) node, context);
-        if (node instanceof LocalFunctionCallNode)
-            return interpretLocalFunctionCallNode((LocalFunctionCallNode) node, context);
-        if (node instanceof ObjectVariableReferenceNode)
-            return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
-        if (node instanceof ObjectVariableReassignmentNode)
-            return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
+        if (node instanceof VariableReassignmentNode) return interpretVariableReassignment((VariableReassignmentNode) node, context);
+        if (node instanceof ObjectFunctionCallNode) return interpretObjectFunctionCall((ObjectFunctionCallNode) node, context);
+        if (node instanceof LocalVariableReferenceNode) return interpretLocalVariableReferenceNode((LocalVariableReferenceNode) node, context);
+        if (node instanceof LocalFunctionCallNode) return interpretLocalFunctionCallNode((LocalFunctionCallNode) node, context);
+        if (node instanceof ObjectVariableReferenceNode) return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
+        if (node instanceof ObjectVariableReassignmentNode) return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
         if (node instanceof VoidNode) return VOID;
         if (node instanceof IncludeNode) return interpretInclude((IncludeNode) node, context);
-        if (node instanceof PackagedNativeFunctionCallNode)
-            return interpretPackagedNativeFunctionCall((PackagedNativeFunctionCallNode) node, context);
+        if (node instanceof PackagedNativeFunctionCallNode) return interpretPackagedNativeFunctionCall((PackagedNativeFunctionCallNode) node, context);
         if (node instanceof ArrayNode) return interpretArray((ArrayNode) node, context);
         if (node instanceof IfNode) return interpretIf((IfNode) node, context);
         if (node instanceof NullNode) return null;
         if (node instanceof ForNode) return interpretFor((ForNode) node, context);
         if (node instanceof WhileNode) return interpretWhile((WhileNode) node, context);
+        if (node instanceof BooleanNode) return ((BooleanNode) node).getValue();
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -429,8 +415,10 @@ public class Interpreter {
         }
 
         final ClassDefinition definition = (ClassDefinition) raw;
-        interpretBlock(definition.getBody(), classContext);
+        Object val = interpretBlock(definition.getBody(), classContext);
 
+        if (val != VOID)
+            except("Return in class body", node.getLine());
 
         final Object result = interpretConstructor(definition.getConstructor(), params, classContext, name);
         context.setCurrentClassName(null);
@@ -555,7 +543,11 @@ public class Interpreter {
                         return array.length;
                     }
                     break;
-
+                case "set":
+                    if (params.size() == 2 && params.get(0) instanceof Integer) {
+                        array[(int)params.get(0)] = params.get((int)params.get(0));
+                        return VOID;
+                    }
                 default:
                     except("Illegal function in array context: " + fn + " with params " + params, node.getLine());
                     return null;
@@ -757,17 +749,25 @@ public class Interpreter {
         final boolean condition = checkCondition(expr, context);
 
         if (condition) {
-            interpretBlock(node.getIfBlock(), context);
+            Object val = interpretBlock(node.getIfBlock(), context);
+            if (val != VOID)
+                return new ReturnValue(val);
         } else {
             LABEL_LOOP:
             {
                 for (final IfNode ifNode : node.getElseIfStatements()) {
                     if (checkCondition(ifNode.getCondition(), context)) {
-                        interpretBlock(ifNode.getIfBlock(), context);
+                        Object val = interpretBlock(ifNode.getIfBlock(), context);
+                        if (val != VOID)
+                            return new ReturnValue(val);
                         break LABEL_LOOP;
                     }
                 }
-                if (node.getElseBlock() != null) interpretBlock(node.getElseBlock(), context);
+                if (node.getElseBlock() != null) {
+                    Object val = interpretBlock(node.getElseBlock(), context);
+                    if (val != VOID)
+                        return new ReturnValue(val);
+                }
             }
         }
 
@@ -806,7 +806,9 @@ public class Interpreter {
         final ASTNode condition = node.getCondition();
 
         while (checkCondition(condition, forContext)) {
-            interpretBlock(node.getBlock(), forContext);
+            final Object val = interpretBlock(node.getBlock(), forContext);
+            if (val != VOID)
+                return new ReturnValue(val);
             if (interpretNode(node.getIncrementation(), forContext) != VOID)
                 except("for incrementation must be void return", node.getLine());
         }
@@ -821,7 +823,9 @@ public class Interpreter {
 
 
         while (checkCondition(condition, whileContext)) {
-            interpretBlock(node.getBlock(), whileContext);
+            final Object val = interpretBlock(node.getBlock(), whileContext);
+            if (val != VOID)
+                return new ReturnValue(val);
         }
 
         return VOID;
