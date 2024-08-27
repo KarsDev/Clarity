@@ -8,7 +8,7 @@ import me.kuwg.clarity.interpreter.types.ObjectType;
 import java.util.HashMap;
 import java.util.Map;
 
-import static me.kuwg.clarity.interpreter.types.Null.NULL;
+import static me.kuwg.clarity.interpreter.types.VoidObject.VOID;
 
 public class Context {
 
@@ -35,16 +35,16 @@ public class Context {
     }
 
     public Object getVariable(final String name) {
-        final ObjectType result = variables.getOrDefault(name, NULL);
-        if (result == NULL && parentContext != null) {
+        final ObjectType result = variables.getOrDefault(name, VOID);
+        if (result == VOID && parentContext != null) {
             return parentContext.getVariable(name);
         }
-        return result == NULL ? NULL : ((VariableDefinition) result).getValue();
+        return result == VOID ? VOID : ((VariableDefinition) result).getValue();
     }
 
     public Object getVariableDefinition(final String name) {
-        final ObjectType result = variables.getOrDefault(name, NULL);
-        if (result == NULL && parentContext != null) {
+        final ObjectType result = variables.getOrDefault(name, VOID);
+        if (result == VOID && parentContext != null) {
             return parentContext.getVariable(name);
         }
         return result;
@@ -66,8 +66,8 @@ public class Context {
     }
 
     public ObjectType getFunction(final String name) {
-        final ObjectType result = functions.getOrDefault(name, NULL);
-        if (result == NULL && parentContext != null) {
+        final ObjectType result = functions.getOrDefault(name, VOID);
+        if (result == VOID && parentContext != null) {
             return parentContext.getFunction(name);
         }
         return result;
@@ -81,8 +81,8 @@ public class Context {
     }
 
     public ObjectType getClass(final String name) {
-        final ObjectType result = classes.getOrDefault(name, NULL);
-        if (result == NULL && parentContext != null) {
+        final ObjectType result = classes.getOrDefault(name, VOID);
+        if (result == VOID && parentContext != null) {
             return parentContext.getClass(name);
         }
         return result;

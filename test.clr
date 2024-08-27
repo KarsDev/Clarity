@@ -1,5 +1,5 @@
 class Person {
-    var name = "x"
+    var name
     var age
 
     constructor(name, age) {
@@ -23,10 +23,20 @@ class Person {
 fn main() {
     var john = new Person("John", 16)
 
-    john.age = get()
+    getVoid()
+
+    var x
+
+    x = 5
+
     john.greet()
+
+    x = 10
+
+    native.println(x)
 }
 
-fn get() {
-    return 1 + 9
+fn getVoid() {
+    native.println("Getting void val")
+    return void
 }

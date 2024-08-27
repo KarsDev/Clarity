@@ -16,6 +16,7 @@ import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
 import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
 import me.kuwg.clarity.ast.nodes.function.call.NativeFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.literal.VoidNode;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
@@ -36,7 +37,7 @@ import me.kuwg.clarity.interpreter.types.ReturnValue;
 import java.util.ArrayList;
 import java.util.List;
 
-import static me.kuwg.clarity.interpreter.types.Null.NULL;
+import static me.kuwg.clarity.interpreter.types.VoidObject.VOID;
 
 // all for building part
 public class Interpreter {
@@ -69,7 +70,7 @@ public class Interpreter {
         if (main != null) {
             final Object result = interpretNode(main.getBlock(), general);
 
-            if (result == NULL) {
+            if (result == VOID) {
                 return 0;
             } else if (!(result instanceof Integer)) {
                 System.err.println("[WARNING] Main function does not return an integer, but returns instead: " + result.getClass().getSimpleName());
@@ -105,6 +106,7 @@ public class Interpreter {
         if (node instanceof LocalFunctionCallNode) return interpretLocalFunctionCallNode((LocalFunctionCallNode) node, context);
         if (node instanceof ObjectVariableReferenceNode) return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
         if (node instanceof ObjectVariableReassignmentNode) return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
+        if (node instanceof VoidNode) return VOID;
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -116,22 +118,22 @@ public class Interpreter {
                 return ((ReturnValue) result).getValue();
             }
         }
-        return NULL;
+        return VOID;
     }
 
     private Object interpretVariableDeclaration(final VariableDeclarationNode node, final Context context) {
         context.defineVariable(node.getName(), new VariableDefinition(node.getName(), node.getValue() == null ? null : interpretNode(node.getValue(), context)));
-        return NULL;
+        return VOID;
     }
 
     private Object interpretFunctionDeclaration(final FunctionDeclarationNode node, final Context context) {
         context.defineFunction(node.getFunctionName(), new FunctionDefinition(node));
-        return NULL;
+        return VOID;
     }
 
     private Object interpretClassDeclaration(final ClassDeclarationNode node, final Context context) {
         context.defineClass(node.getName(), new ClassDefinition(node.getName(), new FunctionDefinition(node.getConstructor()), node.getBody()));
-        return NULL;
+        return VOID;
     }
 
     private Object interpretBinaryExpressionNode(final BinaryExpressionNode node, final Context context) {
@@ -257,7 +259,7 @@ public class Interpreter {
 
     private Object interpretVariableReference(final VariableReferenceNode node, final Context context) {
         final Object ret = context.getVariable(node.getName());
-        if (ret == NULL) {
+        if (ret == VOID) {
             throw new IllegalStateException("Referencing a non-created variable: " + node.getName());
         }
         return ret;
@@ -268,7 +270,7 @@ public class Interpreter {
         final String functionName = node.getFunctionName();
         final ObjectType type = context.getFunction(functionName);
 
-        if (type == NULL) {
+        if (type == VOID) {
             throw new IllegalArgumentException("Calling a function that doesn't exist: " + functionName);
         }
 
@@ -278,7 +280,7 @@ public class Interpreter {
 
         for (final ASTNode param : node.getParams()) {
             final Object returned = interpretNode(param, context);
-            if (returned == NULL) {
+            if (returned == VOID) {
                 throw new IllegalArgumentException("Passing void as a parameter function: " + param.getClass().getSimpleName() + ", fn: " + functionName);
             }
             params.add(returned);
@@ -304,11 +306,7 @@ public class Interpreter {
     }
 
     private Object interpretReturnNode(final ReturnNode node, final Context context) {
-        final Object val = interpretNode(node.getValue(), context);
-        if (val == NULL) {
-            throw new UnsupportedOperationException("None return.");
-        }
-        return new ReturnValue(val);
+        return new ReturnValue(interpretNode(node.getValue(), context));
     }
 
     private Object interpretClassInstantiation(final ClassInstantiationNode node, final Context context) {
@@ -347,7 +345,7 @@ public class Interpreter {
         }
 
         final Object result = interpretBlock(constructor.getBlock(), constructorContext);
-        if (result != NULL) throw new IllegalStateException("You can't return in a constructor!");
+        if (result != VOID) throw new IllegalStateException("You can't return in a constructor!");
         return new ClassObject(cn, constructorContext);
     }
 
@@ -357,7 +355,7 @@ public class Interpreter {
 
     private Object interpretVariableReassignment(final VariableReassignmentNode node, final Context context) {
         context.setVariable(node.getName(), interpretNode(node.getValue(), context));
-        return NULL;
+        return VOID;
     }
 
     private Object interpretObjectFunctionCall(final ObjectFunctionCallNode node, final Context context) {
@@ -369,7 +367,7 @@ public class Interpreter {
 
         final ObjectType rawDefinition = classObject.getContext().getFunction(node.getCalled());
 
-        if (rawDefinition == NULL) throw new IllegalStateException("Called a non existent method: " + classObject.getName() + "#" + node.getCalled());
+        if (rawDefinition == VOID) throw new IllegalStateException("Called a non existent method: " + classObject.getName() + "#" + node.getCalled());
 
         FunctionDefinition definition = (FunctionDefinition) rawDefinition;
 
@@ -384,7 +382,7 @@ public class Interpreter {
 
     private Object interpretLocalVariableReferenceNode(final LocalVariableReferenceNode node, final Context context) {
         final Object ret = context.parentContext().getVariable(node.getName());
-        if (ret == NULL) {
+        if (ret == VOID) {
             throw new IllegalStateException("Referencing a non-created variable: " + node.getName());
         }
         return ret;
@@ -395,7 +393,7 @@ public class Interpreter {
         final String functionName = node.getFunctionName();
         final ObjectType type = context.getFunction(functionName);
 
-        if (type == NULL) {
+        if (type == VOID) {
             throw new IllegalArgumentException("Calling a function that doesn't exist: " + functionName);
         }
 
@@ -405,7 +403,7 @@ public class Interpreter {
 
         for (final ASTNode param : node.getParams()) {
             final Object returned = interpretNode(param, context);
-            if (returned == NULL) {
+            if (returned == VOID) {
                 throw new IllegalArgumentException("Passing void as a parameter function: " + param.getClass().getSimpleName() + ", fn: " + functionName);
             }
             params.add(returned);
@@ -444,6 +442,6 @@ public class Interpreter {
         if (!(callerObjectRaw instanceof ClassObject)) throw new IllegalStateException("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object");
         final ClassObject callerObject = (ClassObject) callerObjectRaw;
         callerObject.getContext().setVariable(node.getCalled(), interpretNode(node.getValue(), context));
-        return NULL;
+        return VOID;
     }
 }

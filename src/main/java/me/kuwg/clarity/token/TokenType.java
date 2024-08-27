@@ -6,7 +6,7 @@ public enum TokenType {
     COMMENT("^//.*"), // Matches single-line comments (//...)
     NEWLINE("\r\n|\n|\r"), // Matches newlines
     WHITESPACE("\\s+"), // Matches any whitespace characters
-    KEYWORD("\\b(class|var|constructor|local|fn|native|if|else|return|new)\\b"), // All keywords
+    KEYWORD("\\b(class|var|constructor|local|fn|native|if|else|return|new|void)\\b"), // All keywords
     BOOLEAN("\\b(true|false)\\b"), // Matches booleans
     STRING("\"[^\"]*\"|'[^']*'"), // Matches anything between " and " or ' and '
     OPERATOR("\\+\\+|--|[+\\-*/%=<>!]=?|==|\\.|\\|\\||&&|\\?|:|\\^"), // Ensure ++ and -- are matched first

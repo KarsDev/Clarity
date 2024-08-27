@@ -4,7 +4,7 @@ import me.kuwg.clarity.token.Token;
 
 public enum Keyword {
 
-    CLASS, VAR, CONSTRUCTOR, LOCAL, FN, NATIVE, IF, ELSE, RETURN, NEW
+    CLASS, VAR, CONSTRUCTOR, LOCAL, FN, NATIVE, IF, ELSE, RETURN, NEW, VOID
     ;
 
     public static Keyword keyword(final Token token) {
@@ -19,6 +19,7 @@ public enum Keyword {
             case "else": return ELSE;
             case "return": return RETURN;
             case "new": return NEW;
+            case "void": return VOID;
             default:
                 throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
         }

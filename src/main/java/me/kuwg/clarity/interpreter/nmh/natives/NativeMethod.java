@@ -1,12 +1,12 @@
 package me.kuwg.clarity.interpreter.nmh.natives;
 
-import me.kuwg.clarity.interpreter.types.Null;
+import me.kuwg.clarity.interpreter.types.VoidObject;
 
 import java.util.List;
 
 public abstract class NativeMethod<R> {
 
-    protected static final Null NULL = Null.NULL;
+    protected static final VoidObject VOID_OBJECT = VoidObject.VOID;
 
     private final String name;
 

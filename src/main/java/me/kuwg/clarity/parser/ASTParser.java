@@ -17,6 +17,7 @@ import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
 import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
 import me.kuwg.clarity.ast.nodes.function.call.NativeFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.literal.VoidNode;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
@@ -24,6 +25,7 @@ import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
+import me.kuwg.clarity.interpreter.types.VoidObject;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.TokenType;
 
@@ -88,6 +90,8 @@ public final class ASTParser {
                 return parseLocalDeclaration();
             case NEW:
                 return parseNewDeclaration();
+            case VOID:
+                return parseVoidDeclaration();
             default:
                 throw new UnsupportedOperationException("Unsupported keyword: " + keyword);
         }
@@ -98,11 +102,7 @@ public final class ASTParser {
 
         final String name = consume(VARIABLE).getValue();
 
-        if (matchAndConsume(OPERATOR, "=")) {
-            return new VariableDeclarationNode(name, parseExpression());
-        }
-
-        return new VariableDeclarationNode(name, null);
+        return matchAndConsume(OPERATOR, "=") ? new VariableDeclarationNode(name, parseExpression()) : new VariableDeclarationNode(name, new VoidNode());
     }
 
     private ASTNode parseFunctionDeclaration() {
@@ -253,22 +253,12 @@ public final class ASTParser {
                 break;
             case KEYWORD:
                 if (token.getValue().equals("local")) {
-                    consume(); // consume "local"
-                    consume(OPERATOR, ".");
-                    final String name = consume(VARIABLE).getValue();
-                    if (matchAndConsume(DIVIDER, "(")) { // Function call
-                        final List<ASTNode> params = new ArrayList<>();
-                        do if (match(VARIABLE)) params.add(parseExpression());
-                        while (matchAndConsume(DIVIDER, ","));
-                        consume(DIVIDER, ")");
-                        return new LocalFunctionCallNode(name, params);
-                    } else {
-                        return new LocalVariableReferenceNode(name);
-                    }
+                    return parsePrimaryLocalDeclaration();
                 } else {
                     return parseKeyword();
                 }
         }
+
         throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " at line " + token.getLine());
     }
 
@@ -324,9 +314,34 @@ public final class ASTParser {
         return new ClassInstantiationNode(clazz, params);
     }
 
+    private ASTNode parsePrimaryLocalDeclaration() {
+        consume(); // consume "local"
+        consume(OPERATOR, ".");
+        final String name = consume(VARIABLE).getValue();
+        if (matchAndConsume(DIVIDER, "(")) {
+            final List<ASTNode> params = new ArrayList<>();
+            do if (match(VARIABLE)) params.add(parseExpression());
+            while (matchAndConsume(DIVIDER, ","));
+            consume(DIVIDER, ")");
+            return new LocalFunctionCallNode(name, params);
+        } else {
+            return new LocalVariableReferenceNode(name);
+        }
+    }
+
+    private VoidNode parseVoidDeclaration() {
+        consume();
+        return new VoidNode();
+    }
 
 
 
+
+
+
+    private Token undo() {
+        return tokens.get(currentTokenIndex--);
+    }
 
     private Token consume() {
         if (currentTokenIndex >= tokens.size()) {

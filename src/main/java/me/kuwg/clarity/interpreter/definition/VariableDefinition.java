@@ -1,6 +1,6 @@
 package me.kuwg.clarity.interpreter.definition;
 
-import me.kuwg.clarity.interpreter.types.Null;
+import me.kuwg.clarity.interpreter.types.VoidObject;
 import me.kuwg.clarity.interpreter.types.ObjectType;
 
 public class VariableDefinition extends ObjectType {
@@ -10,7 +10,6 @@ public class VariableDefinition extends ObjectType {
 
     public VariableDefinition(final String name, final Object value) {
         this.name = name;
-        if (value == Null.NULL) throw new UnsupportedOperationException("No return value.");
         this.value = value;
     }
 
