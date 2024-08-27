@@ -33,13 +33,13 @@ public class ObjectVariableReferenceNode extends ASTNode {
     }
 
     @Override
-    public void save(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(caller);
         out.writeString(called);
     }
 
     @Override
-    public void load(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in) throws IOException {
         this.caller = in.readString();
         this.called = in.readString();
     }

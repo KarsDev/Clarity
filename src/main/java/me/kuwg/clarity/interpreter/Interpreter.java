@@ -24,6 +24,7 @@ import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
 import me.kuwg.clarity.interpreter.definition.VariableDefinition;
 import me.kuwg.clarity.interpreter.exceptions.MultipleMainMethodsException;
+import me.kuwg.clarity.interpreter.register.Register;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.interpreter.types.ClassObject;
 import me.kuwg.clarity.interpreter.types.ObjectType;
@@ -36,8 +37,8 @@ import java.util.stream.Collectors;
 
 import static me.kuwg.clarity.interpreter.types.VoidObject.VOID;
 
-// all for building part
 public class Interpreter {
+
     private final AST ast;
     private final NativeMethodHandler nmh;
     private final Context general;
@@ -71,6 +72,9 @@ public class Interpreter {
         }
 
         if (main != null) {
+
+            Register.addElement("main call {?} -> main()", main.getLine());
+
             final Object result = interpretNode(main.getBlock(), general);
 
             if (result == VOID) {
@@ -89,6 +93,7 @@ public class Interpreter {
     }
 
     private Object interpretNode(final ASTNode node, final Context context) {
+
         if (node instanceof BlockNode) return interpretBlock((BlockNode) node, context);
         if (node instanceof VariableDeclarationNode) return interpretVariableDeclaration((VariableDeclarationNode) node, context);
         if (node instanceof BinaryExpressionNode) return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
@@ -113,7 +118,6 @@ public class Interpreter {
         if (node instanceof IncludeNode) return interpretInclude((IncludeNode) node, context);
         if (node instanceof PackagedNativeFunctionCallNode) return interpretPackagedNativeFunctionCall((PackagedNativeFunctionCallNode) node, context);
         if (node instanceof ArrayNode) return interpretArrayNode((ArrayNode) node, context);
-
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -179,7 +183,7 @@ public class Interpreter {
             if (operator.equals("+")) {
                 return leftValue + rightValue.toString();
             } else {
-                throw new IllegalArgumentException("Operator " + operator + " is not supported for string operands.");
+                except("Operator " + operator + " is not supported for string operands.", node.getLine());
             }
         }
 
@@ -194,19 +198,20 @@ public class Interpreter {
                 double left = leftNumber.doubleValue();
                 double right = rightNumber.doubleValue();
 
-                return evaluateDoubleOperation(left, right, operator);
+                return evaluateDoubleOperation(left, right, operator, node.getLine());
             } else {
                 int left = leftNumber.intValue();
                 int right = rightNumber.intValue();
 
-                return evaluateIntegerOperation(left, right, operator);
+                return evaluateIntegerOperation(left, right, operator, node.getLine());
             }
         } else {
-            throw new IllegalArgumentException("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " and " + rightValue.getClass().getSimpleName());
+            except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " and " + rightValue.getClass().getSimpleName(), node.getLine());
+            return null;
         }
     }
 
-    private Object evaluateDoubleOperation(double left, double right, String operator) {
+    private Object evaluateDoubleOperation(double left, double right, String operator, final int line) {
         switch (operator) {
             case "+":
                 return left + right;
@@ -216,7 +221,7 @@ public class Interpreter {
                 return left * right;
             case "/":
                 if (right == 0) {
-                    throw new ArithmeticException("Division by zero");
+                    except("Division by zero", line);
                 }
                 return left / right;
             case "%":
@@ -236,11 +241,12 @@ public class Interpreter {
             case "!=":
                 return left != right;
             default:
-                throw new UnsupportedOperationException("Unsupported operator: " + operator);
+                except("Unsupported operator: " + operator, line);
+                return null;
         }
     }
 
-    private Object evaluateIntegerOperation(int left, int right, String operator) {
+    private Object evaluateIntegerOperation(int left, int right, String operator, final int line) {
         switch (operator) {
             case "+":
                 return left + right;
@@ -274,30 +280,33 @@ public class Interpreter {
             case "!=":
                 return left != right;
             default:
-                throw new UnsupportedOperationException("Unsupported operator: " + operator);
+                except("Unsupported operator: " + operator, line);
+                return null;
         }
     }
 
     private Object interpretDefaultNativeFunctionCall(final DefaultNativeFunctionCallNode node, final Context context) {
         final List<Object> params = node.getParams().stream().map(param -> interpretNode(param, context)).collect(Collectors.toList());
+        Register.addElement("native call {d} -> " + node.getName() + getParams(params), node.getLine());
         return nmh.callDefault(node.getName(), params);
     }
 
     private Object interpretVariableReference(final VariableReferenceNode node, final Context context) {
         final Object ret = context.getVariable(node.getName());
         if (ret == VOID) {
-            throw new IllegalStateException("Referencing a non-created variable: " + node.getName());
+            except("Referencing a non-created variable: " + node.getName(), node.getLine());
         }
         return ret;
     }
 
     private Object interpretFunctionCall(final FunctionCallNode node, Context context) {
 
-        final String functionName = node.getFunctionName();
+        final String functionName = node.getName();
         final ObjectType type = context.getFunction(functionName);
 
         if (type == VOID) {
-            throw new IllegalArgumentException("Calling a function that doesn't exist: " + functionName);
+            except("Calling a function that doesn't exist: " + functionName, node.getLine());
+            return null;
         }
 
         final FunctionDefinition definition = (FunctionDefinition) type;
@@ -307,15 +316,15 @@ public class Interpreter {
         for (final ASTNode param : node.getParams()) {
             final Object returned = interpretNode(param, context);
             if (returned == VOID) {
-                throw new IllegalArgumentException("Passing void as a parameter function: " + param.getClass().getSimpleName() + ", fn: " + functionName);
+                except("Passing void as a parameter function: " + param.getClass().getSimpleName() + ", fn: " + functionName, node.getLine());
             }
             params.add(returned);
         }
 
         if (params.size() > definition.getParams().size()) {
-            throw new IllegalStateException("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName);
+            except("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
         } else if (params.size() < definition.getParams().size()) {
-            throw new IllegalStateException("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName);
+            except("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
         }
 
         final Context functionContext = new Context(context);
@@ -326,6 +335,9 @@ public class Interpreter {
             final Object value = params.get(i);
             functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
         }
+
+        Register.addElement("function call {d} -> " + node.getName() + getParams(params), node.getLine());
+
         return interpretBlock(definition.getBlock(), functionContext);
     }
 
@@ -347,7 +359,8 @@ public class Interpreter {
         final ObjectType raw = context.getClass(name);
 
         if (raw == VOID) {
-            throw new UnsupportedOperationException("Class not found: " + name);
+            except("Class not found: " + name, node.getLine());
+            return null;
         }
 
         final ClassDefinition definition = (ClassDefinition) raw;
@@ -373,7 +386,7 @@ public class Interpreter {
         }
 
         final Object result = interpretBlock(constructor.getBlock(), constructorContext);
-        if (result != VOID) throw new IllegalStateException("You can't return in a constructor!");
+        if (result != VOID) except("You can't return in a constructor!", constructor.getBlock().getLine());
         return new ClassObject(cn, constructorContext);
     }
 
@@ -392,14 +405,16 @@ public class Interpreter {
         if (caller instanceof VoidObject) {
             final ObjectType rawDefinition = context.getClass(node.getCaller());
             if (rawDefinition instanceof VoidObject) {
-                throw new IllegalStateException("Accessing a static function of a non-existent class: " + node.getCaller());
+                except("Accessing a static function of a non-existent class: " + node.getCaller(), node.getLine());
+                return null;
             }
             final ClassDefinition classDefinition = (ClassDefinition) rawDefinition;
 
             final FunctionDefinition definition = classDefinition.staticFunctions.get(node.getCalled());
 
             if (definition == null) {
-                throw new IllegalStateException("Accessing a static function that does not exist: " + node.getCaller() + "#" + node.getCalled() + "(...)");
+                except("Accessing a static function that does not exist: " + node.getCaller() + "#" + node.getCalled() + "(...)", node.getLine());
+                return null;
             }
 
 
@@ -408,15 +423,16 @@ public class Interpreter {
             for (final ASTNode param : node.getParams()) {
                 final Object returned = interpretNode(param, context);
                 if (returned == VOID) {
-                    throw new IllegalArgumentException("Passing void as a parameter function: " + param.getClass().getSimpleName() + ", fn: " + definition.getName());
+                    except("Passing void as a parameter function: " + param.getClass().getSimpleName() + ", fn: " + definition.getName(), node.getLine());
+                    return null;
                 }
                 params.add(returned);
             }
 
             if (params.size() > definition.getParams().size()) {
-                throw new IllegalStateException("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + definition.getName());
+                except("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + definition.getName(), node.getLine());
             } else if (params.size() < definition.getParams().size()) {
-                throw new IllegalStateException("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + definition.getName());
+                except("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + definition.getName(), node.getLine());
             }
 
             final Context functionContext = new Context(context);
@@ -429,6 +445,7 @@ public class Interpreter {
                 functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
             }
 
+            Register.addElement("static call {o} -> " + node.getCalled() + getParams(params), node.getLine());
             return interpretBlock(definition.getBlock(), functionContext);
         }
 
@@ -440,7 +457,7 @@ public class Interpreter {
             for (final ASTNode param : node.getParams()) {
                 final Object returned = interpretNode(param, context);
                 if (returned == VOID) {
-                    throw new IllegalArgumentException("Passing void as a parameter in a array function");
+                    except("Passing void as a parameter in a array function", node.getLine());
                 }
                 params.add(returned);
             }
@@ -450,7 +467,11 @@ public class Interpreter {
             switch (fn) {
                 case "at":
                     if (params.size() == 1 && params.get(0) instanceof Integer) {
-                        return array[(int) params.get(0)];
+                        try {
+                            return array[(int) params.get(0)];
+                        } catch (final ArrayIndexOutOfBoundsException ex) {
+                            except("Array out of bounds: " + params.get(0), node.getLine());
+                        }
                     }
                     break;
 
@@ -461,47 +482,59 @@ public class Interpreter {
                     break;
 
                 default:
-                    throw new IllegalStateException("Illegal function in array context: " + fn + " with params " + params);
+                    except("Illegal function in array context: " + fn + " with params " + params, node.getLine());
+                    return null;
             }
+
+            Register.addElement("array call {f} -> " + fn + getParams(params), node.getLine());
         }
 
-        if (!(caller instanceof ClassObject))
-            throw new UnsupportedOperationException("You can't call a function out of a " + caller.getClass().getSimpleName());
+        if (!(caller instanceof ClassObject)) {
+            except("You can't call a function out of a " + caller.getClass().getSimpleName(), node.getLine());
+            return null;
+        }
 
         ClassObject classObject = (ClassObject) caller;
 
         final ObjectType rawDefinition = classObject.getContext().getFunction(node.getCalled());
 
-        if (rawDefinition == VOID)
-            throw new IllegalStateException("Called a non existent function: " + classObject.getName() + "#" + node.getCalled());
+        if (rawDefinition == VOID) {
+            except("Called a non existent function: " + classObject.getName() + "#" + node.getCalled(), node.getLine());
+            return null;
+        }
 
         FunctionDefinition definition = (FunctionDefinition) rawDefinition;
 
         final Context functionContext = new Context(classObject.getContext());
+
         if (node.getParams().size() != definition.getParams().size())
-            throw new IllegalStateException("Called a function but params size is different: " + classObject.getName() + "#" + node.getCalled());
+            except("Called a function but params size is different: " + classObject.getName() + "#" + node.getCalled(), node.getLine());
 
         for (int i = 0; i < definition.getParams().size(); i++) {
             functionContext.defineVariable(definition.getParams().get(i), new VariableDefinition(definition.getParams().get(i), interpretNode(node.getParams().get(i), context), false, false));
         }
+
+        Register.addElement("native call {d} -> " + node.getCalled() + getParams(definition.getParams()), node.getLine());
+
         return interpretBlock(definition.getBlock(), functionContext);
     }
 
     private Object interpretLocalVariableReferenceNode(final LocalVariableReferenceNode node, final Context context) {
         final Object ret = context.parentContext().getVariable(node.getName());
         if (ret == VOID) {
-            throw new IllegalStateException("Referencing a non-created variable: " + node.getName());
+            except("Referencing a non-created variable: " + node.getName(), node.getLine());
         }
         return ret;
     }
 
     private Object interpretLocalFunctionCallNode(final LocalFunctionCallNode node, final Context raw) {
         final Context context = raw.parentContext();
-        final String functionName = node.getFunctionName();
+        final String functionName = node.getName();
         final ObjectType type = context.getFunction(functionName);
 
         if (type == VOID) {
-            throw new IllegalArgumentException("Calling a function that doesn't exist: " + functionName);
+            except("Calling a function that doesn't exist: " + functionName, node.getLine());
+            return null;
         }
 
         final FunctionDefinition definition = (FunctionDefinition) type;
@@ -511,15 +544,15 @@ public class Interpreter {
         for (final ASTNode param : node.getParams()) {
             final Object returned = interpretNode(param, context);
             if (returned == VOID) {
-                throw new IllegalArgumentException("Passing void as a parameter function: " + param.getClass().getSimpleName() + ", fn: " + functionName);
+                except("Passing void as a parameter function: " + param.getClass().getSimpleName() + ", fn: " + functionName, node.getLine());
             }
             params.add(returned);
         }
 
         if (params.size() > definition.getParams().size()) {
-            throw new IllegalStateException("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName);
+            except("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
         } else if (params.size() < definition.getParams().size()) {
-            throw new IllegalStateException("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName);
+            except("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
         }
 
         final Context functionContext = new Context(context);
@@ -532,6 +565,8 @@ public class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
         }
 
+        Register.addElement("local call {l} -> " + node.getName() + getParams(params), node.getLine());
+
         return interpretBlock(definition.getBlock(), functionContext);
     }
 
@@ -543,21 +578,25 @@ public class Interpreter {
         if (callerObjectRaw instanceof VoidObject) { // static init
             final ObjectType rawDefinition = context.getClass(callerObjectName);
             if (rawDefinition instanceof VoidObject) {
-                throw new IllegalStateException("Accessing a static variable of a non-existent class: " + callerObjectName);
+                except("Accessing a static variable of a non-existent class: " + callerObjectName, node.getLine());
+                return null;
             }
             final ClassDefinition definition = (ClassDefinition) rawDefinition;
 
             final VariableDefinition variable = definition.staticVariables.get(calledObjectName);
 
             if (variable == null) {
-                throw new IllegalStateException("Accessing a static variable that does not exist: " + callerObjectName + "#" + calledObjectName);
+                except("Accessing a static variable that does not exist: " + callerObjectName + "#" + calledObjectName, node.getLine());
+                return null;
             }
 
             return variable.getValue();
         }
 
-        if (!(callerObjectRaw instanceof ClassObject))
-            throw new IllegalStateException("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object");
+        if (!(callerObjectRaw instanceof ClassObject)) {
+            except("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object", node.getLine());
+            return null;
+        }
         final ClassObject callerObject = (ClassObject) callerObjectRaw;
         return callerObject.getContext().getVariable(calledObjectName);
     }
@@ -565,8 +604,10 @@ public class Interpreter {
     private Object interpretObjectVariableReassignment(final ObjectVariableReassignmentNode node, final Context context) {
         final String callerObjectName = node.getCaller();
         final Object callerObjectRaw = context.getVariable(callerObjectName);
-        if (!(callerObjectRaw instanceof ClassObject))
-            throw new IllegalStateException("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object");
+        if (!(callerObjectRaw instanceof ClassObject)) {
+            except("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object", node.getLine());
+            return null;
+        }
         final ClassObject callerObject = (ClassObject) callerObjectRaw;
         callerObject.getContext().setVariable(node.getCalled(), interpretNode(node.getValue(), context));
         return VOID;
@@ -578,6 +619,7 @@ public class Interpreter {
 
     private Object interpretPackagedNativeFunctionCall(final PackagedNativeFunctionCallNode node, final Context context) {
         final List<Object> params = node.getParams().stream().map(param -> interpretNode(param, context)).collect(Collectors.toList());
+        Register.addElement("native call {p} -> " + node.getName() + getParams(params), node.getLine());
         return nmh.callPackaged(node.getPackage(), node.getName(), params);
     }
 
@@ -588,13 +630,29 @@ public class Interpreter {
         for (int i = 0, nodesSize = nodes.size(); i < nodesSize; i++) {
             final ASTNode astNode = nodes.get(i);
             final Object result = interpretNode(astNode, context);
-            if (result == VOID) {
-                throw new IllegalStateException("Adding void as a object in an array.");
-            }
+
+            if (result == VOID) except("Adding void as a object in an array.", astNode.getLine());
+
 
             objects[i] = result;
         }
 
         return objects;
+    }
+
+    private void except(final String message, final int line) {
+        Register.throwException(message, line);
+        throw new RuntimeException();
+    }
+
+    private String getParams(final List<?> objects) {
+        final StringBuilder s = new StringBuilder("(");
+        for (int i = 0, size = objects.size(); i < size; i++) {
+            final Object o = objects.get(i);
+            s.append(o.getClass());
+            if (i < size - 1)
+                s.append(", ");
+        }
+        return s + ")";
     }
 }

@@ -70,7 +70,7 @@ public class VariableDeclarationNode extends ASTNode {
     }
 
     @Override
-    public void save(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
         out.writeNode(value);
         out.writeBoolean(isConstant);
@@ -78,7 +78,7 @@ public class VariableDeclarationNode extends ASTNode {
     }
 
     @Override
-    public void load(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in) throws IOException {
         this.name = in.readString();
         this.value = in.readNode();
         this.isConstant = in.readBoolean();

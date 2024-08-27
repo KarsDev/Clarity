@@ -3,20 +3,23 @@ package me.kuwg.clarity.nmh;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeMethod;
 import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeMethod;
 import me.kuwg.clarity.nmh.natives.impl.def.*;
+import me.kuwg.clarity.nmh.natives.impl.pkg.error.ExceptNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.util.CreateListNative;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class NativeMethodHandler {
 
     private final DefaultNativeMethod<?>[] DEFAULT = new DefaultNativeMethod[] {
         new PrintlnNative(),
-        new InputNative()
+        new InputNative(),
+
     };
 
     private final PackagedNativeMethod<?>[] PACKAGED = new PackagedNativeMethod[] {
-        new CreateListNative()
+        new CreateListNative(),
+        new ExceptNative(),
+
     };
 
     public Object callDefault(final String name, final List<Object> params) {

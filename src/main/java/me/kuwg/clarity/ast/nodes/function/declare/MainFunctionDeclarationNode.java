@@ -17,12 +17,12 @@ public class MainFunctionDeclarationNode extends FunctionDeclarationNode {
     }
 
     @Override
-    public void save(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeNode(super.block);
     }
 
     @Override
-    public void load(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in) throws IOException {
         super.functionName = "main";
         super.parameterNodes = new ArrayList<>();
         super.block = (BlockNode) in.readNode();

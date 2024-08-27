@@ -62,7 +62,7 @@ public class FunctionDeclarationNode extends ASTNode {
     }
 
     @Override
-    public void save(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(functionName);
         out.writeBoolean(isStatic);
         out.writeNodeList(parameterNodes);
@@ -70,7 +70,7 @@ public class FunctionDeclarationNode extends ASTNode {
     }
 
     @Override
-    public void load(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in) throws IOException {
         this.functionName = in.readString();
         this.isStatic = in.readBoolean();
         this.parameterNodes = in.readNodeListNoCast();

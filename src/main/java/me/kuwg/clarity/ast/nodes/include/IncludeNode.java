@@ -29,12 +29,12 @@ public class IncludeNode extends ASTNode {
     }
 
     @Override
-    public void save(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeNode(included);
     }
 
     @Override
-    public void load(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in) throws IOException {
         included = (BlockNode) in.readNode();
     }
 }

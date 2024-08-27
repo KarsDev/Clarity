@@ -28,6 +28,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -120,15 +121,19 @@ public final class ASTParser {
             }
         }
 
+        final int line = current().getLine();
+
         if (!matchAndConsume(KEYWORD, "var")) {
             if (isStatic) undo();
             if (isConst) throw new UnsupportedOperationException("Constant methods still not supported.");
-            return parseFunctionDeclaration();
+            return parseFunctionDeclaration().setLine(line);
         }
+
+
 
         final String name = consume(VARIABLE).getValue();
 
-        ASTNode value = matchAndConsume(OPERATOR, "=") ? parseExpression() : new VoidNode();
+        ASTNode value = matchAndConsume(OPERATOR, "=") ? parseStatement() : new VoidNode().setLine(line);
 
         return handleVariableDeclaration(name, value, isConst, isStatic);
     }
@@ -142,6 +147,8 @@ public final class ASTParser {
         final String name = matchAndConsume(KEYWORD, "constructor") ? "constructor" : consume(VARIABLE).getValue();
 
         final List<ParameterNode> params = new ArrayList<>();
+
+        final int line = current().getLine();
 
         consume(DIVIDER, "(");
         if (match(VARIABLE)) {
@@ -160,16 +167,18 @@ public final class ASTParser {
         final BlockNode block = parseBlock();
 
         if (name.equals("main") && params.isEmpty()) {
-            return new MainFunctionDeclarationNode(block);
+            return new MainFunctionDeclarationNode(block).setLine(line);
         }
 
-        return new FunctionDeclarationNode(name, isStatic, params, block);
+        return new FunctionDeclarationNode(name, isStatic, params, block).setLine(line);
     }
 
     private ASTNode parseNativeDeclaration() {
         consume(); // consume native
 
         consume(OPERATOR, ".");
+
+        final int line = current().getLine();
 
         if (lookahead().getType().equals(OPERATOR)) {
             StringBuilder pkg = new StringBuilder();
@@ -188,6 +197,8 @@ public final class ASTParser {
 
             final List<ASTNode> params = new ArrayList<>();
 
+
+
             while (true) {
                 params.add(parseExpression());
                 if (!matchAndConsume(DIVIDER, ",")) {
@@ -198,7 +209,7 @@ public final class ASTParser {
 
             final String ip = pkg.substring(0, pkg.length() - 1);
 
-            return "def".equals(ip) ? new DefaultNativeFunctionCallNode(name, params) : new PackagedNativeFunctionCallNode(name, ip, params);
+            return ("def".equals(ip) ? new DefaultNativeFunctionCallNode(name, params) : new PackagedNativeFunctionCallNode(name, ip, params)).setLine(line);
         }
 
         final String name = consume(VARIABLE).getValue();
@@ -211,13 +222,14 @@ public final class ASTParser {
             params.add(parseExpression());
         }
 
-        return new DefaultNativeFunctionCallNode(name, params);
+        return new DefaultNativeFunctionCallNode(name, params).setLine(line);
     }
 
     private ASTNode parseExpression() {
         return parsePrecedence(1);
     }
 
+    @SuppressWarnings("InfiniteRecursion")
     private ASTNode parsePrecedence(int precedence) {
         ASTNode left = parsePrimary();
         while (true) {
@@ -225,9 +237,12 @@ public final class ASTParser {
             if (currentPrecedence < precedence) {
                 break;
             }
+
+            final int line = current().getLine();
+
             Token operatorToken = consume();
             ASTNode right = parsePrecedence(currentPrecedence + 1);
-            left = new BinaryExpressionNode(left, operatorToken.getValue(), right);
+            left = new BinaryExpressionNode(left, operatorToken.getValue(), right).setLine(line);
         }
 
         return left;
@@ -247,24 +262,23 @@ public final class ASTParser {
 
     private ASTNode parsePrimary() {
         Token token = consume();
+
+        final int line = current().getLine();
+
         switch (token.getType()) {
             case VARIABLE:
-                // Handle variable assignment
                 if (matchAndConsume(OPERATOR, "=")) {
                     if (match(OPERATOR, ".")) {
                         consume(); // consume the '.'
                         final String called = consume(VARIABLE).getValue();
-                        return new ObjectVariableReassignmentNode(token.getValue(), called, parseExpression());
+                        return new ObjectVariableReassignmentNode(token.getValue(), called, parseExpression()).setLine(line);
                     } else {
-                        return new VariableReassignmentNode(token.getValue(), parseExpression());
+                        return new VariableReassignmentNode(token.getValue(), parseExpression()).setLine(line);
                     }
-                }
-                // Handle field access or method call
-                else if (matchAndConsume(OPERATOR, ".")) {
+                } else if (matchAndConsume(OPERATOR, ".")) {
                     final String name = consume(VARIABLE).getValue();
 
                     if (matchAndConsume(DIVIDER, "(")) {
-                        // Method call
                         final List<ASTNode> params = new ArrayList<>();
 
                         while (true) {
@@ -275,45 +289,46 @@ public final class ASTParser {
 
                         consume(DIVIDER, ")");
 
-                        return new ObjectFunctionCallNode(token.getValue(), name, params);
+                        return new ObjectFunctionCallNode(token.getValue(), name, params).setLine(line);
                     } else {
-                        // Field access
-                        return new ObjectVariableReferenceNode(token.getValue(), name);
+                        return new ObjectVariableReferenceNode(token.getValue(), name).setLine(line);
                     }
-                }
-                // Handle function call
-                else if (matchAndConsume(DIVIDER, "(")) {
+                } else if (matchAndConsume(DIVIDER, "(")) {
                     final List<ASTNode> params = new ArrayList<>();
 
-                    while (!matchAndConsume(DIVIDER, ")")) {
+                    while (true) {
+                        if (match(DIVIDER, ")")) break;
                         params.add(parseExpression());
                         if (!matchAndConsume(DIVIDER, ",")) break;
                     }
 
-                    return new FunctionCallNode(token.getValue(), params);
+                    consume(DIVIDER, ")");
+
+                    return new FunctionCallNode(token.getValue(), params).setLine(line);
                 }
-                return new VariableReferenceNode(token.getValue());
+
+                return new VariableReferenceNode(token.getValue()).setLine(line);
 
             case NUMBER:
                 final String value = token.getValue();
                 try {
-                    return new IntegerNode(Integer.parseInt(value));
+                    return new IntegerNode(Integer.parseInt(value)).setLine(line);
                 } catch (NumberFormatException e) {
                     try {
-                        return new DecimalNode(Double.parseDouble(value));
+                        return new DecimalNode(Double.parseDouble(value)).setLine(line);
                     } catch (NumberFormatException e1) {
                         throw new RuntimeException(e1);
                     }
                 }
 
             case STRING:
-                return new LiteralNode(token.getValue());
+                return new LiteralNode(token.getValue()).setLine(line);
 
             case DIVIDER:
                 if (token.getValue().equals("(")) {
                     ASTNode expression = parseExpression();
                     consume(DIVIDER, ")");
-                    return expression;
+                    return expression.setLine(line);
                 } else if (token.getValue().equals("[")) {
 
                     List<ASTNode> nodes = new ArrayList<>();
@@ -326,7 +341,7 @@ public final class ASTParser {
 
                     consume(DIVIDER, "]");
 
-                    return new ArrayNode(nodes);
+                    return new ArrayNode(nodes).setLine(line);
                 }
 
                 break;
@@ -334,9 +349,9 @@ public final class ASTParser {
             case KEYWORD:
                 undo();
                 if (token.getValue().equals("local")) {
-                    return parsePrimaryLocalDeclaration();
+                    return parsePrimaryLocalDeclaration().setLine(line);
                 } else {
-                    return parseKeyword();
+                    return parseKeyword().setLine(line);
                 }
 
         }
@@ -353,6 +368,7 @@ public final class ASTParser {
         consume(); // consume "class"
         final String name = consume(VARIABLE).getValue();
 
+        final int line = current().getLine();
 
         final BlockNode body = parseBlock();
 
@@ -368,52 +384,59 @@ public final class ASTParser {
             }
         }
 
-        return new ClassDeclarationNode(name, constructor, body);
+        return new ClassDeclarationNode(name, constructor, body).setLine(line);
     }
 
     private ASTNode parseLocalDeclaration() {
         consume(); // consume "local"
+        final int line = current().getLine();
         if (matchAndConsume(OPERATOR, "."))
-            return new ContextReferenceNode(ContextReferenceNode.ReferenceType.LOCAL);
+            return new ContextReferenceNode(ContextReferenceNode.ReferenceType.LOCAL).setLine(line);
         undo();
         return parseVariableDeclaration();
     }
 
     private ASTNode parseNewDeclaration() {
         consume(); // consume "new"
+
+        final int line = current().getLine();
+
         final String clazz = consume(VARIABLE).getValue();
         consume(DIVIDER, "(");
 
         final List<ASTNode> params = new ArrayList<>();
 
         while (true) {
-            if (matchAndConsume(DIVIDER, ")")) {
-                break;
-            }
+            if (match(DIVIDER, ")")) break;
             params.add(parseExpression());
             if (!matchAndConsume(DIVIDER, ",")) break;
         }
-        return new ClassInstantiationNode(clazz, params);
+
+        consume(DIVIDER, ")");
+
+        return new ClassInstantiationNode(clazz, params).setLine(line);
     }
 
     private ASTNode parsePrimaryLocalDeclaration() {
         consume(); // consume "local"
         consume(OPERATOR, ".");
+        final int line = current().getLine();
         final String name = consume(VARIABLE).getValue();
         if (matchAndConsume(DIVIDER, "(")) {
             final List<ASTNode> params = new ArrayList<>();
             do if (match(VARIABLE)) params.add(parseExpression());
             while (matchAndConsume(DIVIDER, ","));
             consume(DIVIDER, ")");
-            return new LocalFunctionCallNode(name, params);
+            return new LocalFunctionCallNode(name, params).setLine(line);
         } else {
-            return new LocalVariableReferenceNode(name);
+            return new LocalVariableReferenceNode(name).setLine(line);
         }
     }
 
     private VoidNode parseVoidDeclaration() {
+        final int line = current().getLine();
         consume();
-        return new VoidNode();
+        return new VoidNode().setLine(line);
     }
 
     private IncludeNode parseInclude() {
@@ -446,7 +469,7 @@ public final class ASTParser {
         final List<Token> tokens = Tokenizer.tokenize(content);
         final ASTParser parser = new ASTParser(ORIGINAL, tokens);
         final AST ast = parser.parse();
-        return new IncludeNode(ast.getRoot());
+        return new IncludeNode(ast.getRoot()).setLine(current().getLine());
     }
 
     private String parseIncludePath() {
@@ -465,18 +488,15 @@ public final class ASTParser {
     }
 
     private ASTNode handleVariableDeclaration(final String name, final ASTNode value, final boolean k, final boolean s) {
-        return new VariableDeclarationNode(name, value, k, s);
+        return new VariableDeclarationNode(name, value, k, s).setLine(lookahead(-1).getLine());
     }
 
 
-    private boolean matchAndConsume(final TokenType type) {
-        final boolean match = match(type);
-        if (match) consume();
-        return match;
-    }
 
-    private Token undo() {
-        return tokens.get(currentTokenIndex--);
+
+
+    private void undo() {
+        currentTokenIndex--;
     }
 
     private Token consume() {
@@ -500,12 +520,11 @@ public final class ASTParser {
         return token;
     }
 
-    private Token consume(final TokenType expectedType, final String expectedValue) {
+    private void consume(final TokenType expectedType, final String expectedValue) {
         final Token consumed = consume(expectedType);
         if (!consumed.getValue().equals(expectedValue)) {
             throw new IllegalStateException("Expected value " + expectedValue + " but found " + consumed.getValue() + " at line " + consumed.getLine());
         }
-        return consumed;
     }
 
     private boolean match(final TokenType expectedType) {

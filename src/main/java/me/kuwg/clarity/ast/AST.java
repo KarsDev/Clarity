@@ -25,12 +25,12 @@ public class AST extends ASTNode {
     }
 
     @Override
-    public void save(final ASTOutputStream out) {
+    public void save0(final ASTOutputStream out) {
         throw new RuntimeException("Cannot save AST");
     }
 
     @Override
-    public void load(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in) throws IOException {
         throw new RuntimeException("Cannot load AST");
     }
 

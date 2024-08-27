@@ -19,7 +19,7 @@ public class LocalFunctionCallNode extends ASTNode {
     public LocalFunctionCallNode() {
     }
 
-    public final String getFunctionName() {
+    public final String getName() {
         return functionName;
     }
 
@@ -44,13 +44,13 @@ public class LocalFunctionCallNode extends ASTNode {
 
 
     @Override
-    public void save(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(functionName);
         out.writeNodeList(params);
     }
 
     @Override
-    public void load(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in) throws IOException {
         this.functionName = in.readString();
         this.params = in.readNodeListNoCast();
     }
