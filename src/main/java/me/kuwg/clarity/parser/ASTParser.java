@@ -171,13 +171,6 @@ public final class ASTParser {
 
         consume(OPERATOR, ".");
 
-
-        // TODO
-        // native.<package>.<method>
-        // if package is "def" then there's no need to explicitly say it
-        // otherwise native package is needed
-        // also add specific imports (for methods, natives etc)
-
         if (lookahead().getType().equals(OPERATOR)) {
             StringBuilder pkg = new StringBuilder();
             final String name;
