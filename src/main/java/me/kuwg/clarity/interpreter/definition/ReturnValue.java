@@ -1,4 +1,4 @@
-package me.kuwg.clarity.interpreter.types;
+package me.kuwg.clarity.interpreter.definition;
 
 public class ReturnValue {
     private final Object value;

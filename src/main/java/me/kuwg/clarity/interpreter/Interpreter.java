@@ -27,7 +27,7 @@ import me.kuwg.clarity.interpreter.exceptions.MultipleMainMethodsException;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.interpreter.types.ClassObject;
 import me.kuwg.clarity.interpreter.types.ObjectType;
-import me.kuwg.clarity.interpreter.types.ReturnValue;
+import me.kuwg.clarity.interpreter.definition.ReturnValue;
 import me.kuwg.clarity.interpreter.types.VoidObject;
 
 import java.util.ArrayList;
