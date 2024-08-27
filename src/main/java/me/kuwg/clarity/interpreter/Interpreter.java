@@ -12,6 +12,7 @@ import me.kuwg.clarity.ast.nodes.function.call.LocalFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.call.ObjectFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
+import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
 import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
@@ -33,6 +34,7 @@ import me.kuwg.clarity.interpreter.nmh.NativeMethodHandler;
 import me.kuwg.clarity.interpreter.types.ClassObject;
 import me.kuwg.clarity.interpreter.types.ObjectType;
 import me.kuwg.clarity.interpreter.types.ReturnValue;
+import me.kuwg.clarity.interpreter.types.VoidObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,10 +61,16 @@ public class Interpreter {
             if (node instanceof MainFunctionDeclarationNode) {
                 if (main != null) throw new MultipleMainMethodsException();
                 main = (MainFunctionDeclarationNode) node;
+                ast.getRoot().getChildrens().remove(node);
             } else if (node instanceof FunctionDeclarationNode) {
                 interpretFunctionDeclaration((FunctionDeclarationNode) node, general);
+                ast.getRoot().getChildrens().remove(node);
             } else if (node instanceof ClassDeclarationNode) {
                 interpretClassDeclaration((ClassDeclarationNode) node, general);
+                ast.getRoot().getChildrens().remove(node);
+            } else if (node instanceof IncludeNode) {
+                interpretInclude((IncludeNode) node, general);
+                ast.getRoot().getChildrens().remove(node);
             }
 
         }
@@ -107,6 +115,7 @@ public class Interpreter {
         if (node instanceof ObjectVariableReferenceNode) return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
         if (node instanceof ObjectVariableReassignmentNode) return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
         if (node instanceof VoidNode) return VOID;
+        if (node instanceof IncludeNode) return interpretInclude((IncludeNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -132,7 +141,7 @@ public class Interpreter {
     }
 
     private Object interpretClassDeclaration(final ClassDeclarationNode node, final Context context) {
-        context.defineClass(node.getName(), new ClassDefinition(node.getName(), new FunctionDefinition(node.getConstructor()), node.getBody()));
+        context.defineClass(node.getName(), new ClassDefinition(node.getName(), node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody()));
         return VOID;
     }
 
@@ -253,7 +262,6 @@ public class Interpreter {
         for (final ASTNode param : node.getParams()) {
             params.add(interpretNode(param, context));
         }
-
         return nmh.call(node.getName(), params);
     }
 
@@ -322,7 +330,7 @@ public class Interpreter {
 
         final ObjectType raw = context.getClass(name);
 
-        if (raw == null) {
+        if (raw == VOID) {
             throw new UnsupportedOperationException("Class not found: " + name);
         }
 
@@ -332,6 +340,10 @@ public class Interpreter {
     }
 
     private ClassObject interpretConstructor(final FunctionDefinition constructor, final List<Object> params, final Context context, final String cn) {
+        if (constructor == null) {
+            return new ClassObject(cn, new Context(context));
+        }
+
         if (constructor.getParams().size() != params.size()) {
             System.out.println("Params length do not match for initialization of class " + cn);
         }
@@ -360,6 +372,11 @@ public class Interpreter {
 
     private Object interpretObjectFunctionCall(final ObjectFunctionCallNode node, final Context context) {
         final Object caller = context.getVariable(node.getCaller());
+
+        if (caller instanceof VoidObject) {
+            throw new UnsupportedOperationException("You can't call a method out of a null variable");
+        }
+
         if (!(caller instanceof ClassObject))
             throw new UnsupportedOperationException("You can't call a method out of a " + caller.getClass().getSimpleName());
 
@@ -443,5 +460,9 @@ public class Interpreter {
         final ClassObject callerObject = (ClassObject) callerObjectRaw;
         callerObject.getContext().setVariable(node.getCalled(), interpretNode(node.getValue(), context));
         return VOID;
+    }
+
+    private Object interpretInclude(final IncludeNode node, final Context context) {
+        return interpretNode(node.getIncluded(), context);
     }
 }

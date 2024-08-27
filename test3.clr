@@ -1,4 +1,8 @@
-fn main() {
-  var value = native.input("Name: ")
-  native.println("Your name: " + value)
+include test2
+
+class Test2 {
+    fn exe() {
+        native.println("executed")
+        return 1
+    }
 }

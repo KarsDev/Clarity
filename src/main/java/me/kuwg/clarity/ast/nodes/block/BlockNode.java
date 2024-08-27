@@ -9,17 +9,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 
 public class BlockNode extends ASTNode implements Iterable<ASTNode> {
 
-    private final List<ASTNode> children = new ArrayList<>();
+    private final List<ASTNode> children = new CopyOnWriteArrayList<>();
 
     public void addChild(final ASTNode child) {
         children.add(child);
     }
 
-    public final List<ASTNode> getChildren() {
+    public final List<ASTNode> getChildrens() {
         return children;
     }
 

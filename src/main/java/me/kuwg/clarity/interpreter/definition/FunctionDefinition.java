@@ -20,7 +20,11 @@ public class FunctionDefinition extends ObjectType {
     }
 
     public FunctionDefinition(final FunctionDeclarationNode node) {
-        this(node.getFunctionName(), node.getParameterNodes().stream().map(ParameterNode::getName).collect(Collectors.toList()), node.getBlock());
+        this(
+                node.getFunctionName(),
+                node.getParameterNodes().stream().map(ParameterNode::getName).collect(Collectors.toList()),
+                node.getBlock()
+        );
     }
 
     public final String getName() {

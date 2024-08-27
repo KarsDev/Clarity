@@ -50,4 +50,8 @@ public final class Token {
         result = 31 * result + line;
         return result;
     }
+
+    public boolean is(final TokenType type, final String value) {
+        return this.type.equals(type) && this.value.equals(value);
+    }
 }

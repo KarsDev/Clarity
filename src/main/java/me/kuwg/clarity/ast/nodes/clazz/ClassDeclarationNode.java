@@ -7,7 +7,6 @@ import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
-import java.util.List;
 
 public class ClassDeclarationNode extends ASTNode {
 

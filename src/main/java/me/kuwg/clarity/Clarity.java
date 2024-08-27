@@ -109,7 +109,7 @@ public class Clarity {
 
     private static AST parseASTFromSource(File file) throws IOException {
         List<Token> tokens = Tokenizer.tokenize(new String(Files.readAllBytes(file.toPath())));
-        ASTParser parser = new ASTParser(tokens);
+        ASTParser parser = new ASTParser(file.getAbsolutePath(), tokens);
         return parser.parse();
     }
 

@@ -13,6 +13,7 @@ import me.kuwg.clarity.ast.nodes.function.call.ObjectFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
+import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
 import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
@@ -25,26 +26,38 @@ import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
-import me.kuwg.clarity.interpreter.types.VoidObject;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.TokenType;
+import me.kuwg.clarity.token.Tokenizer;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static me.kuwg.clarity.token.TokenType.*;
 
 public final class ASTParser {
+
+    private final String ORIGINAL;
     private final List<Token> tokens;
     private int currentTokenIndex = 0;
 
-    public ASTParser(final List<Token> tokens) {
+    public ASTParser(final String original, final List<Token> tokens) {
+        ORIGINAL = original;
         this.tokens = tokens;
     }
 
     public AST parse() {
         final BlockNode node = new BlockNode();
+
+        while (matchAndConsume(KEYWORD, "include")) {
+            final ASTNode include = parseInclude();
+            if (include != null) node.addChild(include);
+        }
 
         while (currentTokenIndex < tokens.size()) {
             final ASTNode result = parseStatement();
@@ -152,25 +165,6 @@ public final class ASTParser {
     }
 
     private ASTNode parseExpression() {
-        if (lookahead().getValue().equals("(")) {
-            if (!match(VARIABLE)) {
-                return parsePrecedence(1);
-            }
-            final Token token = consume();
-            consume();
-            final List<ASTNode> params = new ArrayList<>();
-
-            while (true) {
-                if (matchAndConsume(DIVIDER, ")")){
-                    break;
-                } else {
-                    params.add(parseExpression());
-                    if (!matchAndConsume(DIVIDER, ",")) break;
-                }
-            }
-            return new FunctionCallNode(token.getValue(), params);
-        }
-
         return parsePrecedence(1);
     }
 
@@ -181,7 +175,6 @@ public final class ASTParser {
             if (currentPrecedence < precedence) {
                 break;
             }
-
             Token operatorToken = consume();
             ASTNode right = parsePrecedence(currentPrecedence + 1);
             left = new BinaryExpressionNode(left, operatorToken.getValue(), right);
@@ -203,13 +196,12 @@ public final class ASTParser {
     }
 
     private ASTNode parsePrimary() {
-        Token token = current();
-        if (!token.getType().equals(KEYWORD)) consume();
+        Token token = consume();
         switch (token.getType()) {
             case VARIABLE:
                 if (matchAndConsume(OPERATOR, "=")) {
                     if (match(OPERATOR, ".")) {
-                        consume();
+                        consume(); // consume the '.'
                         final String called = consume(VARIABLE).getValue();
                         return new ObjectVariableReassignmentNode(token.getValue(), called, parseExpression());
                     } else {
@@ -222,28 +214,43 @@ public final class ASTParser {
                         return new ObjectVariableReassignmentNode(token.getValue(), name, parseStatement());
                     } else if (matchAndConsume(DIVIDER, "(")) {
                         final List<ASTNode> params = new ArrayList<>();
-                        do if (match(VARIABLE)) params.add(parseExpression());
-                        while (matchAndConsume(DIVIDER, ","));
-                        consume(DIVIDER, ")");
+
+                        while (!matchAndConsume(DIVIDER, ")")) {
+                            params.add(parseExpression());
+                            if (!matchAndConsume(DIVIDER, ",")) break;
+                        }
+
                         return new ObjectFunctionCallNode(token.getValue(), name, params);
                     } else {
                         return new ObjectVariableReferenceNode(token.getValue(), name);
                     }
+                } else if (matchAndConsume(DIVIDER, "(")) {
+                    final List<ASTNode> params = new ArrayList<>();
+
+                    while (!matchAndConsume(DIVIDER, ")")) {
+                        params.add(parseExpression());
+                        if (!matchAndConsume(DIVIDER, ",")) break;
+                    }
+
+                    return new FunctionCallNode(token.getValue(), params);
                 }
                 return new VariableReferenceNode(token.getValue());
+
             case NUMBER:
                 final String value = token.getValue();
                 try {
                     return new IntegerNode(Integer.parseInt(value));
-                } catch (final NumberFormatException e) {
+                } catch (NumberFormatException e) {
                     try {
                         return new DecimalNode(Double.parseDouble(value));
-                    } catch (final NumberFormatException e1) {
+                    } catch (NumberFormatException e1) {
                         throw new RuntimeException(e1);
                     }
                 }
+
             case STRING:
                 return new LiteralNode(token.getValue());
+
             case DIVIDER:
                 if (token.getValue().equals("(")) {
                     ASTNode expression = parseExpression();
@@ -251,12 +258,15 @@ public final class ASTParser {
                     return expression;
                 }
                 break;
+
             case KEYWORD:
+                undo();
                 if (token.getValue().equals("local")) {
                     return parsePrimaryLocalDeclaration();
                 } else {
                     return parseKeyword();
                 }
+
         }
 
         throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " at line " + token.getLine());
@@ -275,12 +285,12 @@ public final class ASTParser {
         final BlockNode body = parseBlock();
 
         FunctionDeclarationNode constructor = null;
-        for (ASTNode node : body.getChildren()) {
+        for (ASTNode node : body.getChildrens()) {
             if (node instanceof FunctionDeclarationNode) {
                 FunctionDeclarationNode cast = (FunctionDeclarationNode) node;
                 if (cast.getFunctionName().equals("constructor")) {
                     constructor = cast;
-                    body.getChildren().remove(node);
+                    body.getChildrens().remove(node);
                     break;
                 }
             }
@@ -299,18 +309,16 @@ public final class ASTParser {
         consume(); // consume "new"
         final String clazz = consume(VARIABLE).getValue();
         consume(DIVIDER, "(");
+
         final List<ASTNode> params = new ArrayList<>();
 
         while (true) {
-            params.add(parseExpression());
-            if (match(DIVIDER, ",")) {
-                consume(DIVIDER, ",");
-            } else {
-                consume(DIVIDER, ")");
+            if (matchAndConsume(DIVIDER, ")")) {
                 break;
             }
+            params.add(parseExpression());
+            if (!matchAndConsume(DIVIDER, ",")) break;
         }
-
         return new ClassInstantiationNode(clazz, params);
     }
 
@@ -334,10 +342,60 @@ public final class ASTParser {
         return new VoidNode();
     }
 
+    private IncludeNode parseInclude() {
+        final boolean isNative = matchAndConsume(KEYWORD, "native");
+        final String path = parseIncludePath();
+
+        final File file = isNative ? null : new File(path);
+        final String absolutePath = isNative ? path : file.getAbsolutePath();
+
+        if (!isNative && ORIGINAL.equals(absolutePath)) {
+            return null;
+        }
+
+        final String content;
+        if (isNative) {
+            content = new BufferedReader(
+                    new InputStreamReader(
+                            Objects.requireNonNull(getClass().getClassLoader().getResourceAsStream(path),
+                                    "File not found: " + path), StandardCharsets.UTF_8
+                    )
+            ).lines().collect(Collectors.joining("\n"));
+        } else {
+            try {
+                content = new String(Files.readAllBytes(file.toPath()));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        final List<Token> tokens = Tokenizer.tokenize(content);
+        final ASTParser parser = new ASTParser(ORIGINAL, tokens);
+        final AST ast = parser.parse();
+        return new IncludeNode(ast.getRoot());
+    }
+
+    private String parseIncludePath() {
+        if (match(STRING)) {
+            return consume().getValue();
+        }
+        StringBuilder path = new StringBuilder();
+
+        path.append(consume(VARIABLE).getValue());
+
+        while (matchAndConsume(OPERATOR, ".")) {
+            path.append("\\").append(consume(VARIABLE).getValue());
+        }
+
+        return path + ".clr";
+    }
 
 
-
-
+    private boolean matchAndConsume(final TokenType type) {
+        final boolean match = match(type);
+        if (match) consume();
+        return match;
+    }
 
     private Token undo() {
         return tokens.get(currentTokenIndex--);
@@ -393,6 +451,6 @@ public final class ASTParser {
     }
 
     private Token except() {
-        throw new RuntimeException("Out of tokens");
+        return new Token(null, "null", -1);
     }
 }
