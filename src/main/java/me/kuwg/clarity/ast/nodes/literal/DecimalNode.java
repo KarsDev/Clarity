@@ -37,4 +37,11 @@ public class DecimalNode extends ASTNode {
     public void load(final ASTInputStream in) throws IOException {
         this.value = in.readDouble();
     }
+
+    @Override
+    public String toString() {
+        return "DecimalNode{" +
+                "value=" + value +
+                '}';
+    }
 }

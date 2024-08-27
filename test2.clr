@@ -1,6 +1,4 @@
-include test3
+include native math
 
-fn main() {
-    var test = new Test2()
-    return test.exe()
-}
+var array = [Math.PI, 3.3, new Math()]
+native.println(array.at(0) + " is number 0 in array of size " + array.size())

@@ -36,4 +36,11 @@ public class LiteralNode extends ASTNode {
     public void load(final ASTInputStream in) throws IOException {
         this.value = in.readString();
     }
+
+    @Override
+    public String toString() {
+        return "LiteralNode{" +
+                "value='" + value + '\'' +
+                '}';
+    }
 }

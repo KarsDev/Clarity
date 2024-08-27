@@ -5,10 +5,7 @@ import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
-import me.kuwg.clarity.ast.nodes.function.call.FunctionCallNode;
-import me.kuwg.clarity.ast.nodes.function.call.LocalFunctionCallNode;
-import me.kuwg.clarity.ast.nodes.function.call.NativeFunctionCallNode;
-import me.kuwg.clarity.ast.nodes.function.call.ObjectFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
@@ -16,6 +13,7 @@ import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
 import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
 import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
+import me.kuwg.clarity.ast.nodes.literal.VoidNode;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
@@ -50,10 +48,11 @@ public class ASTData {
         registerNode(FunctionDeclarationNode.class, 0x300);
         registerNode(MainFunctionDeclarationNode.class, 0x301);
         registerNode(ParameterNode.class, 0x302);
-        registerNode(NativeFunctionCallNode.class, 0x303);
+        registerNode(DefaultNativeFunctionCallNode.class, 0x303);
         registerNode(FunctionCallNode.class, 0x304);
         registerNode(ObjectFunctionCallNode.class, 0x305);
         registerNode(LocalFunctionCallNode.class, 0x306);
+        registerNode(PackagedNativeFunctionCallNode.class, 0x307);
 
         // Variable (0x400)
         registerNode(VariableDeclarationNode.class, 0x400);
@@ -67,6 +66,7 @@ public class ASTData {
         registerNode(LiteralNode.class, 0x500);
         registerNode(IntegerNode.class, 0x501);
         registerNode(DecimalNode.class, 0x502);
+        registerNode(VoidNode.class, 0x503);
 
         // Inclusion (0x600)
         registerNode(IncludeNode.class, 0x600);

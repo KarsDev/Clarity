@@ -11,11 +11,13 @@ import java.util.List;
 public class FunctionDeclarationNode extends ASTNode {
 
     protected String functionName;
+    private boolean isStatic;
     protected List<ParameterNode> parameterNodes;
     protected BlockNode block;
 
-    public FunctionDeclarationNode(final String functionName, final List<ParameterNode> parameterNodes, final BlockNode block) {
+    public FunctionDeclarationNode(final String functionName, final boolean isStatic, final List<ParameterNode> parameterNodes, final BlockNode block) {
         this.functionName = functionName;
+        this.isStatic = isStatic;
         this.parameterNodes = parameterNodes;
         this.block = block;
     }
@@ -26,6 +28,10 @@ public class FunctionDeclarationNode extends ASTNode {
 
     public final String getFunctionName() {
         return functionName;
+    }
+
+    public final boolean isStatic() {
+        return isStatic;
     }
 
     public final List<ParameterNode> getParameterNodes() {
@@ -58,6 +64,7 @@ public class FunctionDeclarationNode extends ASTNode {
     @Override
     public void save(final ASTOutputStream out) throws IOException {
         out.writeString(functionName);
+        out.writeBoolean(isStatic);
         out.writeNodeList(parameterNodes);
         out.writeNode(block);
     }
@@ -65,6 +72,7 @@ public class FunctionDeclarationNode extends ASTNode {
     @Override
     public void load(final ASTInputStream in) throws IOException {
         this.functionName = in.readString();
+        this.isStatic = in.readBoolean();
         this.parameterNodes = in.readNodeListNoCast();
         this.block = (BlockNode) in.readNode();
     }

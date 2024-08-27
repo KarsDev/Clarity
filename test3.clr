@@ -1,8 +1,7 @@
-include test2
+class Test {
+    static const var x = "X"
 
-class Test2 {
-    fn exe() {
-        native.println("executed")
-        return 1
+    static fn get() {
+        return Test.x
     }
 }

@@ -1,11 +1,11 @@
-package me.kuwg.clarity.interpreter.nmh.natives.io;
+package me.kuwg.clarity.nmh.natives.impl.def;
 
-import me.kuwg.clarity.interpreter.nmh.natives.NativeMethod;
+import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeMethod;
 
 import java.util.List;
 import java.util.Scanner;
 
-public class InputNative extends NativeMethod<String> {
+public class InputNative extends DefaultNativeMethod<String> {
 
     private static final Scanner scanner = new Scanner(System.in);
 

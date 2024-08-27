@@ -37,4 +37,11 @@ public class IntegerNode extends ASTNode {
     public void load(final ASTInputStream in) throws IOException {
         this.value = in.readInt();
     }
+
+    @Override
+    public String toString() {
+        return "IntegerNode{" +
+                "value=" + value +
+                '}';
+    }
 }

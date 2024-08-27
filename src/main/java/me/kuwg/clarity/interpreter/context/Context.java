@@ -42,10 +42,10 @@ public class Context {
         return result == VOID ? VOID : ((VariableDefinition) result).getValue();
     }
 
-    public Object getVariableDefinition(final String name) {
+    public ObjectType getVariableDefinition(final String name) {
         final ObjectType result = variables.getOrDefault(name, VOID);
         if (result == VOID && parentContext != null) {
-            return parentContext.getVariable(name);
+            return parentContext.getVariableDefinition(name); // Fixed reference here
         }
         return result;
     }

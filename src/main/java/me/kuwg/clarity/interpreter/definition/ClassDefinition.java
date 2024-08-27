@@ -3,7 +3,14 @@ package me.kuwg.clarity.interpreter.definition;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.interpreter.types.ObjectType;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ClassDefinition extends ObjectType {
+
+    public final Map<String, VariableDefinition> staticVariables = new HashMap<>();
+    public final Map<String, FunctionDefinition> staticFunctions = new HashMap<>();
+
     private final String name;
     private final FunctionDefinition constructor;
     private final BlockNode body;

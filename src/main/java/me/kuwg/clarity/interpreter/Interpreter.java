@@ -7,17 +7,11 @@ import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
-import me.kuwg.clarity.ast.nodes.function.call.FunctionCallNode;
-import me.kuwg.clarity.ast.nodes.function.call.LocalFunctionCallNode;
-import me.kuwg.clarity.ast.nodes.function.call.ObjectFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
-import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
-import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
-import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
-import me.kuwg.clarity.ast.nodes.function.call.NativeFunctionCallNode;
-import me.kuwg.clarity.ast.nodes.literal.VoidNode;
+import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
@@ -30,7 +24,7 @@ import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
 import me.kuwg.clarity.interpreter.definition.VariableDefinition;
 import me.kuwg.clarity.interpreter.exceptions.MultipleMainMethodsException;
-import me.kuwg.clarity.interpreter.nmh.NativeMethodHandler;
+import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.interpreter.types.ClassObject;
 import me.kuwg.clarity.interpreter.types.ObjectType;
 import me.kuwg.clarity.interpreter.types.ReturnValue;
@@ -38,6 +32,7 @@ import me.kuwg.clarity.interpreter.types.VoidObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static me.kuwg.clarity.interpreter.types.VoidObject.VOID;
 
@@ -97,7 +92,7 @@ public class Interpreter {
         if (node instanceof BlockNode) return interpretBlock((BlockNode) node, context);
         if (node instanceof VariableDeclarationNode) return interpretVariableDeclaration((VariableDeclarationNode) node, context);
         if (node instanceof BinaryExpressionNode) return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
-        if (node instanceof NativeFunctionCallNode) return interpretNativeFunctionCall((NativeFunctionCallNode) node, context);
+        if (node instanceof DefaultNativeFunctionCallNode) return interpretDefaultNativeFunctionCall((DefaultNativeFunctionCallNode) node, context);
         if (node instanceof IntegerNode) return ((IntegerNode) node).getValue();
         if (node instanceof DecimalNode) return ((DecimalNode) node).getValue();
         if (node instanceof LiteralNode) return ((LiteralNode) node).getValue();
@@ -116,6 +111,9 @@ public class Interpreter {
         if (node instanceof ObjectVariableReassignmentNode) return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
         if (node instanceof VoidNode) return VOID;
         if (node instanceof IncludeNode) return interpretInclude((IncludeNode) node, context);
+        if (node instanceof PackagedNativeFunctionCallNode) return interpretPackagedNativeFunctionCall((PackagedNativeFunctionCallNode) node, context);
+        if (node instanceof ArrayNode) return interpretArrayNode((ArrayNode) node, context);
+
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -131,7 +129,9 @@ public class Interpreter {
     }
 
     private Object interpretVariableDeclaration(final VariableDeclarationNode node, final Context context) {
-        context.defineVariable(node.getName(), new VariableDefinition(node.getName(), node.getValue() == null ? null : interpretNode(node.getValue(), context)));
+        VariableDefinition variableDefinition = new VariableDefinition(node.getName(), node.getValue() == null ? null : interpretNode(node.getValue(), context), node.isConstant(), node.isStatic());
+
+        context.defineVariable(node.getName(), variableDefinition);
         return VOID;
     }
 
@@ -141,9 +141,30 @@ public class Interpreter {
     }
 
     private Object interpretClassDeclaration(final ClassDeclarationNode node, final Context context) {
-        context.defineClass(node.getName(), new ClassDefinition(node.getName(), node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody()));
+        final ClassDefinition definition = new ClassDefinition(node.getName(), node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody());
+        context.defineClass(node.getName(), definition);
+
+        definition.getBody().forEach(statement -> {
+            if (statement instanceof VariableDeclarationNode) {
+                VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
+                if (declarationNode.isStatic()) {
+                    definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true));
+                }
+            } else if (statement instanceof FunctionDeclarationNode) {
+                FunctionDeclarationNode declarationNode = (FunctionDeclarationNode) statement;
+                final List<String> params = new ArrayList<>();
+
+                declarationNode.getParameterNodes().forEach(param -> params.add(param.getName()));
+
+                if (declarationNode.isStatic()) {
+                    definition.staticFunctions.put(declarationNode.getFunctionName(), new FunctionDefinition(declarationNode.getFunctionName(), true, params, declarationNode.getBlock()));
+                }
+            }
+        });
+
         return VOID;
     }
+
 
     private Object interpretBinaryExpressionNode(final BinaryExpressionNode node, final Context context) {
         Object leftValue = interpretNode(node.getLeft(), context);
@@ -257,12 +278,9 @@ public class Interpreter {
         }
     }
 
-    private Object interpretNativeFunctionCall(final NativeFunctionCallNode node, final Context context) {
-        final List<Object> params = new ArrayList<>();
-        for (final ASTNode param : node.getParams()) {
-            params.add(interpretNode(param, context));
-        }
-        return nmh.call(node.getName(), params);
+    private Object interpretDefaultNativeFunctionCall(final DefaultNativeFunctionCallNode node, final Context context) {
+        final List<Object> params = node.getParams().stream().map(param -> interpretNode(param, context)).collect(Collectors.toList());
+        return nmh.callDefault(node.getName(), params);
     }
 
     private Object interpretVariableReference(final VariableReferenceNode node, final Context context) {
@@ -306,10 +324,8 @@ public class Interpreter {
         for (int i = 0; i < definitionParams.size(); i++) {
             final String name = definitionParams.get(i);
             final Object value = params.get(i);
-
-            functionContext.defineVariable(name, new VariableDefinition(name, value));
+            functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
         }
-
         return interpretBlock(definition.getBlock(), functionContext);
     }
 
@@ -353,7 +369,7 @@ public class Interpreter {
         final Context constructorContext = new Context(context);
 
         for (int i = 0; i < constructorParams.size(); i++) {
-            constructorContext.defineVariable(constructorParams.get(i), new VariableDefinition(constructorParams.get(i), params.get(i)));
+            constructorContext.defineVariable(constructorParams.get(i), new VariableDefinition(constructorParams.get(i), params.get(i), false, false));
         }
 
         final Object result = interpretBlock(constructor.getBlock(), constructorContext);
@@ -374,25 +390,99 @@ public class Interpreter {
         final Object caller = context.getVariable(node.getCaller());
 
         if (caller instanceof VoidObject) {
-            throw new UnsupportedOperationException("You can't call a method out of a null variable");
+            final ObjectType rawDefinition = context.getClass(node.getCaller());
+            if (rawDefinition instanceof VoidObject) {
+                throw new IllegalStateException("Accessing a static function of a non-existent class: " + node.getCaller());
+            }
+            final ClassDefinition classDefinition = (ClassDefinition) rawDefinition;
+
+            final FunctionDefinition definition = classDefinition.staticFunctions.get(node.getCalled());
+
+            if (definition == null) {
+                throw new IllegalStateException("Accessing a static function that does not exist: " + node.getCaller() + "#" + node.getCalled() + "(...)");
+            }
+
+
+            final List<Object> params = new ArrayList<>();
+
+            for (final ASTNode param : node.getParams()) {
+                final Object returned = interpretNode(param, context);
+                if (returned == VOID) {
+                    throw new IllegalArgumentException("Passing void as a parameter function: " + param.getClass().getSimpleName() + ", fn: " + definition.getName());
+                }
+                params.add(returned);
+            }
+
+            if (params.size() > definition.getParams().size()) {
+                throw new IllegalStateException("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + definition.getName());
+            } else if (params.size() < definition.getParams().size()) {
+                throw new IllegalStateException("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + definition.getName());
+            }
+
+            final Context functionContext = new Context(context);
+
+            List<String> definitionParams = definition.getParams();
+            for (int i = 0; i < definitionParams.size(); i++) {
+                final String name = definitionParams.get(i);
+                final Object value = params.get(i);
+
+                functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
+            }
+
+            return interpretBlock(definition.getBlock(), functionContext);
+        }
+
+        if (caller instanceof Object[]) {
+            final Object[] array = (Object[]) caller;
+
+            final List<Object> params = new ArrayList<>();
+
+            for (final ASTNode param : node.getParams()) {
+                final Object returned = interpretNode(param, context);
+                if (returned == VOID) {
+                    throw new IllegalArgumentException("Passing void as a parameter in a array function");
+                }
+                params.add(returned);
+            }
+
+            final String fn = node.getCalled();
+
+            switch (fn) {
+                case "at":
+                    if (params.size() == 1 && params.get(0) instanceof Integer) {
+                        return array[(int) params.get(0)];
+                    }
+                    break;
+
+                case "size":
+                    if (params.isEmpty()) {
+                        return array.length;
+                    }
+                    break;
+
+                default:
+                    throw new IllegalStateException("Illegal function in array context: " + fn + " with params " + params);
+            }
         }
 
         if (!(caller instanceof ClassObject))
-            throw new UnsupportedOperationException("You can't call a method out of a " + caller.getClass().getSimpleName());
+            throw new UnsupportedOperationException("You can't call a function out of a " + caller.getClass().getSimpleName());
 
         ClassObject classObject = (ClassObject) caller;
 
         final ObjectType rawDefinition = classObject.getContext().getFunction(node.getCalled());
 
-        if (rawDefinition == VOID) throw new IllegalStateException("Called a non existent method: " + classObject.getName() + "#" + node.getCalled());
+        if (rawDefinition == VOID)
+            throw new IllegalStateException("Called a non existent function: " + classObject.getName() + "#" + node.getCalled());
 
         FunctionDefinition definition = (FunctionDefinition) rawDefinition;
 
         final Context functionContext = new Context(classObject.getContext());
-        if (node.getParams().size() != definition.getParams().size()) throw new IllegalStateException("Called a function but params size is different: " + classObject.getName() + "#" + node.getCalled());
+        if (node.getParams().size() != definition.getParams().size())
+            throw new IllegalStateException("Called a function but params size is different: " + classObject.getName() + "#" + node.getCalled());
 
         for (int i = 0; i < definition.getParams().size(); i++) {
-            functionContext.defineVariable(definition.getParams().get(i), new VariableDefinition(definition.getParams().get(i), interpretNode(node.getParams().get(i), context)));
+            functionContext.defineVariable(definition.getParams().get(i), new VariableDefinition(definition.getParams().get(i), interpretNode(node.getParams().get(i), context), false, false));
         }
         return interpretBlock(definition.getBlock(), functionContext);
     }
@@ -439,7 +529,7 @@ public class Interpreter {
             final String name = definitionParams.get(i);
             final Object value = params.get(i);
 
-            functionContext.defineVariable(name, new VariableDefinition(name, value));
+            functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
         }
 
         return interpretBlock(definition.getBlock(), functionContext);
@@ -447,16 +537,36 @@ public class Interpreter {
 
     private Object interpretObjectVariableReference(final ObjectVariableReferenceNode node, final Context context) {
         final String callerObjectName = node.getCaller();
+        final String calledObjectName = node.getCalled();
         final Object callerObjectRaw = context.getVariable(callerObjectName);
-        if (!(callerObjectRaw instanceof ClassObject)) throw new IllegalStateException("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object");
+
+        if (callerObjectRaw instanceof VoidObject) { // static init
+            final ObjectType rawDefinition = context.getClass(callerObjectName);
+            if (rawDefinition instanceof VoidObject) {
+                throw new IllegalStateException("Accessing a static variable of a non-existent class: " + callerObjectName);
+            }
+            final ClassDefinition definition = (ClassDefinition) rawDefinition;
+
+            final VariableDefinition variable = definition.staticVariables.get(calledObjectName);
+
+            if (variable == null) {
+                throw new IllegalStateException("Accessing a static variable that does not exist: " + callerObjectName + "#" + calledObjectName);
+            }
+
+            return variable.getValue();
+        }
+
+        if (!(callerObjectRaw instanceof ClassObject))
+            throw new IllegalStateException("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object");
         final ClassObject callerObject = (ClassObject) callerObjectRaw;
-        return callerObject.getContext().getVariable(node.getCalled());
+        return callerObject.getContext().getVariable(calledObjectName);
     }
 
     private Object interpretObjectVariableReassignment(final ObjectVariableReassignmentNode node, final Context context) {
         final String callerObjectName = node.getCaller();
         final Object callerObjectRaw = context.getVariable(callerObjectName);
-        if (!(callerObjectRaw instanceof ClassObject)) throw new IllegalStateException("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object");
+        if (!(callerObjectRaw instanceof ClassObject))
+            throw new IllegalStateException("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object");
         final ClassObject callerObject = (ClassObject) callerObjectRaw;
         callerObject.getContext().setVariable(node.getCalled(), interpretNode(node.getValue(), context));
         return VOID;
@@ -464,5 +574,27 @@ public class Interpreter {
 
     private Object interpretInclude(final IncludeNode node, final Context context) {
         return interpretNode(node.getIncluded(), context);
+    }
+
+    private Object interpretPackagedNativeFunctionCall(final PackagedNativeFunctionCallNode node, final Context context) {
+        final List<Object> params = node.getParams().stream().map(param -> interpretNode(param, context)).collect(Collectors.toList());
+        return nmh.callPackaged(node.getPackage(), node.getName(), params);
+    }
+
+    private Object interpretArrayNode(final ArrayNode node, final Context context) {
+        final Object[] objects = new Object[node.getNodes().size()];
+
+        List<ASTNode> nodes = node.getNodes();
+        for (int i = 0, nodesSize = nodes.size(); i < nodesSize; i++) {
+            final ASTNode astNode = nodes.get(i);
+            final Object result = interpretNode(astNode, context);
+            if (result == VOID) {
+                throw new IllegalStateException("Adding void as a object in an array.");
+            }
+
+            objects[i] = result;
+        }
+
+        return objects;
     }
 }

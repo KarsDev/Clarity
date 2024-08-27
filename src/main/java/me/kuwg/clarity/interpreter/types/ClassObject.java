@@ -20,4 +20,9 @@ public class ClassObject {
     public final Context getContext() {
         return context;
     }
+
+    @Override
+    public String toString() {
+        return "ClassObject@" + name;
+    }
 }

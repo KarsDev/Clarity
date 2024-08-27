@@ -8,10 +8,13 @@ import java.io.IOException;
 
 public class VariableDeclarationNode extends ASTNode {
     private String name;
+    private boolean isConstant, isStatic;
     private ASTNode value;
 
-    public VariableDeclarationNode(final String name, final ASTNode value) {
+    public VariableDeclarationNode(final String name, final ASTNode value, final boolean isConstant,  final boolean isStatic) {
         this.name = name;
+        this.isConstant = isConstant;
+        this.isStatic = isStatic;
         this.value = value;
     }
 
@@ -27,10 +30,20 @@ public class VariableDeclarationNode extends ASTNode {
         return value;
     }
 
+    public final boolean isConstant() {
+        return isConstant;
+    }
+
+    public final boolean isStatic() {
+        return isStatic;
+    }
+
     @Override
     public String toString() {
         return "VariableDeclarationNode{" +
                 "name='" + name + '\'' +
+                ", isConstant=" + isConstant +
+                ", isStatic=" + isStatic +
                 ", value=" + value +
                 '}';
     }
@@ -40,6 +53,13 @@ public class VariableDeclarationNode extends ASTNode {
         sb.append(indent).append("Variable Declaration:\n");
 
         sb.append(indent).append("  Name: ").append(name).append("\n");
+
+        if (isConstant) {
+            sb.append(indent).append("  Type: Constant\n");
+        }
+        if (isStatic) {
+            sb.append(indent).append("  Type: Static\n");
+        }
 
         sb.append(indent).append("  Value:\n");
         if (value != null) {
@@ -53,11 +73,15 @@ public class VariableDeclarationNode extends ASTNode {
     public void save(final ASTOutputStream out) throws IOException {
         out.writeString(name);
         out.writeNode(value);
+        out.writeBoolean(isConstant);
+        out.writeBoolean(isStatic);
     }
 
     @Override
     public void load(final ASTInputStream in) throws IOException {
         this.name = in.readString();
         this.value = in.readNode();
+        this.isConstant = in.readBoolean();
+        this.isStatic = in.readBoolean();
     }
 }

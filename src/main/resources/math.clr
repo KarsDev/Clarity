@@ -1,0 +1,3 @@
+class Math {
+    static const var PI = 3.141592653589793
+}

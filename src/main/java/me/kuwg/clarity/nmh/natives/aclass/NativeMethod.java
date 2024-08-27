@@ -1,12 +1,12 @@
-package me.kuwg.clarity.interpreter.nmh.natives;
+package me.kuwg.clarity.nmh.natives.aclass;
 
 import me.kuwg.clarity.interpreter.types.VoidObject;
 
 import java.util.List;
 
-public abstract class NativeMethod<R> {
+abstract class NativeMethod<R> {
 
-    protected static final VoidObject VOID_OBJECT = VoidObject.VOID;
+    protected static final VoidObject VOID = VoidObject.VOID;
 
     private final String name;
 
@@ -18,7 +18,7 @@ public abstract class NativeMethod<R> {
 
     protected abstract boolean applies0(final List<Object> params);
 
-    public final boolean applies(final String name, final List<Object> params) {
+    public boolean applies(final String name, final List<Object> params) {
         return this.name.equals(name) && applies0(params);
     }
 }

@@ -12,7 +12,7 @@ public abstract class VoidObject extends ObjectType {
 
     @Override
     public String toString() {
-        return "null";
+        return "VOID";
     }
 
     @SuppressWarnings("StaticInitializerReferencesSubClass")
