@@ -200,12 +200,12 @@ public final class ASTParser {
 
 
             while (true) {
+                if (match(DIVIDER, ")")) break;
                 params.add(parseExpression());
-                if (!matchAndConsume(DIVIDER, ",")) {
-                    consume();
-                    break;
-                }
+                if (!matchAndConsume(DIVIDER, ",")) break;
             }
+
+            consume(DIVIDER, ")");
 
             final String ip = pkg.substring(0, pkg.length() - 1);
 
@@ -469,7 +469,7 @@ public final class ASTParser {
         final List<Token> tokens = Tokenizer.tokenize(content);
         final ASTParser parser = new ASTParser(ORIGINAL, tokens);
         final AST ast = parser.parse();
-        return new IncludeNode(ast.getRoot()).setLine(current().getLine());
+        return new IncludeNode(ast.getRoot(), isNative).setLine(current().getLine());
     }
 
     private String parseIncludePath() {

@@ -18,4 +18,9 @@ public class CreateListNative extends PackagedNativeMethod<Object[]> {
     protected boolean applies0(final List<Object> params) {
         return !params.isEmpty();
     }
+
+    @Override
+    protected boolean canCall(final String className) {
+        return true;
+    }
 }

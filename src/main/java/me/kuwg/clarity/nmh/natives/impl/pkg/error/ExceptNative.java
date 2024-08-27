@@ -24,4 +24,9 @@ public class ExceptNative extends PackagedNativeMethod<VoidObject> {
         return (params.size() == 1 && (params.get(0) instanceof String || params.get(0) instanceof Number)) ||
                ((params.size() == 2 && (params.get(0) instanceof String || params.get(0) instanceof Number)) && params.get(1) instanceof Number);
     }
+
+    @Override
+    protected boolean canCall(final String className) {
+        return true;
+    }
 }

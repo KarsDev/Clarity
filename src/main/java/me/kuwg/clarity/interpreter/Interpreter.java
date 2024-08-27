@@ -30,6 +30,7 @@ import me.kuwg.clarity.interpreter.types.ClassObject;
 import me.kuwg.clarity.interpreter.types.ObjectType;
 import me.kuwg.clarity.interpreter.definition.ReturnValue;
 import me.kuwg.clarity.interpreter.types.VoidObject;
+import me.kuwg.clarity.privilege.Privileges;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,7 @@ public class Interpreter {
 
         if (main != null) {
 
-            Register.addElement("main call {?} -> main()", main.getLine());
+            Register.addElement("main call -> main()", main.getLine());
 
             final Object result = interpretNode(main.getBlock(), general);
 
@@ -145,8 +146,15 @@ public class Interpreter {
     }
 
     private Object interpretClassDeclaration(final ClassDeclarationNode node, final Context context) {
-        final ClassDefinition definition = new ClassDefinition(node.getName(), node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody());
-        context.defineClass(node.getName(), definition);
+
+        final String name = node.getName();
+        context.setCurrentClassName(name);
+
+        final ClassDefinition definition = new ClassDefinition(name, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody());
+        context.defineClass(name, definition);
+
+        if (!context.isNativeClass())
+            Privileges.checkClassName(name, node.getLine());
 
         definition.getBody().forEach(statement -> {
             if (statement instanceof VariableDeclarationNode) {
@@ -165,6 +173,8 @@ public class Interpreter {
                 }
             }
         });
+
+        context.setCurrentClassName(null);
 
         return VOID;
     }
@@ -287,7 +297,7 @@ public class Interpreter {
 
     private Object interpretDefaultNativeFunctionCall(final DefaultNativeFunctionCallNode node, final Context context) {
         final List<Object> params = node.getParams().stream().map(param -> interpretNode(param, context)).collect(Collectors.toList());
-        Register.addElement("native call {d} -> " + node.getName() + getParams(params), node.getLine());
+        Register.addElement("native call -> " + node.getName() + getParams(params), node.getLine());
         return nmh.callDefault(node.getName(), params);
     }
 
@@ -302,7 +312,10 @@ public class Interpreter {
     private Object interpretFunctionCall(final FunctionCallNode node, Context context) {
 
         final String functionName = node.getName();
-        final ObjectType type = context.getFunction(functionName);
+
+        context.setCurrentFunctionName(functionName);
+
+        final ObjectType type = context.getFunction(functionName, node.getParams().size());
 
         if (type == VOID) {
             except("Calling a function that doesn't exist: " + functionName, node.getLine());
@@ -336,9 +349,11 @@ public class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
         }
 
-        Register.addElement("function call {d} -> " + node.getName() + getParams(params), node.getLine());
+        Register.addElement("function call -> " + node.getName() + getParams(params), node.getLine());
 
-        return interpretBlock(definition.getBlock(), functionContext);
+        final Object result = interpretBlock(definition.getBlock(), functionContext);
+        context.setCurrentFunctionName(null);
+        return result;
     }
 
     private Object interpretReturnNode(final ReturnNode node, final Context context) {
@@ -347,6 +362,8 @@ public class Interpreter {
 
     private Object interpretClassInstantiation(final ClassInstantiationNode node, final Context context) {
         final String name = node.getName();
+
+        context.setCurrentClassName(name);
 
         final Context classContext = new Context(context);
 
@@ -365,7 +382,11 @@ public class Interpreter {
 
         final ClassDefinition definition = (ClassDefinition) raw;
         interpretBlock(definition.getBody(), classContext);
-        return interpretConstructor(definition.getConstructor(), params, classContext, name);
+
+
+        final Object result = interpretConstructor(definition.getConstructor(), params, classContext, name);
+        context.setCurrentClassName(null);
+        return result;
     }
 
     private ClassObject interpretConstructor(final FunctionDefinition constructor, final List<Object> params, final Context context, final String cn) {
@@ -410,6 +431,9 @@ public class Interpreter {
             }
             final ClassDefinition classDefinition = (ClassDefinition) rawDefinition;
 
+            context.setCurrentClassName(classDefinition.getName());
+            context.setCurrentFunctionName(node.getCalled());
+
             final FunctionDefinition definition = classDefinition.staticFunctions.get(node.getCalled());
 
             if (definition == null) {
@@ -445,8 +469,11 @@ public class Interpreter {
                 functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
             }
 
-            Register.addElement("static call {o} -> " + node.getCalled() + getParams(params), node.getLine());
-            return interpretBlock(definition.getBlock(), functionContext);
+            Register.addElement("static call -> " + node.getCalled() + getParams(params), node.getLine());
+            final Object result = interpretBlock(definition.getBlock(), functionContext);
+            context.setCurrentClassName(null);
+            context.setCurrentFunctionName(null);
+            return result;
         }
 
         if (caller instanceof Object[]) {
@@ -486,7 +513,7 @@ public class Interpreter {
                     return null;
             }
 
-            Register.addElement("array call {f} -> " + fn + getParams(params), node.getLine());
+            Register.addElement("array call -> " + fn + getParams(params), node.getLine());
         }
 
         if (!(caller instanceof ClassObject)) {
@@ -494,9 +521,14 @@ public class Interpreter {
             return null;
         }
 
+
+
         ClassObject classObject = (ClassObject) caller;
 
-        final ObjectType rawDefinition = classObject.getContext().getFunction(node.getCalled());
+        context.setCurrentClassName(classObject.getName());
+        context.setCurrentFunctionName(node.getCalled());
+
+        final ObjectType rawDefinition = classObject.getContext().getFunction(node.getCalled(), node.getParams().size());
 
         if (rawDefinition == VOID) {
             except("Called a non existent function: " + classObject.getName() + "#" + node.getCalled(), node.getLine());
@@ -514,9 +546,12 @@ public class Interpreter {
             functionContext.defineVariable(definition.getParams().get(i), new VariableDefinition(definition.getParams().get(i), interpretNode(node.getParams().get(i), context), false, false));
         }
 
-        Register.addElement("native call {d} -> " + node.getCalled() + getParams(definition.getParams()), node.getLine());
+        Register.addElement("native call -> " + node.getCalled() + getParams(definition.getParams()), node.getLine());
 
-        return interpretBlock(definition.getBlock(), functionContext);
+        final Object result = interpretBlock(definition.getBlock(), functionContext);
+        context.setCurrentClassName(null);
+        context.setCurrentFunctionName(null);
+        return result;
     }
 
     private Object interpretLocalVariableReferenceNode(final LocalVariableReferenceNode node, final Context context) {
@@ -530,7 +565,10 @@ public class Interpreter {
     private Object interpretLocalFunctionCallNode(final LocalFunctionCallNode node, final Context raw) {
         final Context context = raw.parentContext();
         final String functionName = node.getName();
-        final ObjectType type = context.getFunction(functionName);
+
+        context.setCurrentFunctionName(functionName);
+
+        final ObjectType type = context.getFunction(functionName, node.getParams().size());
 
         if (type == VOID) {
             except("Calling a function that doesn't exist: " + functionName, node.getLine());
@@ -565,9 +603,11 @@ public class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
         }
 
-        Register.addElement("local call {l} -> " + node.getName() + getParams(params), node.getLine());
+        Register.addElement("local call -> " + node.getName() + getParams(params), node.getLine());
 
-        return interpretBlock(definition.getBlock(), functionContext);
+        final Object result = interpretBlock(definition.getBlock(), functionContext);
+        context.setCurrentFunctionName(null);
+        return result;
     }
 
     private Object interpretObjectVariableReference(final ObjectVariableReferenceNode node, final Context context) {
@@ -614,13 +654,16 @@ public class Interpreter {
     }
 
     private Object interpretInclude(final IncludeNode node, final Context context) {
-        return interpretNode(node.getIncluded(), context);
+        context.setNativeClass(true);
+        final Object result = interpretNode(node.getIncluded(), context);
+        context.setNativeClass(false);
+        return result;
     }
 
     private Object interpretPackagedNativeFunctionCall(final PackagedNativeFunctionCallNode node, final Context context) {
         final List<Object> params = node.getParams().stream().map(param -> interpretNode(param, context)).collect(Collectors.toList());
-        Register.addElement("native call {p} -> " + node.getName() + getParams(params), node.getLine());
-        return nmh.callPackaged(node.getPackage(), node.getName(), params);
+        Register.addElement("native call -> " + node.getName() + getParams(params), node.getLine());
+        return nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params);
     }
 
     private Object interpretArrayNode(final ArrayNode node, final Context context) {
@@ -642,7 +685,6 @@ public class Interpreter {
 
     private void except(final String message, final int line) {
         Register.throwException(message, line);
-        throw new RuntimeException();
     }
 
     private String getParams(final List<?> objects) {

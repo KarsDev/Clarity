@@ -10,10 +10,7 @@ import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
-import me.kuwg.clarity.ast.nodes.literal.DecimalNode;
-import me.kuwg.clarity.ast.nodes.literal.IntegerNode;
-import me.kuwg.clarity.ast.nodes.literal.LiteralNode;
-import me.kuwg.clarity.ast.nodes.literal.VoidNode;
+import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
@@ -67,6 +64,7 @@ public class ASTData {
         registerNode(IntegerNode.class, 0x501);
         registerNode(DecimalNode.class, 0x502);
         registerNode(VoidNode.class, 0x503);
+        registerNode(ArrayNode.class, 0x504);
 
         // Inclusion (0x600)
         registerNode(IncludeNode.class, 0x600);

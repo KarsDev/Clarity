@@ -9,9 +9,11 @@ import java.io.IOException;
 
 public class IncludeNode extends ASTNode {
     private BlockNode included;
+    private boolean isNative;
 
-    public IncludeNode(final BlockNode included) {
+    public IncludeNode(final BlockNode included, final boolean isNative) {
         this.included = included;
+        this.isNative = isNative;
     }
 
     public IncludeNode() {
@@ -20,6 +22,10 @@ public class IncludeNode extends ASTNode {
 
     public final BlockNode getIncluded() {
         return included;
+    }
+
+    public final boolean isNative() {
+        return isNative;
     }
 
     @Override
@@ -31,10 +37,12 @@ public class IncludeNode extends ASTNode {
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
         out.writeNode(included);
+        out.writeBoolean(isNative);
     }
 
     @Override
     public void load0(final ASTInputStream in) throws IOException {
-        included = (BlockNode) in.readNode();
+        this.included = (BlockNode) in.readNode();
+        this.isNative = in.readBoolean();
     }
 }

@@ -1,10 +1,5 @@
-include native math
+include native system
 
 fn main() {
-    exe(1)
-}
-
-fn exe(x) {
-    var array = [Math.PI, 3.3, new Math()]
-    native.println(array.at(44) + " is number 0 in array of size " + array.size())
+    System.exit(1)
 }

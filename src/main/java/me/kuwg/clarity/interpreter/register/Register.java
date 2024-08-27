@@ -38,6 +38,12 @@ public final class Register {
         exit();
     }
 
+    public static void throwException(final String message) {
+        error(message, "?");
+        printRegister();
+        exit();
+    }
+
     public static void throwException() {
         error("?", "?");
         printRegister();

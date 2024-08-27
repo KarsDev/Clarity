@@ -1,0 +1,11 @@
+class System {
+    constructor() {
+    }
+    static fn exit() {
+        native.system.exit(status)
+    }
+
+    static fn exit(status) {
+        native.system.exit(status)
+    }
+}

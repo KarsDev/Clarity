@@ -1,24 +1,32 @@
 package me.kuwg.clarity.nmh;
 
+import me.kuwg.clarity.interpreter.register.Register;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeMethod;
 import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeMethod;
-import me.kuwg.clarity.nmh.natives.impl.def.*;
+import me.kuwg.clarity.nmh.natives.impl.def.InputNative;
+import me.kuwg.clarity.nmh.natives.impl.def.PrintNative;
+import me.kuwg.clarity.nmh.natives.impl.def.PrintlnNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.error.ExceptNative;
+import me.kuwg.clarity.nmh.natives.impl.pkg.system.ExitNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.util.CreateListNative;
 
 import java.util.List;
 
 public class NativeMethodHandler {
 
-    private final DefaultNativeMethod<?>[] DEFAULT = new DefaultNativeMethod[] {
-        new PrintlnNative(),
-        new InputNative(),
+    private final DefaultNativeMethod<?>[] DEFAULT = new DefaultNativeMethod[]{
+            new PrintlnNative(),
+            new InputNative(),
+            new PrintNative(),
+
 
     };
 
-    private final PackagedNativeMethod<?>[] PACKAGED = new PackagedNativeMethod[] {
-        new CreateListNative(),
-        new ExceptNative(),
+    private final PackagedNativeMethod<?>[] PACKAGED = new PackagedNativeMethod[]{
+            new CreateListNative(),
+            new ExceptNative(),
+            new ExitNative()
+
 
     };
 
@@ -29,16 +37,18 @@ public class NativeMethodHandler {
             }
         }
 
-        throw new UnsupportedOperationException("Default native method " + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
+        Register.throwException("Default native method " + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
+        return null;
     }
 
-    public Object callPackaged(final String pkg, final String name, final List<Object> params) {
+    public Object callPackaged(final String pkg, final String name, final String callerClass, final List<Object> params) {
         for (final PackagedNativeMethod<?> method : this.PACKAGED) {
-            if (method.applies(pkg, name, params)) {
+            if (method.applies(pkg, name, callerClass, params)) {
                 return method.call(params);
             }
         }
-        throw new UnsupportedOperationException("Packaged native method " + pkg + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
+        Register.throwException("Packaged native method " + pkg + "." + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
+        return null;
     }
 
     private String objectsToClassesString(final List<Object> objects) {

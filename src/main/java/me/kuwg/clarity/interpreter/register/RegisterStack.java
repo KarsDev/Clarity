@@ -1,5 +1,7 @@
 package me.kuwg.clarity.interpreter.register;
 
+import java.util.Arrays;
+
 public final class RegisterStack {
 
     private final String[] elements;
@@ -35,5 +37,10 @@ public final class RegisterStack {
 
     public int size() {
         return size;
+    }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(elements);
     }
 }

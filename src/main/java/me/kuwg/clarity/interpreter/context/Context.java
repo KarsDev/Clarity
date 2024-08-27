@@ -5,7 +5,9 @@ import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
 import me.kuwg.clarity.interpreter.definition.VariableDefinition;
 import me.kuwg.clarity.interpreter.types.ObjectType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static me.kuwg.clarity.interpreter.types.VoidObject.VOID;
@@ -13,16 +15,18 @@ import static me.kuwg.clarity.interpreter.types.VoidObject.VOID;
 public class Context {
 
     private final Map<String, ObjectType> variables = new HashMap<>();
-    private final Map<String, ObjectType> functions = new HashMap<>();
+    private final Map<String, List<FunctionDefinition>> functions = new HashMap<>();
     private final Map<String, ObjectType> classes = new HashMap<>();
-    private final Context parentContext; // New parent context field
 
-    // Constructor to initialize with a parent context
+    private boolean isNativeClass;
+    private String currentClassName, currentFunctionName;
+
+    private final Context parentContext;
+
     public Context(Context parentContext) {
         this.parentContext = parentContext;
     }
 
-    // Default constructor for a root context with no parent
     public Context() {
         this(null);
     }
@@ -45,7 +49,7 @@ public class Context {
     public ObjectType getVariableDefinition(final String name) {
         final ObjectType result = variables.getOrDefault(name, VOID);
         if (result == VOID && parentContext != null) {
-            return parentContext.getVariableDefinition(name); // Fixed reference here
+            return parentContext.getVariableDefinition(name);
         }
         return result;
     }
@@ -59,18 +63,22 @@ public class Context {
     }
 
     public void defineFunction(final String name, final FunctionDefinition definition) {
-        if (functions.containsKey(name)) {
-            throw new IllegalStateException("Declaring an already declared function: " + name);
-        }
-        functions.put(name, definition);
+        functions.computeIfAbsent(name, k -> new ArrayList<>()).add(definition);
     }
 
-    public ObjectType getFunction(final String name) {
-        final ObjectType result = functions.getOrDefault(name, VOID);
-        if (result == VOID && parentContext != null) {
-            return parentContext.getFunction(name);
+    public ObjectType getFunction(final String name, final int paramsSize) {
+        List<FunctionDefinition> definitions = functions.get(name);
+        if (definitions != null) {
+            for (FunctionDefinition definition : definitions) {
+                if (paramsSize == definition.getParams().size()) {
+                    return definition;
+                }
+            }
         }
-        return result;
+        if (parentContext != null) {
+            return parentContext.getFunction(name, paramsSize);
+        }
+        return VOID;
     }
 
     public void defineClass(final String name, final ClassDefinition definition) {
@@ -88,6 +96,31 @@ public class Context {
         return result;
     }
 
+    public final boolean isNativeClass() {
+        return isNativeClass;
+    }
+
+    public final void setNativeClass(final boolean nativeClass) {
+        isNativeClass = nativeClass;
+    }
+
+    public final String getCurrentClassName() {
+        if (currentClassName == null && parentContext != null) return parentContext.getCurrentClassName();
+        return currentClassName;
+    }
+
+    public final void setCurrentClassName(final String currentClassName) {
+        this.currentClassName = currentClassName;
+    }
+
+    public final String getCurrentFunctionName() {
+        return currentFunctionName == null && parentContext != null ? parentContext.currentFunctionName : getCurrentFunctionName();
+    }
+
+    public final void setCurrentFunctionName(final String currentFunctionName) {
+        this.currentFunctionName = currentFunctionName;
+    }
+
     public Context parentContext() {
         return parentContext;
     }
@@ -98,6 +131,8 @@ public class Context {
                 "variables=" + variables +
                 ", functions=" + functions +
                 ", classes=" + classes +
+                ", currentClassName='" + currentClassName + '\'' +
+                ", currentFunctionName='" + currentFunctionName + '\'' +
                 ", parentContext=" + parentContext +
                 '}';
     }
