@@ -6,6 +6,7 @@ import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
+import me.kuwg.clarity.ast.nodes.condition.IfStatementNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
@@ -118,7 +119,9 @@ public class Interpreter {
         if (node instanceof VoidNode) return VOID;
         if (node instanceof IncludeNode) return interpretInclude((IncludeNode) node, context);
         if (node instanceof PackagedNativeFunctionCallNode) return interpretPackagedNativeFunctionCall((PackagedNativeFunctionCallNode) node, context);
-        if (node instanceof ArrayNode) return interpretArrayNode((ArrayNode) node, context);
+        if (node instanceof ArrayNode) return interpretArray((ArrayNode) node, context);
+        if (node instanceof IfStatementNode) return interpretIfStatement((IfStatementNode) node, context);
+        if (node instanceof NullNode) return null;
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -188,8 +191,9 @@ public class Interpreter {
 
         String operator = node.getOperator();
 
-        if (leftValue == null) leftValue = "null";
-        if (rightValue == null) rightValue = "null";
+        if (leftValue instanceof Boolean && rightValue instanceof Boolean) {
+            return evaluateBooleanOperation((Boolean) leftValue, (Boolean) rightValue, operator, node.getLine());
+        }
 
         if (leftValue instanceof String || rightValue instanceof String) {
             if (operator.equals("+")) {
@@ -217,9 +221,31 @@ public class Interpreter {
 
                 return evaluateIntegerOperation(left, right, operator, node.getLine());
             }
+        } else if (leftValue == null || rightValue == null) {
+            if (!operator.equals("==")) {
+                except("Only operator available for null is '=='", node.getLine());
+                return null;
+            }
+            return leftValue == rightValue;
         } else {
             except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " and " + rightValue.getClass().getSimpleName(), node.getLine());
             return null;
+        }
+    }
+
+    private Object evaluateBooleanOperation(boolean left, boolean right, String operator, final int line) {
+        switch (operator) {
+            case "&&":
+                return left && right;
+            case "||":
+                return left || right;
+            case "==":
+                return left == right;
+            case "!=":
+                return left != right;
+            default:
+                except("Unsupported operator for boolean operands: " + operator, line);
+                return null;
         }
     }
 
@@ -668,7 +694,7 @@ public class Interpreter {
         return nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params);
     }
 
-    private Object interpretArrayNode(final ArrayNode node, final Context context) {
+    private Object interpretArray(final ArrayNode node, final Context context) {
         final Object[] objects = new Object[node.getNodes().size()];
 
         List<ASTNode> nodes = node.getNodes();
@@ -698,5 +724,50 @@ public class Interpreter {
                 s.append(", ");
         }
         return s + ")";
+    }
+
+    private Object interpretIfStatement(final IfStatementNode node, final Context context) {
+        final ASTNode expr = node.getCondition();
+        final boolean condition = checkCondition(expr, context);
+
+        if (condition) {
+            interpretBlock(node.getIfBlock(), context);
+        } else {
+            LABEL_LOOP: {
+                for (final IfStatementNode statementNode : node.getElseIfStatements()) {
+                    if (checkCondition(statementNode.getCondition(), context)) {
+                        interpretBlock(statementNode.getIfBlock(), context);
+                        break LABEL_LOOP;
+                    }
+                }
+                if (node.getElseBlock() != null) interpretBlock(node.getElseBlock(), context);
+            }
+        }
+
+        return VOID;
+    }
+
+    private boolean checkCondition(final ASTNode expr, final Context context) {
+        final Object rawConditionValue = interpretNode(expr, context);
+        final boolean condition;
+        if (rawConditionValue instanceof Integer || rawConditionValue instanceof Byte) {
+            final int num = (int) rawConditionValue;
+            if (num == 0) {
+                condition = false;
+            }
+            else if (num == 1) {
+                condition = true;
+            }
+            else {
+                except("Integer condition must be 1 or 0", expr.getLine());
+                condition = false;
+            }
+        } else if (!(rawConditionValue instanceof Boolean)) {
+            except("Condition is not boolean", expr.getLine());
+            condition = false;
+        } else {
+            condition = (boolean) rawConditionValue;
+        }
+        return condition;
     }
 }

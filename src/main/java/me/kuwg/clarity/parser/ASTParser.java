@@ -6,6 +6,7 @@ import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
+import me.kuwg.clarity.ast.nodes.condition.IfStatementNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
@@ -59,23 +60,24 @@ public final class ASTParser {
         }
 
         while (currentTokenIndex < tokens.size()) {
-            final ASTNode result = parseStatement();
+            final ASTNode result = parseExpression();
             if (result != null) node.addChild(result);
         }
         return new AST(node);
     }
 
-    private ASTNode parseStatement() {
-        return Objects.requireNonNull(current().getType()) == KEYWORD ? parseKeyword() : parseExpression();
-    }
-
     private BlockNode parseBlock() {
         final BlockNode node = new BlockNode();
 
-        consume(DIVIDER, "{");
+        if (!matchAndConsume(DIVIDER, "{")) {
+            final ASTNode result = parseExpression();
+            if (result != null) node.addChild(result);
+            else throw new IllegalStateException("Block has no expression at line " + node.getLine());
+            return node;
+        }
 
         while (!matchAndConsume(DIVIDER, "}")) {
-            final ASTNode result = parseStatement();
+            final ASTNode result = parseExpression();
             if (result != null) node.addChild(result);
         }
 
@@ -106,6 +108,10 @@ public final class ASTParser {
                 return parseNewDeclaration();
             case VOID:
                 return parseVoidDeclaration();
+            case IF:
+                return parseIfDeclaration();
+            case NULL:
+                return parseNullDeclaration();
             default:
                 throw new UnsupportedOperationException("Unsupported keyword: " + keyword);
         }
@@ -135,9 +141,10 @@ public final class ASTParser {
 
         final String name = consume(VARIABLE).getValue();
 
-        ASTNode value = matchAndConsume(OPERATOR, "=") ? parseStatement() : new VoidNode().setLine(line);
+        ASTNode value;
+        value = matchAndConsume(OPERATOR, "=") ? parseExpression() : new VoidNode().setLine(line);
 
-        return handleVariableDeclaration(name, value, isConst, isStatic);
+        return new VariableDeclarationNode(name, value, isConst, isStatic).setLine(lookahead(-1).getLine());
     }
 
     private ASTNode parseFunctionDeclaration() {
@@ -228,11 +235,44 @@ public final class ASTParser {
         return parsePrecedence(1);
     }
 
+    private int getPrecedence(Token token) {
+        if (token.getType() == OPERATOR) {
+            String op = token.getValue();
+            switch (op) {
+                case "||":
+                    return 1;
+                case "&&":
+                    return 2;
+                case "==":
+                case "!=":
+                    return 3;
+                case "<":
+                case "<=":
+                case ">":
+                case ">=":
+                    return 4;
+                case "+":
+                case "-":
+                    return 5;
+                case "*":
+                case "/":
+                case "%":
+                    return 6;
+                case "^":
+                    return 7;
+                default:
+                    return -1;
+            }
+        }
+        return -1;
+    }
+
     @SuppressWarnings("InfiniteRecursion")
     private ASTNode parsePrecedence(int precedence) {
         ASTNode left = parsePrimary();
         while (true) {
             int currentPrecedence = getPrecedence(current());
+
             if (currentPrecedence < precedence) {
                 break;
             }
@@ -243,20 +283,7 @@ public final class ASTParser {
             ASTNode right = parsePrecedence(currentPrecedence + 1);
             left = new BinaryExpressionNode(left, operatorToken.getValue(), right).setLine(line);
         }
-
         return left;
-    }
-
-    private int getPrecedence(Token token) {
-        if (token.getType() == OPERATOR) {
-            String op = token.getValue();
-            if ("+".equals(op) || "-".equals(op)) {
-                return 1;
-            } else if ("*".equals(op) || "/".equals(op) || "%".equals(op) || "^".equals(op)) {
-                return 2;
-            }
-        }
-        return -1;
     }
 
     private ASTNode parsePrimary() {
@@ -334,7 +361,7 @@ public final class ASTParser {
 
                     while (true) {
                         if (match(DIVIDER, "]")) break;
-                        nodes.add(parseStatement());
+                        nodes.add(parseExpression());
                         if (!matchAndConsume(DIVIDER, ",")) break;
                     }
 
@@ -352,10 +379,9 @@ public final class ASTParser {
                 } else {
                     return parseKeyword().setLine(line);
                 }
-
         }
 
-        throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " at line " + token.getLine());
+        throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " (type=" + token.getType() + ") at line " + token.getLine());
     }
 
     private ASTNode parseReturnDeclaration() {
@@ -540,9 +566,39 @@ public final class ASTParser {
         return path + (compiled ? ".cclr" : ".clr");
     }
 
-    private ASTNode handleVariableDeclaration(final String name, final ASTNode value, final boolean k, final boolean s) {
-        return new VariableDeclarationNode(name, value, k, s).setLine(lookahead(-1).getLine());
+    private ASTNode parseIfDeclaration() {
+
+        consume(); // consume "if"
+
+        final ASTNode condition = parseExpression();
+        final BlockNode ifBlock = parseBlock();
+
+        final IfStatementNode node = new IfStatementNode(condition, ifBlock);
+
+        while (matchAndConsume(KEYWORD, "else")) {
+            if (matchAndConsume(KEYWORD, "if")) {
+                final ASTNode elseIfCondition = parseExpression();
+                final BlockNode elseIfBlock = parseBlock();
+                node.addElseIfStatement(new IfStatementNode(elseIfCondition, elseIfBlock));
+            } else {
+                final BlockNode elseBlock = parseBlock();
+                node.setElseBlock(elseBlock);
+                break;
+            }
+        }
+
+        return node;
     }
+
+    private ASTNode parseNullDeclaration() {
+        consume(); // consume "null"
+        return new NullNode();
+    }
+
+
+
+
+
 
     private void undo() {
         currentTokenIndex--;
