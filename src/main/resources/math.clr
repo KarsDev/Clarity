@@ -1,4 +1,11 @@
+include native system
+
 class Math {
+
+    constructor() {
+        System.initExcept()
+    }
+
     static const var PI = 3.141592653589793
 
     static fn isPrime(num) {

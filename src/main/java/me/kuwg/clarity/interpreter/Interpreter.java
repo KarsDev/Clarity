@@ -14,6 +14,7 @@ import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.statements.ForNode;
+import me.kuwg.clarity.ast.nodes.statements.ForeachNode;
 import me.kuwg.clarity.ast.nodes.statements.IfNode;
 import me.kuwg.clarity.ast.nodes.statements.WhileNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
@@ -76,7 +77,7 @@ public class Interpreter {
 
         if (main != null) {
 
-            Register.addElement("main call -> main()", main.getLine());
+            Register.addElement("main call -> main()", main.getLine(), "none");
 
             final Object result = interpretNode(main.getBlock(), general);
 
@@ -126,6 +127,7 @@ public class Interpreter {
         if (node instanceof ForNode) return interpretFor((ForNode) node, context);
         if (node instanceof WhileNode) return interpretWhile((WhileNode) node, context);
         if (node instanceof BooleanNode) return ((BooleanNode) node).getValue();
+        if (node instanceof ForeachNode) return interpretForeach((ForeachNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -143,7 +145,7 @@ public class Interpreter {
     private Object interpretVariableDeclaration(final VariableDeclarationNode node, final Context context) {
         VariableDefinition variableDefinition = new VariableDefinition(node.getName(), node.getValue() == null ? null : interpretNode(node.getValue(), context), node.isConstant(), node.isStatic());
         if (variableDefinition.getValue() == VOID) {
-            Register.throwException("Creating a void variable: " + node.getName(), node.getLine());
+            Register.throwException("Creating a void variable: " + node.getName());
         }
         context.defineVariable(node.getName(), variableDefinition);
         return VOID;
@@ -331,7 +333,7 @@ public class Interpreter {
         for (final ASTNode param : node.getParams()) {
             params.add(interpretNode(param, context));
         }
-        Register.addElement("native call -> " + node.getName() + getParams(params), node.getLine());
+        Register.addElement("native call -> " + node.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
         return nmh.callDefault(node.getName(), params);
     }
 
@@ -383,7 +385,7 @@ public class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
         }
 
-        Register.addElement("function call -> " + node.getName() + getParams(params), node.getLine());
+        Register.addElement("function call -> " + node.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
         context.setCurrentFunctionName(null);
@@ -398,6 +400,8 @@ public class Interpreter {
         final String name = node.getName();
 
         context.setCurrentClassName(name);
+
+        Register.addElement("instantiation -> " + name + " class", node.getLine(), context.getCurrentClassName());
 
         final Context classContext = new Context(context);
 
@@ -422,6 +426,7 @@ public class Interpreter {
 
         final Object result = interpretConstructor(definition.getConstructor(), params, classContext, name);
         context.setCurrentClassName(null);
+
         return result;
     }
 
@@ -505,7 +510,7 @@ public class Interpreter {
                 functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
             }
 
-            Register.addElement("static call -> " + node.getCalled() + getParams(params), node.getLine());
+            Register.addElement("static call -> " + node.getCalled() + getParams(params), node.getLine(), context.getCurrentClassName());
             final Object result = interpretBlock(definition.getBlock(), functionContext);
             context.setCurrentClassName(null);
             context.setCurrentFunctionName(null);
@@ -553,7 +558,7 @@ public class Interpreter {
                     return null;
             }
 
-            Register.addElement("array call -> " + fn + getParams(params), node.getLine());
+            Register.addElement("array call -> " + fn + getParams(params), node.getLine(), context.getCurrentClassName());
         }
 
         if (!(caller instanceof ClassObject)) {
@@ -585,7 +590,7 @@ public class Interpreter {
             functionContext.defineVariable(definition.getParams().get(i), new VariableDefinition(definition.getParams().get(i), interpretNode(node.getParams().get(i), context), false, false));
         }
 
-        Register.addElement("native call -> " + node.getCalled() + getParams(definition.getParams()), node.getLine());
+        Register.addElement("native call -> " + node.getCalled() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName());
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
         context.setCurrentClassName(null);
@@ -642,7 +647,7 @@ public class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
         }
 
-        Register.addElement("local call -> " + node.getName() + getParams(params), node.getLine());
+        Register.addElement("local call -> " + node.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
         context.setCurrentFunctionName(null);
@@ -709,7 +714,7 @@ public class Interpreter {
         for (final ASTNode param : node.getParams()) {
             params.add(interpretNode(param, context));
         }
-        Register.addElement("native call -> " + node.getName() + getParams(params), node.getLine());
+        Register.addElement("native call -> " + node.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
         return nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params);
     }
 
@@ -731,14 +736,14 @@ public class Interpreter {
     }
 
     private void except(final String message, final int line) {
-        Register.throwException(message, line);
+        Register.throwException(message);
     }
 
     private String getParams(final List<?> objects) {
         final StringBuilder s = new StringBuilder("(");
         for (int i = 0, size = objects.size(); i < size; i++) {
             final Object o = objects.get(i);
-            s.append(o.getClass());
+            s.append(o.getClass().getSimpleName().toLowerCase());
             if (i < size - 1) s.append(", ");
         }
         return s + ")";
@@ -824,6 +829,39 @@ public class Interpreter {
 
         while (checkCondition(condition, whileContext)) {
             final Object val = interpretBlock(node.getBlock(), whileContext);
+            if (val != VOID)
+                return new ReturnValue(val);
+        }
+
+        return VOID;
+    }
+
+    private Object interpretForeach(final ForeachNode node, final Context context) {
+
+        final Context forEachContext = new Context(context);
+
+        final Object list = interpretNode(node.getList(), context);
+
+        if (list == VOID) {
+            except("Void type not allowed in foreach", node.getLine());
+            return null;
+        }
+        if (list == null) {
+            except("Null list in foreach", node.getLine());
+            return null;
+        }
+        if (!(list instanceof Object[])) {
+            except("Expected list or array in foreach, but got " + list.getClass().getSimpleName(), node.getLine());
+            return null;
+        }
+
+        Object[] arr = (Object[]) list;
+
+        forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, false, false));
+
+        for (final Object o : arr) {
+            forEachContext.setVariable(node.getVariable(), o);
+            final Object val = interpretBlock(node.getBlock(), forEachContext);
             if (val != VOID)
                 return new ReturnValue(val);
         }

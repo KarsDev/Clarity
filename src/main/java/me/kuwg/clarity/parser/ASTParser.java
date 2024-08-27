@@ -7,6 +7,7 @@ import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.statements.ForNode;
+import me.kuwg.clarity.ast.nodes.statements.ForeachNode;
 import me.kuwg.clarity.ast.nodes.statements.IfNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
@@ -574,11 +575,32 @@ public final class ASTParser {
     private ASTNode parseForDeclaration() {
         consume(); // consume "for"
 
-        final ASTNode declaration = parseVariableDeclaration();
+        if (lookahead().is(OPERATOR, ":")) {
+            // foreach
+            final String var = consume(VARIABLE).getValue();
+
+            consume(); // consume :
+
+            final ASTNode list = parseExpression();
+
+            return new ForeachNode(var, list, parseBlock());
+        }
+
+        final ASTNode declaration;
+        if (!match(DIVIDER, ",")) declaration = parseVariableDeclaration();
+        else declaration = null;
+
         consume(DIVIDER, ",");
-        final ASTNode condition = parseExpression();
+
+        final ASTNode condition;
+        if (!match(DIVIDER, ",")) condition = parseExpression();
+        else condition = null;
+
         consume(DIVIDER, ",");
-        final ASTNode incrementation = parseExpression();
+
+        final ASTNode incrementation;
+        if (!match(DIVIDER, ",")) incrementation = parseExpression();
+        else incrementation = null;
 
         final BlockNode block = parseBlock();
         return new ForNode(declaration, condition, incrementation, block);

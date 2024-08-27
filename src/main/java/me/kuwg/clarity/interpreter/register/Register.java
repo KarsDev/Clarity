@@ -4,9 +4,8 @@ public final class Register {
 
     private static final RegisterStack stack = new RegisterStack(20);
 
-
-    public static void addElement(final String element, final int line) {
-        stack.push(element + " at line: " + line);
+    public static void addElement(final String element, final int line, final String currentClass) {
+        stack.push(element + " at line: " + line + (currentClass != null ? " in class " + currentClass : ""));
     }
 
     public static void removeElement() {
@@ -24,36 +23,32 @@ public final class Register {
     }
 
     public static void throwException(final String message, final int line) {
-        error(message, line);
-        printRegister();
-        exit();
-    }
-
-    public static void throwException(final int line) {
-        error("?", line);
-        printRegister();
-        exit();
+        throwException(message, String.valueOf(line));
     }
 
     public static void throwException(final String message) {
-        error(message, "?");
+        error(message);
         printRegister();
         exit();
     }
 
     public static void throwException() {
-        error("?", "?");
+        error("?");
         printRegister();
         exit();
     }
 
-    private static void error(final String message, final Object line) {
-        System.err.println("An error occurred: '" + message + "' at line " + line);
+    private static void error(final String message) {
+        System.err.println("An error occurred: " + message);
+    }
+
+    private static void error(final String message, final String line) {
+        System.err.println("An error occurred: " + message + "\nAt line " + line);
     }
 
     private static void printRegister() {
         System.err.println("Register:");
-        for (int i = 0; i < stack.size(); i++) System.err.println("    " + stack.pop());
+        for (int i = stack.size() - 1; i >= 0; i--) System.err.println("    " + stack.pop());
     }
 
     private static void exit() {

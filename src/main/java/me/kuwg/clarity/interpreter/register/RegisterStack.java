@@ -27,7 +27,6 @@ public final class RegisterStack {
     public String pop() {
         if (size == 0) throw new IllegalStateException("Stack is empty");
 
-        // Remove the element from the end
         final String element = elements[--size];
         elements[size] = null;
         return element;

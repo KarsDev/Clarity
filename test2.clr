@@ -1,12 +1,5 @@
 include native math
 
 fn main() {
-    var arr = [1, 2, 3]
-
-    arr.set(1, 4)
-
-    for var i = 0, i < arr.size(), i = i + 1 {
-        native.println("is " + arr.at(i) + " prime? " + Math.isPrime(arr.at(i)))
-    }
-
+    new Math()
 }

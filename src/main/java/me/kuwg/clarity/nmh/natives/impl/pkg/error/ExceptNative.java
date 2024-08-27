@@ -14,8 +14,8 @@ public class ExceptNative extends PackagedNativeMethod<VoidObject> {
     @Override
     public VoidObject call(final List<Object> params) {
         final String error = params.get(0).toString();
-        final String line = params.size() == 2 ? params.get(1).toString() : "?";
-        Register.throwException(error, line);
+        if (params.size() == 2) Register.throwException(error, params.get(1).toString());
+        else Register.throwException(error);
         return VOID;
     }
 

@@ -7,7 +7,7 @@
 
 class System {
     constructor() {
-        throw("You cannot instantiate this class!")
+        initExcept()
     }
 
     static fn exit() {
@@ -30,10 +30,7 @@ class System {
         native.error.except(error)
     }
 
-    static fn except() {
-        fn getVoid() {
-            return void
-        }
-        var a = getVoid()
+    static fn initExcept() {
+        System.throw("You cannot instantiate this class!")
     }
 }

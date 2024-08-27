@@ -28,8 +28,7 @@ public enum Keyword {
             case "for": return FOR;
             case "while": return WHILE;
 
-            default:
-                throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
+            default: throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
         }
     }
 
