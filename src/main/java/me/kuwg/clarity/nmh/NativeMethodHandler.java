@@ -3,10 +3,7 @@ package me.kuwg.clarity.nmh;
 import me.kuwg.clarity.interpreter.register.Register;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeMethod;
 import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeMethod;
-import me.kuwg.clarity.nmh.natives.impl.def.InputNative;
-import me.kuwg.clarity.nmh.natives.impl.def.NowNative;
-import me.kuwg.clarity.nmh.natives.impl.def.PrintNative;
-import me.kuwg.clarity.nmh.natives.impl.def.PrintlnNative;
+import me.kuwg.clarity.nmh.natives.impl.def.*;
 import me.kuwg.clarity.nmh.natives.impl.pkg.error.ExceptNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.ExitNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.util.CreateListNative;
@@ -30,6 +27,7 @@ public class NativeMethodHandler {
         registerDefaultMethod(new InputNative());
         registerDefaultMethod(new PrintNative());
         registerDefaultMethod(new NowNative());
+        registerDefaultMethod(new NanoNative());
     }
 
     private void initializePackagedMethods() {

@@ -797,14 +797,17 @@ public class Interpreter {
     }
 
     private Object interpretFor(final ForNode node, final Context context) {
-        if (interpretNode(node.getDeclaration(), context) != VOID)
+
+        final Context forContext = new Context(context);
+
+        if (interpretNode(node.getDeclaration(), forContext) != VOID)
             except("for declaration must be void return", node.getLine());
 
         final ASTNode condition = node.getCondition();
 
-        while (checkCondition(condition, context)) {
-            interpretBlock(node.getBlock(), context);
-            if (interpretNode(node.getIncrementation(), context) != VOID)
+        while (checkCondition(condition, forContext)) {
+            interpretBlock(node.getBlock(), forContext);
+            if (interpretNode(node.getIncrementation(), forContext) != VOID)
                 except("for incrementation must be void return", node.getLine());
         }
 
@@ -812,11 +815,13 @@ public class Interpreter {
     }
 
     private Object interpretWhile(final WhileNode node, final Context context) {
+        final Context whileContext = new Context(context);
 
         final ASTNode condition = node.getCondition();
 
-        while (checkCondition(condition, context)) {
-            interpretBlock(node.getBlock(), context);
+
+        while (checkCondition(condition, whileContext)) {
+            interpretBlock(node.getBlock(), whileContext);
         }
 
         return VOID;

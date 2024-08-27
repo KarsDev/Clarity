@@ -1,12 +1,13 @@
 include native system
 
 fn main() {
-    var x = 0
-    var start = native.now()
-    for var i = 0, i < 5000000, i = i + 1 {
-        x = x + 1
-        native.println(x)
+    var start = native.nano()
+    loop(5 * 10 ^ 6)
+    var end = native.nano()
+    native.print("took " + (end - start) + "ns")
+}
+
+fn loop(max) {
+    for var i = 0, i < max, i = i + 1 {
     }
-    var end = native.now()
-    native.println(end - start)
 }
