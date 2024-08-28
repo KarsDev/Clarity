@@ -1,6 +1,6 @@
 include native system
 
-class Math {
+native class Math {
 
     constructor() {
         System.initExcept()
@@ -24,4 +24,6 @@ class Math {
         return true
     }
 
+    static native fn sqrt(num)
+    static native fn cbrt(num)
 }

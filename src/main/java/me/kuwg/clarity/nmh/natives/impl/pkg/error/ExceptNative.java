@@ -2,11 +2,11 @@ package me.kuwg.clarity.nmh.natives.impl.pkg.error;
 
 import me.kuwg.clarity.interpreter.register.Register;
 import me.kuwg.clarity.interpreter.types.VoidObject;
-import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeMethod;
+import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeFunction;
 
 import java.util.List;
 
-public class ExceptNative extends PackagedNativeMethod<VoidObject> {
+public class ExceptNative extends PackagedNativeFunction<VoidObject> {
     public ExceptNative() {
         super("except");
     }

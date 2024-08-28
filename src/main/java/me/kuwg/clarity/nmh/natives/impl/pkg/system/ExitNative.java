@@ -4,7 +4,7 @@ import me.kuwg.clarity.interpreter.types.VoidObject;
 
 import java.util.List;
 
-public class ExitNative extends SystemNativeMethod<VoidObject> {
+public class ExitNative extends SystemNativeFunction<VoidObject> {
     public ExitNative() {
         super("exit");
     }

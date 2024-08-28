@@ -1,12 +1,12 @@
 package me.kuwg.clarity.nmh.natives.impl.def;
 
 import me.kuwg.clarity.interpreter.types.VoidObject;
-import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeMethod;
+import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeFunction;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class PrintNative extends DefaultNativeMethod<VoidObject> {
+public class PrintNative extends DefaultNativeFunction<VoidObject> {
     public PrintNative() {
         super("print");
     }

@@ -6,10 +6,13 @@ import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
+import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
+import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
+import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
@@ -62,15 +65,8 @@ public class Interpreter {
                 if (main != null) throw new MultipleMainMethodsException();
                 main = (MainFunctionDeclarationNode) node;
                 ast.getRoot().getChildrens().remove(node);
-            } else if (node instanceof FunctionDeclarationNode) {
-                interpretFunctionDeclaration((FunctionDeclarationNode) node, general);
-                ast.getRoot().getChildrens().remove(node);
-            } else if (node instanceof ClassDeclarationNode) {
-                interpretClassDeclaration((ClassDeclarationNode) node, general);
-                ast.getRoot().getChildrens().remove(node);
-            } else if (node instanceof IncludeNode) {
-                interpretInclude((IncludeNode) node, general);
-                ast.getRoot().getChildrens().remove(node);
+            } else {
+                preInterpret(node, ast.getRoot(), general);
             }
 
         }
@@ -81,7 +77,7 @@ public class Interpreter {
 
             final Object result = interpretNode(main.getBlock(), general);
 
-            if (result == VOID) {
+            if (result == VOID || result == null) {
                 return 0;
             } else if (!(result instanceof Integer)) {
                 System.err.println("[WARNING] Main function does not return an integer, but returns instead: " + result.getClass().getSimpleName());
@@ -96,8 +92,24 @@ public class Interpreter {
 
     }
 
-    private Object interpretNode(final ASTNode node, final Context context) {
+    private void preInterpret(final ASTNode node, final BlockNode block, final Context context) {
+        if (node instanceof FunctionDeclarationNode) {
+            interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
+            block.getChildrens().remove(node);
+        } else if (node instanceof ClassDeclarationNode) {
+            final ClassDeclarationNode cdn = (ClassDeclarationNode) node;
+            if (context.getClass(cdn.getName()) == VOID) interpretClassDeclaration(cdn, context);
+            block.getChildrens().remove(node);
+        } else if (node instanceof IncludeNode) {
+            interpretInclude((IncludeNode) node, context);
+            block.getChildrens().remove(node);
+        } else if (node instanceof ReflectedNativeFunctionDeclaration) {
+            final ReflectedNativeFunctionDeclaration reflected = (ReflectedNativeFunctionDeclaration) node;
+            if (reflected.isStatic()) interpretReflectedNativeFunctionDeclaration(reflected, context);
+        }
+    }
 
+    private Object interpretNode(final ASTNode node, final Context context) {
         if (node instanceof BlockNode) return interpretBlock((BlockNode) node, context);
         if (node instanceof VariableDeclarationNode) return interpretVariableDeclaration((VariableDeclarationNode) node, context);
         if (node instanceof BinaryExpressionNode) return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
@@ -128,6 +140,8 @@ public class Interpreter {
         if (node instanceof WhileNode) return interpretWhile((WhileNode) node, context);
         if (node instanceof BooleanNode) return ((BooleanNode) node).getValue();
         if (node instanceof ForeachNode) return interpretForeach((ForeachNode) node, context);
+        if (node instanceof ReflectedNativeFunctionDeclaration) return interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) node, context);
+        if (node instanceof NativeClassDeclarationNode) return interpretNativeClassDeclaration((NativeClassDeclarationNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -161,10 +175,10 @@ public class Interpreter {
         final String name = node.getName();
         context.setCurrentClassName(name);
 
-        final ClassDefinition definition = new ClassDefinition(name, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody());
+        final ClassDefinition definition = new ClassDefinition(name, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), false);
         context.defineClass(name, definition);
 
-        if (!context.isNativeClass()) Privileges.checkClassName(name, node.getLine());
+        if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
 
         definition.getBody().forEach(statement -> {
             if (statement instanceof VariableDeclarationNode) {
@@ -181,6 +195,12 @@ public class Interpreter {
                 if (declarationNode.isStatic()) {
                     definition.staticFunctions.put(declarationNode.getFunctionName(), new FunctionDefinition(declarationNode.getFunctionName(), true, params, declarationNode.getBlock()));
                 }
+            } else if (statement instanceof ReflectedNativeFunctionDeclaration) {
+                final Object o = interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) statement, context);
+                if (o instanceof FunctionDefinition) {
+                    FunctionDefinition def = (FunctionDefinition) o;
+                    definition.staticFunctions.put(def.getName(), def);
+                }
             }
         });
 
@@ -189,26 +209,27 @@ public class Interpreter {
         return VOID;
     }
 
-
     private Object interpretBinaryExpressionNode(final BinaryExpressionNode node, final Context context) {
-        Object leftValue = interpretNode(node.getLeft(), context);
-        Object rightValue = interpretNode(node.getRight(), context);
+        final Object leftValue = interpretNode(node.getLeft(), context);
+        final Object rightValue = interpretNode(node.getRight(), context);
 
-        String operator = node.getOperator();
+        final String operator = node.getOperator();
 
         if (leftValue instanceof Boolean && rightValue instanceof Boolean) {
             return evaluateBooleanOperation((Boolean) leftValue, (Boolean) rightValue, operator, node.getLine());
-        }
-
-        if (leftValue instanceof String || rightValue instanceof String) {
+        } else if (leftValue == null || rightValue == null) {
+            if (!operator.equals("==")) {
+                except("Only operator available for null is '=='", node.getLine());
+                return null;
+            }
+            return leftValue == rightValue;
+        } else if (leftValue instanceof String || rightValue instanceof String) {
             if (operator.equals("+")) {
                 return leftValue + rightValue.toString();
             } else {
                 except("Operator " + operator + " is not supported for string operands.", node.getLine());
             }
-        }
-
-        if (leftValue instanceof Number && rightValue instanceof Number) {
+        } else if (leftValue instanceof Number && rightValue instanceof Number) {
             Number leftNumber = (Number) leftValue;
             Number rightNumber = (Number) rightValue;
 
@@ -226,16 +247,10 @@ public class Interpreter {
 
                 return evaluateIntegerOperation(left, right, operator, node.getLine());
             }
-        } else if (leftValue == null || rightValue == null) {
-            if (!operator.equals("==")) {
-                except("Only operator available for null is '=='", node.getLine());
-                return null;
-            }
-            return leftValue == rightValue;
-        } else {
-            except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " and " + rightValue.getClass().getSimpleName(), node.getLine());
-            return null;
         }
+
+        except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " and " + rightValue.getClass().getSimpleName(), node.getLine());
+        return null;
     }
 
     private Object evaluateBooleanOperation(boolean left, boolean right, String operator, final int line) {
@@ -703,19 +718,29 @@ public class Interpreter {
 
 
     private Object interpretInclude(final IncludeNode node, final Context context) {
-        context.setNativeClass(true);
-        final Object result = interpretNode(node.getIncluded(), context);
-        context.setNativeClass(false);
-        return result;
+        if (node.isNative()) context.getNatives().add(node.getName());
+
+        for (final ASTNode astnode : node.getIncluded()) {
+            final Object result = interpretNode(astnode, context);
+            preInterpret(astnode, node.getIncluded(), context);
+            if (result instanceof ReturnValue) {
+                return ((ReturnValue) result).getValue();
+            }
+        }
+        return VOID;
     }
 
     private Object interpretPackagedNativeFunctionCall(final PackagedNativeFunctionCallNode node, final Context context) {
         final List<Object> params = new ArrayList<>();
-        for (final ASTNode param : node.getParams()) {
-            params.add(interpretNode(param, context));
-        }
+
+        for (final ASTNode param : node.getParams()) params.add(interpretNode(param, context));
+
         Register.addElement("native call -> " + node.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
-        return nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params);
+
+        final ClassDefinition current = (ClassDefinition) context.getClass(context.getCurrentClassName());
+
+        if (current.isNative()) return new ReturnValue(nmh.callClassNative(current.getName(), node.getName(), params));
+        else return new ReturnValue(nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params));
     }
 
     private Object interpretArray(final ArrayNode node, final Context context) {
@@ -728,7 +753,6 @@ public class Interpreter {
 
             if (result == VOID) except("Adding void as a object in an array.", astNode.getLine());
 
-
             objects[i] = result;
         }
 
@@ -736,7 +760,7 @@ public class Interpreter {
     }
 
     private void except(final String message, final int line) {
-        Register.throwException(message);
+        Register.throwException(message, line);
     }
 
     private String getParams(final List<?> objects) {
@@ -866,6 +890,78 @@ public class Interpreter {
                 return new ReturnValue(val);
         }
 
+        return VOID;
+    }
+
+    private Object interpretReflectedNativeFunctionDeclaration(final ReflectedNativeFunctionDeclaration node, final Context context) {
+
+        final BlockNode block = new BlockNode();
+
+        final List<ASTNode> nodes = new ArrayList<>();
+
+        for (final ParameterNode parameterNode : node.getParams())
+            nodes.add(new VariableReferenceNode(parameterNode.getName()));
+
+
+        final ASTNode astnode = new PackagedNativeFunctionCallNode(
+                node.getName(),
+                node.getFileName().substring(0, node.getFileName().length() - 3),
+                nodes
+        );
+
+        block.addChild(astnode);
+
+        final List<String> params = new ArrayList<>();
+
+        for (final ParameterNode param : node.getParams()) params.add(param.getName());
+
+        final FunctionDefinition function = new FunctionDefinition(node.getName(), node.isStatic(), params, block);
+
+        if (node.isStatic()) {
+            final ObjectType obj = context.getClass(node.getFileName());
+            if (obj != VOID) ((ClassDefinition) obj).staticFunctions.put(node.getName(), function);
+            else return function;
+        } else {
+            context.defineFunction(node.getName(), function);
+        }
+
+        return VOID;
+    }
+
+    private Object interpretNativeClassDeclaration(final NativeClassDeclarationNode node, final Context context) {
+        final String name = node.getName();
+        context.setCurrentClassName(name);
+
+        final ClassDefinition definition = new ClassDefinition(name, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), true);
+        context.defineClass(name, definition);
+
+        if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
+
+        definition.getBody().forEach(statement -> {
+            if (statement instanceof VariableDeclarationNode) {
+                VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
+                if (declarationNode.isStatic()) {
+                    definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true));
+                }
+            } else if (statement instanceof FunctionDeclarationNode) {
+                FunctionDeclarationNode declarationNode = (FunctionDeclarationNode) statement;
+                final List<String> params = new ArrayList<>();
+
+                declarationNode.getParameterNodes().forEach(param -> params.add(param.getName()));
+
+                if (declarationNode.isStatic()) {
+                    definition.staticFunctions.put(declarationNode.getFunctionName(), new FunctionDefinition(declarationNode.getFunctionName(), true, params, declarationNode.getBlock()));
+                }
+            } else if (statement instanceof ReflectedNativeFunctionDeclaration) {
+                final Object o = interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) statement, context);
+                if (o instanceof FunctionDefinition) {
+                    FunctionDefinition def = (FunctionDefinition) o;
+                    definition.staticFunctions.put(def.getName(), def);
+                }
+            }
+        });
+
+        context.setCurrentClassName(null);
         return VOID;
     }
 }

@@ -14,8 +14,8 @@ public class Context {
     private final Map<String, ObjectType> variables = new HashMap<>();
     private final Map<String, List<FunctionDefinition>> functions = new HashMap<>();
     private final Map<String, ObjectType> classes = new HashMap<>();
+    private final List<String> natives = new ArrayList<>();
 
-    private boolean isNativeClass;
     private String currentClassName, currentFunctionName;
 
     private final Context parentContext;
@@ -86,12 +86,9 @@ public class Context {
         return result == VOID && parentContext != null ? parentContext.getClass(name) : result;
     }
 
-    public boolean isNativeClass() {
-        return isNativeClass;
-    }
 
-    public void setNativeClass(boolean nativeClass) {
-        isNativeClass = nativeClass;
+    public final List<String> getNatives() {
+        return natives;
     }
 
     public String getCurrentClassName() {
@@ -112,17 +109,5 @@ public class Context {
 
     public Context parentContext() {
         return parentContext;
-    }
-
-    @Override
-    public String toString() {
-        return "Context{" +
-                "variables=" + variables +
-                ", functions=" + functions +
-                ", classes=" + classes +
-                ", currentClassName='" + currentClassName + '\'' +
-                ", currentFunctionName='" + currentFunctionName + '\'' +
-                ", parentContext=" + parentContext +
-                '}';
     }
 }

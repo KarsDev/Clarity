@@ -4,13 +4,13 @@ import me.kuwg.clarity.interpreter.types.VoidObject;
 
 import java.util.List;
 
-abstract class NativeMethod<R> {
+abstract class NativeFunction<R> {
 
     protected static final VoidObject VOID = VoidObject.VOID;
 
     private final String name;
 
-    protected NativeMethod(final String name) {
+    protected NativeFunction(final String name) {
         this.name = name;
     }
 

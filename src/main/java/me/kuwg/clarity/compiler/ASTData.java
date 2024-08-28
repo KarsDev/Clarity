@@ -4,11 +4,13 @@ import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
+import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
+import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
@@ -30,7 +32,7 @@ public class ASTData {
     public static final int SEGMENT_BITS = 0x7F;
     public static final int CONTINUE_BIT = 0x80;
 
-    private static final Map<Class<? extends ASTNodeCompiler>, Integer> NODE_IDS = new HashMap<>();
+    private static final Map<Class<? extends ASTNodeCompiler>, Integer> NODE_TO_ID = new HashMap<>();
     private static final Map<Integer, Class<? extends ASTNodeCompiler>> ID_TO_NODE = new HashMap<>();
 
     static {
@@ -53,6 +55,7 @@ public class ASTData {
         registerNode(ObjectFunctionCallNode.class, 0x305);
         registerNode(LocalFunctionCallNode.class, 0x306);
         registerNode(PackagedNativeFunctionCallNode.class, 0x307);
+        registerNode(ReflectedNativeFunctionDeclaration.class, 0x308);
 
         // Variable (0x400)
         registerNode(VariableDeclarationNode.class, 0x400);
@@ -68,6 +71,7 @@ public class ASTData {
         registerNode(DecimalNode.class, 0x502);
         registerNode(VoidNode.class, 0x503);
         registerNode(ArrayNode.class, 0x504);
+        registerNode(BooleanNode.class, 0x505);
 
         // Inclusion (0x600)
         registerNode(IncludeNode.class, 0x600);
@@ -75,6 +79,7 @@ public class ASTData {
         // Class (0x700)
         registerNode(ClassDeclarationNode.class, 0x700);
         registerNode(ClassInstantiationNode.class, 0x701);
+        registerNode(NativeClassDeclarationNode.class, 0x702);
 
         // Context (0x800)
         registerNode(ContextReferenceNode.class, 0x800);
@@ -86,12 +91,12 @@ public class ASTData {
     }
 
     private static void registerNode(Class<? extends ASTNodeCompiler> clazz, int id) {
-        NODE_IDS.put(clazz, id);
+        NODE_TO_ID.put(clazz, id);
         ID_TO_NODE.put(id, clazz);
     }
 
-    public static int getNodeId(Class<? extends ASTNodeCompiler> clazz) {
-        return NODE_IDS.getOrDefault(clazz, -1);
+    public static int getIdFromNode(Class<? extends ASTNodeCompiler> clazz) {
+        return NODE_TO_ID.getOrDefault(clazz, -1);
     }
 
     public static Class<? extends ASTNodeCompiler> getClassFromId(int id) {

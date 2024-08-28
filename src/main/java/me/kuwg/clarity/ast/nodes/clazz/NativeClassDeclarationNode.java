@@ -8,21 +8,21 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
 
-public class ClassDeclarationNode extends ASTNode {
+public class NativeClassDeclarationNode extends ASTNode {
 
     private String name;
     private String fileName;
     private FunctionDeclarationNode constructor;
     private BlockNode body;
 
-    public ClassDeclarationNode(final String name, final String fileName, final FunctionDeclarationNode constructor, final BlockNode body) {
+    public NativeClassDeclarationNode(final String name, final String fileName, final FunctionDeclarationNode constructor, final BlockNode body) {
         this.name = name;
         this.fileName = fileName;
         this.constructor = constructor;
         this.body = body;
     }
 
-    public ClassDeclarationNode() {
+    public NativeClassDeclarationNode() {
     }
 
     public final String getName() {
@@ -43,7 +43,7 @@ public class ClassDeclarationNode extends ASTNode {
 
     @Override
     public void print(final StringBuilder sb, final String indent) {
-        sb.append(indent).append("Class: ").append(name).append("\n");
+        sb.append(indent).append("Native Class: ").append(name).append("\n");
         sb.append(indent).append(indent).append("File: ").append(fileName).append("\n");
         if (constructor != null) {
             sb.append(indent).append("    ").append("Constructor:\n");

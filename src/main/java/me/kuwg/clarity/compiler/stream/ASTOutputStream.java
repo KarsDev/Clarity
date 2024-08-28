@@ -27,7 +27,7 @@ public class ASTOutputStream extends DataOutputStream {
      */
     public void writeNode(ASTNodeCompiler node) throws IOException {
         // Get node id
-        int id = ASTData.getNodeId(node == null ? null : node.getClass());
+        int id = ASTData.getIdFromNode(node == null ? null : node.getClass());
 
         if (id == -1) {
             throw new IOException((node == null ? "null" : node.getClass().getName()) + " has no node id. Please add to ASTData.");
