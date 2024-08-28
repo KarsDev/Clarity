@@ -2,11 +2,11 @@ package me.kuwg.clarity.nmh.natives.aclass;
 
 import java.util.List;
 
-public abstract class PackagedNativeMethod<R> extends NativeMethod<R> {
+public abstract class PackagedNativeFunction<R> extends NativeFunction<R> {
 
     private final String pkg;
 
-    protected PackagedNativeMethod(final String name) {
+    protected PackagedNativeFunction(final String name) {
         super(name);
         this.pkg = getClass().getPackage().getName().substring(37);
     }

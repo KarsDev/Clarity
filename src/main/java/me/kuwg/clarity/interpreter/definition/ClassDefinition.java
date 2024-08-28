@@ -14,11 +14,13 @@ public class ClassDefinition extends ObjectType {
     private final String name;
     private final FunctionDefinition constructor;
     private final BlockNode body;
+    private final boolean isNative;
 
-    public ClassDefinition(final String name, final FunctionDefinition constructor, final BlockNode body) {
+    public ClassDefinition(final String name, final FunctionDefinition constructor, final BlockNode body, final boolean isNative) {
         this.name = name;
         this.constructor = constructor;
         this.body = body;
+        this.isNative = isNative;
     }
 
     public final String getName() {
@@ -33,12 +35,19 @@ public class ClassDefinition extends ObjectType {
         return body;
     }
 
+    public final boolean isNative() {
+        return isNative;
+    }
+
     @Override
     public String toString() {
         return "ClassDefinition{" +
-                "name='" + name + '\'' +
+                "staticVariables=" + staticVariables +
+                ", staticFunctions=" + staticFunctions +
+                ", name='" + name + '\'' +
                 ", constructor=" + constructor +
                 ", body=" + body +
+                ", isNative=" + isNative +
                 '}';
     }
 }

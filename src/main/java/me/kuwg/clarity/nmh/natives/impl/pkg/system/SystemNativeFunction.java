@@ -1,9 +1,9 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.system;
 
-import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeMethod;
+import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeFunction;
 
-abstract class SystemNativeMethod<R> extends PackagedNativeMethod<R> {
-    protected SystemNativeMethod(final String name) {
+abstract class SystemNativeFunction<R> extends PackagedNativeFunction<R> {
+    protected SystemNativeFunction(final String name) {
         super(name);
     }
 

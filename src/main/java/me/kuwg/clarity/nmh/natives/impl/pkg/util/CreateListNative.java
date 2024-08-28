@@ -1,10 +1,10 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.util;
 
-import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeMethod;
+import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeFunction;
 
 import java.util.List;
 
-public class CreateListNative extends PackagedNativeMethod<Object[]> {
+public class CreateListNative extends PackagedNativeFunction<Object[]> {
     public CreateListNative() {
         super("list");
     }

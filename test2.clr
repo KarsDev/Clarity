@@ -1,5 +1,5 @@
 include native math
 
 fn main() {
-    new Math()
+    native.println("x=" + Math.sqrt(2))
 }

@@ -42,8 +42,8 @@ public class ObjectFunctionCallNode extends ASTNode {
             sb.append(")");
         } else {
             sb.append("\n");
-            String paramIndent = indent + "    ";
-            for (ASTNode param : params) {
+            final String paramIndent = indent + "    ";
+            for (final ASTNode param : params) {
                 param.print(sb, paramIndent);
                 sb.append("\n");
             }

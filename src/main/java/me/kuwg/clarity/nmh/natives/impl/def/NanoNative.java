@@ -1,10 +1,10 @@
 package me.kuwg.clarity.nmh.natives.impl.def;
 
-import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeMethod;
+import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeFunction;
 
 import java.util.List;
 
-public class NanoNative extends DefaultNativeMethod<Long> {
+public class NanoNative extends DefaultNativeFunction<Long> {
     public NanoNative() {
         super("nano");
     }
