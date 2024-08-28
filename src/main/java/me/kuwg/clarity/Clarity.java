@@ -8,7 +8,8 @@ import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.Tokenizer;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
@@ -23,6 +24,7 @@ public class Clarity {
                     throw new RuntimeException(e);
                 }
             }
+
             void exec() throws IOException {
                 if (args.length == 0) {
                     printUsage();
@@ -66,7 +68,6 @@ public class Clarity {
                 }
             }
         }.start();
-
     }
 
     private static void printUsage() {
