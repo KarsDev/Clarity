@@ -1,0 +1,25 @@
+{
+  "name": "clarity",
+  "displayName": "clarity",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "clarity",
+      "aliases": ["clarity"],
+      "extensions": [".clr"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "clarity",
+      "scopeName": "source.clarity",
+      "path": "./syntaxes/clarity.tmLanguage.json"
+    }]
+  }
+}

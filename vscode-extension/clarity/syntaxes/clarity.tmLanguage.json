@@ -1,0 +1,34 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "clarity",
+	"patterns": [
+		{ "include": "#keywords" },
+		{ "include": "#classes" },
+		{ "include": "#strings" },
+		{ "include": "#operators" },
+		{ "include": "#functions" }
+	],
+	"repository": {
+		"keywords": {
+			"name": "keyword",
+			"match": "\\b(class|var|constructor|local|fn|native|if|else|return|new|void|include|static|const|compiled|null|for|while)\\b"
+		},
+		"classes": {
+			"name": "entity.name.class",
+			"match": "(?<=\\b(new|class)\\b\\s+)\\w+"
+		},
+		"strings": {
+			"name": "string",
+			"match": "\"([^\"]*)\""
+		},
+		"operators": {
+			"name": "keyword.operator",
+			"match": "(\\+|\\-|\\/|\\*|\\=)"
+		},
+		"functions": {
+			"name": "entity.name.function",
+			"match": "\\b(\\w+)\\s*\\("
+		}
+	},
+	"scopeName": "source.clarity"
+}
