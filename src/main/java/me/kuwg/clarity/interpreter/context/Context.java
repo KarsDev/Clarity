@@ -3,6 +3,7 @@ package me.kuwg.clarity.interpreter.context;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
 import me.kuwg.clarity.interpreter.definition.VariableDefinition;
+import me.kuwg.clarity.interpreter.register.Register;
 import me.kuwg.clarity.interpreter.types.ObjectType;
 
 import java.util.*;
@@ -53,9 +54,12 @@ public class Context {
     public void setVariable(String name, Object value) {
         ObjectType definition = getVariableDefinition(name);
         if (!(definition instanceof VariableDefinition)) {
-            throw new IllegalStateException("You cannot edit a variable that hasn't been created: " + name);
+            Register.throwException("You cannot edit a variable that hasn't been created: " + name);
+            return;
         }
-        ((VariableDefinition) definition).setValue(value);
+        final VariableDefinition variableDefinition = ((VariableDefinition) definition);
+        if (variableDefinition.isConstant()) Register.throwException("Variable that has const cannot be edited");
+        variableDefinition.setValue(value);
     }
 
     public void defineFunction(String name, FunctionDefinition definition) {

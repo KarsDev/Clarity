@@ -20,6 +20,7 @@ import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.statements.WhileNode;
+import me.kuwg.clarity.ast.nodes.variable.assign.LocalVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
@@ -415,6 +416,12 @@ public final class ASTParser {
                 }
             case BOOLEAN:
                 return new BooleanNode(Boolean.parseBoolean(token.getValue()));
+            case OPERATOR:
+                if (token.getValue().equals("-")) {
+                    ASTNode right = parsePrimary();
+                    return new BinaryExpressionNode(new IntegerNode(0).setLine(line), "-", right).setLine(line);
+                }
+                break;
         }
 
         throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " (type=" + token.getType() + ") at line " + token.getLine());
@@ -490,6 +497,9 @@ public final class ASTParser {
             consume(DIVIDER, ")");
             return new LocalFunctionCallNode(name, params).setLine(line);
         } else {
+            if (matchAndConsume(OPERATOR, "=")) {
+                return new LocalVariableReassignmentNode(current().getValue(), parseExpression()).setLine(line);
+            }
             return new LocalVariableReferenceNode(name).setLine(line);
         }
     }

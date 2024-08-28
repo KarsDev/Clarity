@@ -1,7 +1,6 @@
 include native math
 
 fn main() {
-    for i : [1, 2, 3] {
-        native.println(i)
-    }
+    const var x = 2
+    x = 3
 }
