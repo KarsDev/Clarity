@@ -20,6 +20,7 @@ import me.kuwg.clarity.ast.nodes.statements.ForNode;
 import me.kuwg.clarity.ast.nodes.statements.ForeachNode;
 import me.kuwg.clarity.ast.nodes.statements.IfNode;
 import me.kuwg.clarity.ast.nodes.statements.WhileNode;
+import me.kuwg.clarity.ast.nodes.variable.assign.LocalVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
@@ -142,6 +143,7 @@ public class Interpreter {
         if (node instanceof ForeachNode) return interpretForeach((ForeachNode) node, context);
         if (node instanceof ReflectedNativeFunctionDeclaration) return interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) node, context);
         if (node instanceof NativeClassDeclarationNode) return interpretNativeClassDeclaration((NativeClassDeclarationNode) node, context);
+        if (node instanceof LocalVariableReassignmentNode) return VOID; // ignore
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -157,10 +159,14 @@ public class Interpreter {
     }
 
     private Object interpretVariableDeclaration(final VariableDeclarationNode node, final Context context) {
-        VariableDefinition variableDefinition = new VariableDefinition(node.getName(), node.getValue() == null ? null : interpretNode(node.getValue(), context), node.isConstant(), node.isStatic());
-        if (variableDefinition.getValue() == VOID) {
-            Register.throwException("Creating a void variable: " + node.getName());
+        final VariableDefinition variableDefinition;
+        if (node.getValue() instanceof VoidNode) {
+            variableDefinition = new VariableDefinition(node.getName(), VOID, node.isConstant(), node.isStatic());
+        } else {
+            variableDefinition = new VariableDefinition(node.getName(), interpretNode(node.getValue(), context), node.isConstant(), node.isStatic());
+            if (variableDefinition.getValue() == VOID) Register.throwException("Creating a void variable: " + node.getName());
         }
+
         context.defineVariable(node.getName(), variableDefinition);
         return VOID;
     }
@@ -732,12 +738,17 @@ public class Interpreter {
 
     private Object interpretPackagedNativeFunctionCall(final PackagedNativeFunctionCallNode node, final Context context) {
         final List<Object> params = new ArrayList<>();
-
         for (final ASTNode param : node.getParams()) params.add(interpretNode(param, context));
 
         Register.addElement("native call -> " + node.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
 
-        final ClassDefinition current = (ClassDefinition) context.getClass(context.getCurrentClassName());
+        final ObjectType rawCurrent =  context.getClass(context.getCurrentClassName());
+
+        if (!(rawCurrent instanceof ClassDefinition)) {
+            return new ReturnValue(nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params));
+        }
+
+        final ClassDefinition current = (ClassDefinition) rawCurrent;
 
         if (current.isNative()) return new ReturnValue(nmh.callClassNative(current.getName(), node.getName(), params));
         else return new ReturnValue(nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params));
@@ -964,4 +975,5 @@ public class Interpreter {
         context.setCurrentClassName(null);
         return VOID;
     }
+
 }

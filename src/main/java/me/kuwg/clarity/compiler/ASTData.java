@@ -17,6 +17,7 @@ import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.statements.ForNode;
 import me.kuwg.clarity.ast.nodes.statements.IfNode;
 import me.kuwg.clarity.ast.nodes.statements.WhileNode;
+import me.kuwg.clarity.ast.nodes.variable.assign.LocalVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
@@ -64,6 +65,7 @@ public class ASTData {
         registerNode(ObjectVariableReferenceNode.class, 0x403);
         registerNode(ObjectVariableReassignmentNode.class, 0x404);
         registerNode(LocalVariableReferenceNode.class, 0x405);
+        registerNode(LocalVariableReassignmentNode.class, 0x406);
 
         // Literal (0x500)
         registerNode(LiteralNode.class, 0x500);

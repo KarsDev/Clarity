@@ -1,29 +1,38 @@
 include native system
 
 native class Math {
+    static const var PI = 3.141592653589793
+    static const var E = 2.7182818284590452
+
+    static fn abs(x) {
+        if x < 0 return -x
+        else return x
+    }
+
+    static fn clamp(val, min, max) {
+        return Math.max(min, Math.min(max, val))
+    }
+
+    static fn max(x, y) {
+        if x > y return x
+        else return y
+    }
+
+    static fn min(x, y) {
+        if x < y return x
+        else return y
+    }
+
+
+    static native fn isPrime(num)
+    static native fn sqrt(num)
+    static native fn cbrt(num)
+    static native fn floor(num)
+    static native fn ceil(num)
+    static native fn round(num)
+    static native fn random()
 
     constructor() {
         System.initExcept()
     }
-
-    static const var PI = 3.141592653589793
-
-    static fn isPrime(num) {
-        if num <= 1 return false
-
-
-        if num <= 3 return true
-
-        if num % 2 == 0 || num % 3 == 0 return false
-
-
-        for var i = 5, i * i <= num, i = i + 6 if num % i == 0 || num % (i + 2) == 0 return false
-
-
-
-        return true
-    }
-
-    static native fn sqrt(num)
-    static native fn cbrt(num)
 }

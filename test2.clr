@@ -1,5 +1,7 @@
 include native math
 
 fn main() {
-    native.println("x=" + Math.sqrt(2))
+    for i : [1, 2, 3] {
+        native.println(i)
+    }
 }
