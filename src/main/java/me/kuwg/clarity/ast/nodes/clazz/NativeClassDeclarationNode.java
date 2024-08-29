@@ -68,7 +68,7 @@ public class NativeClassDeclarationNode extends ASTNode {
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
-        out.writeString(inheritedClass);
+        out.writeString(inheritedClass != null ? inheritedClass : "null");
         out.writeString(fileName);
         out.writeNode(constructor);
         out.writeNode(body);
@@ -78,6 +78,7 @@ public class NativeClassDeclarationNode extends ASTNode {
     public void load0(final ASTInputStream in) throws IOException {
         this.name = in.readString();
         this.inheritedClass = in.readString();
+        if (this.inheritedClass.equals("null")) this.inheritedClass = null;
         this.fileName = in.readString();
         this.constructor = (FunctionDeclarationNode) in.readNode();
         this.body = (BlockNode) in.readNode();

@@ -80,38 +80,38 @@ public final class Register {
 
         @Override
         public String toString() {
-            switch (type) {
+            switch (getType()) {
                 case FUNCALL: {
-                    return "function call " + param + formatClass() + formatLine();
+                    return "function call " + getParam() + formatClass() + formatLine();
                 }
                 case ARRAYCALL: {
-                    return "array function " + param + formatClass() + formatLine();
+                    return "array function " + getParam() + formatClass() + formatLine();
                 }
                 case NATIVECALL: {
-                    return "native call " + param + formatClass() + formatLine();
+                    return "native call " + getParam() + formatClass() + formatLine();
                 }
                 case CLASSINST: {
-                    return "init class " + param + formatClass() + formatLine();
+                    return "init class " + getParam() + formatClass() + formatLine();
                 }
                 case LOCALCALL: {
-                    return "local function call " + param + formatClass() + formatLine();
+                    return "local function call " + getParam() + formatClass() + formatLine();
                 }
                 case STATICCALL: {
-                    return "static call " + param + formatClass() + formatLine();
+                    return "static call " + getParam() + formatClass() + formatLine();
                 }
                 default: {
-                    throwException("Unsupported register element type: " + type);
+                    throwException("Unsupported register element type: " + getType());
                     return null;
                 }
             }
         }
 
         private String formatClass() {
-            return "none".equals(currentClass) ? " in no class" : " in class " + currentClass;
+            return "none".equals(getCurrentClass()) ? " in no class" : " in class " + getCurrentClass();
         }
 
         private String formatLine() {
-            return line == 0 ? " (unknown line)" : ", at line: " + line;
+            return getLine() == 0 ? " (unknown line)" : ", at line: " + getLine();
         }
     }
 }
