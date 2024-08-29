@@ -1,4 +1,4 @@
-package me.kuwg.clarity.interpreter.register;
+package me.kuwg.clarity.register;
 
 import java.util.Arrays;
 

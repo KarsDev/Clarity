@@ -1,6 +1,6 @@
 package me.kuwg.clarity.privilege;
 
-import me.kuwg.clarity.interpreter.register.Register;
+import me.kuwg.clarity.register.Register;
 
 public class Privileges {
 

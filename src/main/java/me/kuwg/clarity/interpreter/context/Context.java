@@ -3,7 +3,7 @@ package me.kuwg.clarity.interpreter.context;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
 import me.kuwg.clarity.interpreter.definition.VariableDefinition;
-import me.kuwg.clarity.interpreter.register.Register;
+import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.interpreter.types.ObjectType;
 
 import java.util.*;

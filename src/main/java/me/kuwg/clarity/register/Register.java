@@ -1,4 +1,4 @@
-package me.kuwg.clarity.interpreter.register;
+package me.kuwg.clarity.register;
 
 public final class Register {
 
@@ -82,22 +82,22 @@ public final class Register {
         public String toString() {
             switch (type) {
                 case FUNCALL: {
-                    return "function call " + param + formatClass() + ", at line: " + line;
+                    return "function call " + param + formatClass() + formatLine();
                 }
                 case ARRAYCALL: {
-                    return "array function " + param + formatClass() + ", at line: " + line;
+                    return "array function " + param + formatClass() + formatLine();
                 }
                 case NATIVECALL: {
-                    return "native call " + param + formatClass() + ", at line: " + line;
+                    return "native call " + param + formatClass() + formatLine();
                 }
                 case CLASSINST: {
-                    return "init class " + param + formatClass() + ", at line: " + line;
+                    return "init class " + param + formatClass() + formatLine();
                 }
                 case LOCALCALL: {
-                    return "local function call " + param + formatClass() + ", at line: " + line;
+                    return "local function call " + param + formatClass() + formatLine();
                 }
                 case STATICCALL: {
-                    return "static call " + param + formatClass() + ", at line: " + line;
+                    return "static call " + param + formatClass() + formatLine();
                 }
                 default: {
                     throwException("Unsupported register element type: " + type);
@@ -108,6 +108,10 @@ public final class Register {
 
         private String formatClass() {
             return "none".equals(currentClass) ? " in no class" : " in class " + currentClass;
+        }
+
+        private String formatLine() {
+            return line == 0 ? " (unknown line)" : ", at line: " + line;
         }
     }
 }

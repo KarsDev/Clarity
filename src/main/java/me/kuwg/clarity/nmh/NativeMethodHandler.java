@@ -1,7 +1,7 @@
 package me.kuwg.clarity.nmh;
 
 import me.kuwg.clarity.interpreter.context.Context;
-import me.kuwg.clarity.interpreter.register.Register;
+import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeFunction;
 import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
 import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeFunction;

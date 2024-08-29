@@ -1,11 +1,8 @@
 package me.kuwg.clarity.nmh.natives.impl.clazz;
 
-import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.interpreter.context.Context;
-import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.VariableDefinition;
-import me.kuwg.clarity.interpreter.register.Register;
-import me.kuwg.clarity.interpreter.types.ObjectType;
+import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
 
 import java.util.List;
