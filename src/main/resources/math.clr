@@ -1,37 +1,267 @@
-include native system
+/####################################################
+ #  Math Class
+ #
+ #  Overview:
+ #  The Math class provides a collection of static methods for performing common mathematical
+ #  operations and calculations. This class also includes native function declarations for 
+ #  more complex or performance-critical tasks such as calculating square roots, cube roots, 
+ #  rounding, and generating random numbers.
+ #
+ #  Important:
+ #  - This class is non-instantiable, as all of its methods are static.
+ #  - The native functions must be properly defined in the runtime environment for these methods
+ #    to function correctly.
+ #
+ #  Example Usage:
+ #  Math.abs(-5)                // Returns: 5
+ #  Math.max(10, 20)            // Returns: 20
+ #  Math.sqrt(16)               // Returns: 4 (requires native implementation)
+ #
+ #  Notes:
+ #  Native functions are used for operations that are often optimized at a lower level.
+ ####################################################/
+const native class Math {
 
-native const class Math {
+    /##
+     # Constant: PI
+     #
+     # Description:
+     # Represents the mathematical constant Pi, the ratio of the circumference of a circle to its
+     # diameter. This value is accurate to 15 decimal places.
+     #
+     # Value:
+     # - PI = 3.141592653589793
+     #
+     # Example:
+     # Math.PI    // Accesses the constant value of Pi.
+     #/
     static const var PI = 3.141592653589793
+
+    /##
+     # Constant: E
+     #
+     # Description:
+     # Represents the mathematical constant e, the base of the natural logarithm. This value is
+     # accurate to 16 decimal places.
+     #
+     # Value:
+     # - E = 2.7182818284590452
+     #
+     # Example:
+     # Math.E    // Accesses the constant value of e.
+     #/
     static const var E = 2.7182818284590452
 
+    /##
+     # Method: abs
+     #
+     # Description:
+     # Computes the absolute value of a given number. If the number is negative, it returns its
+     # positive equivalent; otherwise, it returns the number unchanged.
+     #
+     # Parameters:
+     # - x: A number whose absolute value is to be computed.
+     #
+     # Returns:
+     # - The absolute value of the number x.
+     #
+     # Example:
+     # Math.abs(-5)    // Returns: 5
+     #/
     static fn abs(x) {
         if x < 0 return -x
         else return x
     }
 
+    /##
+     # Method: clamp
+     #
+     # Description:
+     # Restricts a value to lie between a minimum and a maximum value.
+     #
+     # Parameters:
+     # - val: The value to clamp.
+     # - min: The minimum allowable value.
+     # - max: The maximum allowable value.
+     #
+     # Returns:
+     # - The value clamped to the range [min, max].
+     #
+     # Example:
+     # Math.clamp(15, 0, 10)    // Returns: 10
+     #/
     static fn clamp(val, min, max) {
         return Math.max(min, Math.min(max, val))
     }
 
+    /##
+     # Method: max
+     #
+     # Description:
+     # Returns the greater of two numbers.
+     #
+     # Parameters:
+     # - x: The first number to compare.
+     # - y: The second number to compare.
+     #
+     # Returns:
+     # - The larger of the two numbers x and y.
+     #
+     # Example:
+     # Math.max(5, 10)    // Returns: 10
+     #/
     static fn max(x, y) {
         if x > y return x
         else return y
     }
 
+    /##
+     # Method: min
+     #
+     # Description:
+     # Returns the lesser of two numbers.
+     #
+     # Parameters:
+     # - x: The first number to compare.
+     # - y: The second number to compare.
+     #
+     # Returns:
+     # - The smaller of the two numbers x and y.
+     #
+     # Example:
+     # Math.min(5, 10)    // Returns: 5
+     #/
     static fn min(x, y) {
         if x < y return x
         else return y
     }
 
-
+    /##
+     # Native Method: isPrime
+     #
+     # Description:
+     # Checks if a number is a prime number.
+     #
+     # Parameters:
+     # - num: The number to check for primality.
+     #
+     # Returns:
+     # - Boolean value indicating if the number is prime.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
     static native fn isPrime(num)
+
+    /##
+     # Native Method: sqrt
+     #
+     # Description:
+     # Computes the square root of a number.
+     #
+     # Parameters:
+     # - num: The number whose square root is to be calculated.
+     #
+     # Returns:
+     # - The square root of the number.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
     static native fn sqrt(num)
+
+    /##
+     # Native Method: cbrt
+     #
+     # Description:
+     # Computes the cube root of a number.
+     #
+     # Parameters:
+     # - num: The number whose cube root is to be calculated.
+     #
+     # Returns:
+     # - The cube root of the number.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
     static native fn cbrt(num)
+
+    /##
+     # Native Method: floor
+     #
+     # Description:
+     # Rounds a number down to the nearest integer.
+     #
+     # Parameters:
+     # - num: The number to round down.
+     #
+     # Returns:
+     # - The largest integer less than or equal to the number.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
     static native fn floor(num)
+
+    /##
+     # Native Method: ceil
+     #
+     # Description:
+     # Rounds a number up to the nearest integer.
+     #
+     # Parameters:
+     # - num: The number to round up.
+     #
+     # Returns:
+     # - The smallest integer greater than or equal to the number.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
     static native fn ceil(num)
+
+    /##
+     # Native Method: round
+     #
+     # Description:
+     # Rounds a number to the nearest integer.
+     #
+     # Parameters:
+     # - num: The number to round.
+     #
+     # Returns:
+     # - The nearest integer to the number.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
     static native fn round(num)
+
+    /##
+     # Native Method: random
+     #
+     # Description:
+     # Generates a random number between 0 (inclusive) and 1 (exclusive).
+     #
+     # Returns:
+     # - A random floating-point number in the range [0, 1).
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
     static native fn random()
 
+    /##
+     # Constructor: Math
+     #
+     # Description:
+     # The constructor is private and used internally to ensure any necessary initialization.
+     # This prevents instantiation of the Math class.
+     #
+     # Example:
+     # new Math()  // Not allowed; Math is non-instantiable.
+     #/
     constructor() {
         System.initExcept()
     }

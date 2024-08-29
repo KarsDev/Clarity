@@ -1,7 +1,8 @@
 {
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
-	"name": "Clarity",
+	"name": "clarity",
 	"patterns": [
+		{ "include": "#comments" },
 		{ "include": "#keywords" },
 		{ "include": "#classes" },
 		{ "include": "#strings" },
@@ -9,25 +10,38 @@
 		{ "include": "#functions" }
 	],
 	"repository": {
+		"comments": {
+			"patterns": [
+				{
+					"name": "comment.line.double-slash",
+					"match": "//.*$"
+				},
+				{
+					"name": "comment.block.hash",
+					"begin": "/#",
+					"end": "#/"
+				}
+			]
+		},
 		"keywords": {
-			"name": "keyword.control.clarity",
+			"name": "keyword",
 			"match": "\\b(class|var|constructor|local|fn|native|if|else|return|new|void|include|static|const|compiled|null|for|while|select|when|default|break|continue|float|int|inherits)\\b"
 		},
 		"classes": {
-			"name": "entity.name.type.class.clarity",
+			"name": "entity.name.class",
 			"match": "(?<=\\b(new|class)\\b\\s+)\\w+"
 		},
 		"strings": {
-			"name": "string.quoted.double.clarity",
-			"match": "\"([^\"\\\\]*(\\\\.[^\"\\\\]*)*)\""
+			"name": "string",
+			"match": "\"([^\"]*)\""
 		},
 		"operators": {
-			"name": "keyword.operator.arithmetic.clarity",
+			"name": "keyword.operator",
 			"match": "(\\+|\\-|\\/|\\*|\\=)"
 		},
 		"functions": {
-			"name": "entity.name.function.clarity",
-			"match": "\\b(\\w+)\\s*(?=\\()"
+			"name": "entity.name.function",
+			"match": "\\b(\\w+)\\s*\\("
 		}
 	},
 	"scopeName": "source.clarity"

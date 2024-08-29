@@ -141,6 +141,10 @@ public final class ASTParser {
             return parseClassDeclaration();
         }
 
+        if (lookahead().is(KEYWORD, "native")) {
+            return parseNativeClassDeclaration();
+        }
+
         boolean isConst = false;
         boolean isStatic = false;
 
@@ -684,6 +688,12 @@ public final class ASTParser {
 
         boolean isConstant = matchAndConsume(KEYWORD);
 
+        matchAndConsume(KEYWORD, "native");
+
+        if (match(KEYWORD, "fn")) {
+            undo();
+            return parseFunctionDeclaration();
+        }
         consume(KEYWORD, "class");
 
         final String name = consume(VARIABLE).getValue();

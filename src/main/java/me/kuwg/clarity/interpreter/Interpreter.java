@@ -205,7 +205,7 @@ public class Interpreter {
             } else {
                 inheritedClass = (ClassDefinition) type;
                 if (inheritedClass.isConstant()) {
-                    Register.throwException("Inheriting a const class: " + node.getInheritedClass(), node.getLine());
+                    Register.throwException("Inheriting a const " + (inheritedClass.isNative() ? "native " : "") + "class: " + node.getInheritedClass(), node.getLine());
                 }
             }
         } else {

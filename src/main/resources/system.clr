@@ -1,32 +1,150 @@
-/#
-    System class.
-    You cannot instantiate this class.
-#/
-class System {
+/####################################################
+ #  System Class
+ #
+ #  Overview:
+ #  This is a utility class that provides a set of static methods for performing
+ #  essential system-level operations such as exiting the program, printing messages
+ #  to the console, and throwing exceptions. The System class is designed to be non-instantiable,
+ #  meaning that objects of this class cannot be created. Instead, all its methods are static
+ #  and should be accessed directly through the class itself.
+ #
+ #  Important:
+ #  - This class cannot be instantiated. Any attempt to create an object of the System class
+ #    will result in an exception.
+ #  - The methods provided by this class are designed to interface with native system operations.
+ #
+ #  Example Usage:
+ #  System.print("Hello, World!")    // Prints "Hello, World!" to the console.
+ #  System.exit(1)                   // Exits the program with status code 1.
+ #
+ #  Notes:
+ #  The System class uses native functions that must be properly defined in the runtime
+ #  environment for the methods to function correctly.
+ ####################################################/
+const class System {
+    /##
+     # Constructor: System
+     #
+     # Description:
+     # The constructor of the System class is marked as private and immediately throws
+     # an exception upon invocation. This is to prevent instantiation of the System class,
+     # as all methods are static and should be accessed directly from the class itself.
+     #
+     # Throws:
+     # An error stating "You cannot instantiate this class!".
+     #
+     # Example:
+     # new System()  // Throws an error.
+     #/
     constructor() {
         initExcept()
     }
 
-    static fn exit() {
-        native.system.exit(status)
-    }
-
+    /##
+     # Method: exit
+     #
+     # Description:
+     # Terminates the currently running program. This method is overloaded to provide
+     # two versions: one without parameters that exits with a default status code, and
+     # another that takes a status code as an argument.
+     #
+     # Overloads:
+     # 1. exit(): Exits the program with a default status code.
+     # 2. exit(status): Exits the program with a specified status code.
+     #
+     # Parameters:
+     # - status (optional): An integer representing the exit status code. A non-zero status
+     #   code usually indicates an error or abnormal termination.
+     #
+     # Returns:
+     # - This method does not return a value. The program terminates after its execution.
+     #
+     # Example:
+     # System.exit()       // Exits the program with a default status code.
+     # System.exit(0)      // Exits the program with a status code of 0 (usually indicates success).
+     #/
     static fn exit(status) {
         native.system.exit(status)
     }
 
+    /##
+     # Method: print
+     #
+     # Description:
+     # Prints a message to the standard output (console). The print method does not add
+     # a newline character at the end of the message.
+     #
+     # Parameters:
+     # - msg: A string representing the message to be printed to the console.
+     #
+     # Returns:
+     # - None.
+     #
+     # Example:
+     # System.print("Hello")  // Outputs: Hello (without a newline)
+     #/
     static fn print(msg) {
         native.def.print(msg)
     }
 
+    /##
+     # Method: println
+     #
+     # Description:
+     # Prints a message to the standard output (console) and appends a newline character
+     # to the end of the message. This is useful for outputting messages line by line.
+     #
+     # Parameters:
+     # - msg: A string representing the message to be printed to the console.
+     #
+     # Returns:
+     # - None.
+     #
+     # Example:
+     # System.println("Hello")  // Outputs: Hello (with a newline)
+     #/
     static fn println(msg) {
         native.def.print(msg + "\n")
     }
 
+    /##
+     # Method: throw
+     #
+     # Description:
+     # Throws an error or exception within the program. This method interfaces with the
+     # native error handling system to throw a specified error.
+     #
+     # Parameters:
+     # - error: An error object or string representing the error message to be thrown.
+     #
+     # Returns:
+     # - None. Execution may be halted based on the nature of the error and the runtime
+     #   environment's exception handling mechanism.
+     #
+     # Example:
+     # System.throw("An error occurred!")  // Throws an exception with the message "An error occurred!"
+     #/
     static fn throw(error) {
         native.error.except(error)
     }
 
+    /##
+     # Private Method: initExcept
+     #
+     # Description:
+     # A private method that is called by the constructor to immediately throw an exception
+     # when an attempt is made to instantiate the System class. This ensures that the class
+     # remains non-instantiable.
+     #
+     # Throws:
+     # An error with the message "You cannot instantiate this class!".
+     #
+     # Returns:
+     # - None.
+     #
+     # Example:
+     # Not intended for direct use.
+     #/
     static fn initExcept() {
         System.throw("You cannot instantiate this class!")
     }
