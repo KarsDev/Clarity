@@ -2,7 +2,7 @@
 
 ## Overview
 
-Clarity is a high-level, object-oriented programming language designed to prioritize simplicity and clarity. It features a concise syntax and supports dynamic typing, making it easy to read and write. Clarity is suitable for both beginners and experienced developers who want to create clean, maintainable code.
+Clarity is a high-level, object-oriented custom programming language designed to prioritize simplicity and clarity. It features a concise syntax and supports dynamic typing, making it easy to read and write. Clarity is suitable for both beginners and experienced developers who want to create clean, maintainable code.
 
 ## Table of Contents
 
