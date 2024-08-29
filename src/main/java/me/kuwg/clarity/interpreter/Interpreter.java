@@ -1061,57 +1061,68 @@ public class Interpreter {
         }
 
         switch (node.getType()) {
-            case FLOAT: {
-                if (expression instanceof String) {
-                    try {
-                        return Double.parseDouble((String) expression);
-                    } catch (final NumberFormatException ignore) {
-                        Register.throwException("Could not cast to float", node.getLine());
-                        return null;
-                    }
-                }
-                if (expression instanceof Integer) {
-                    return (double) ((int) expression);
-                }
-
-                try {
-                    return (double) expression;
-                } catch (final NumberFormatException ignore) {
-                    Register.throwException("Could not cast to int", node.getLine());
-                    return null;
-                }
-            }
-
-            case INT: {
-                if (expression instanceof String) {
-                    final String exprString = (String) expression;
-                    try {
-                        return Integer.parseInt(exprString);
-                    } catch (final NumberFormatException ignore) {
-                        if (exprString.contains(".")) {
-                            return Integer.parseInt(exprString.split("\\.")[0]);
-                        }
-
-                        Register.throwException("Could not cast to int", node.getLine());
-                        return null;
-                    }
-                }
-                if (expression instanceof Double) {
-                    return ((Double) expression).intValue();
-                }
-
-                try {
-                    return (int) expression;
-                } catch (final NumberFormatException ignore) {
-                    Register.throwException("Could not cast to int", node.getLine());
-                    return null;
-                }
-            }
-
-            default: {
+            case FLOAT:
+                return castToFloat(expression, node);
+            case INT:
+                return castToInt(expression, node);
+            default:
                 Register.throwException("Unknown cast: " + node.getType().name().toLowerCase(), node.getLine());
                 return null;
-            }
         }
     }
+
+    private Double castToFloat(Object expression, NativeCastNode node) {
+        if (expression instanceof String) {
+            return parseDoubleOrThrow((String) expression, node);
+        }
+        if (expression instanceof Integer) {
+            return ((Integer) expression).doubleValue();
+        }
+        if (expression instanceof Double) {
+            return (Double) expression;
+        }
+
+        Register.throwException("Could not cast to float", node.getLine());
+        return null;
+    }
+
+    private Integer castToInt(final Object expression, final NativeCastNode node) {
+        if (expression instanceof String) {
+            return parseIntegerOrThrow((String) expression, node);
+        }
+        if (expression instanceof Double) {
+            return ((Double) expression).intValue();
+        }
+        if (expression instanceof Integer) {
+            return (Integer) expression;
+        }
+
+        Register.throwException("Could not cast to int", node.getLine());
+        return null;
+    }
+
+    private Double parseDoubleOrThrow(final String expression,final  NativeCastNode node) {
+        try {
+            return Double.parseDouble(expression);
+        } catch (NumberFormatException e) {
+            Register.throwException("Could not cast to float", node.getLine());
+            return null;
+        }
+    }
+
+    private Integer parseIntegerOrThrow(final String expression, final NativeCastNode node) {
+        try {
+            return Integer.parseInt(expression);
+        } catch (NumberFormatException e) {
+            if (expression.contains(".")) {
+                try {
+                    return Integer.parseInt(expression.split("\\.")[0]);
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            Register.throwException("Could not cast to int", node.getLine());
+            return null;
+        }
+    }
+
 }
