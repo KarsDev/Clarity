@@ -114,7 +114,6 @@ Common Native Functions
     native.println(message): Prints a message with a newline.
     native.print(message): Prints a message without adding a newline.
     native.error.except(): Handles errors or exceptions.
-    math.pow(a, b): Performs power of a^b.
 ```
 ## Examples
 ## Simple Program
