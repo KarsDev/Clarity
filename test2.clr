@@ -1,7 +1,1 @@
-include compiled test2
-
-fn exe(val) {
-    native.throw()
-}
-
-exe("LOL")
+native.input("x")

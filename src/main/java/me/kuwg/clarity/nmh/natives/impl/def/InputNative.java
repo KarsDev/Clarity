@@ -18,6 +18,7 @@ public class InputNative extends DefaultNativeFunction<String> {
         if (!params.isEmpty()) {
             System.out.print(params.get(0));
         }
+
         return scanner.nextLine();
     }
 
@@ -26,7 +27,8 @@ public class InputNative extends DefaultNativeFunction<String> {
         return params.size() <= 1;
     }
 
-    protected void finalize() throws Throwable {
+    @Override
+    protected void finalize()  {
         scanner.close();
     }
 }
