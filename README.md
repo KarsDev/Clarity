@@ -18,7 +18,6 @@ Clarity is a high-level, object-oriented programming language designed to priori
    - [Using a Class](#using-a-class)
    - [Looping Over a List](#looping-over-a-list)
    - [Static Properties and Methods](#static-properties-and-methods)
-5. [Conclusion](#conclusion)
 
 ## Features
 
@@ -114,7 +113,6 @@ Common Native Functions
     native.println(message): Prints a message with a newline.
     native.print(message): Prints a message without adding a newline.
     native.error.except(): Handles errors or exceptions.
-    math.pow(a, b): Performs power of a^b.
 ```
 ## Examples
 ## Simple Program
@@ -154,6 +152,3 @@ for var i = 1, i <= 100, i = i + 1 {
     native.print(Test.getName() + " loves you " + i + " times\n")
 }
 ```
-## Conclusion
-
-Clarity is designed to be straightforward and easy to learn, offering both powerful features and a simple syntax. With its dynamic typing, flexible structure, and access to native libraries, Clarity is an ideal language for developing various types of applications while maintaining clean and readable code.
