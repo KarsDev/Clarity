@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public final class RegisterStack {
 
-    private final String[] elements;
+    private final Register.RegisterElement[] elements;
     private final int maxSize;
     private int size = 0;
 
@@ -12,10 +12,10 @@ public final class RegisterStack {
         if (maxSize <= 0) throw new IllegalArgumentException("Max size must be positive");
 
         this.maxSize = maxSize;
-        this.elements = new String[maxSize];
+        this.elements = new Register.RegisterElement[maxSize];
     }
 
-    public void push(final String element) {
+    public void push(final Register.RegisterElement element) {
         if (size >= maxSize) {
             System.arraycopy(elements, 1, elements, 0, maxSize - 1);
             elements[maxSize - 1] = element;
@@ -24,9 +24,9 @@ public final class RegisterStack {
         }
     }
 
-    public String pop() {
+    public Register.RegisterElement pop() {
         if (size == 0) throw new IllegalStateException("Stack is empty");
-        final String element = elements[--size];
+        final Register.RegisterElement element = elements[--size];
         elements[size] = null;
         return element;
     }
@@ -35,12 +35,12 @@ public final class RegisterStack {
         return size == 0;
     }
 
-    public boolean isFull() {
-        return size == maxSize;
-    }
-
     public int size() {
         return size;
+    }
+
+    public Register.RegisterElement at(final int i) {
+        return elements[i];
     }
 
     @Override

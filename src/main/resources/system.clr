@@ -1,10 +1,7 @@
 /#
     System class.
-
     You cannot instantiate this class.
-
 #/
-
 class System {
     constructor() {
         initExcept()

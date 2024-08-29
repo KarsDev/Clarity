@@ -8,7 +8,7 @@ import me.kuwg.clarity.interpreter.types.ObjectType;
 
 import java.util.*;
 
-import static me.kuwg.clarity.interpreter.types.VoidObject.VOID;
+import static me.kuwg.clarity.interpreter.types.VoidObject.VOID_OBJECT;
 
 public class Context {
 
@@ -31,21 +31,21 @@ public class Context {
 
     public void defineVariable(String name, VariableDefinition value) {
         if (variables.putIfAbsent(name, value) != null) {
-            throw new IllegalStateException("Declaring an already declared variable: " + name);
+            Register.throwException("Declaring an already declared variable: " + name);
         }
     }
 
     public Object getVariable(String name) {
-        ObjectType result = variables.getOrDefault(name, VOID);
-        if (result == VOID && parentContext != null) {
+        ObjectType result = variables.getOrDefault(name, VOID_OBJECT);
+        if (result == VOID_OBJECT && parentContext != null) {
             return parentContext.getVariable(name);
         }
-        return result == VOID ? VOID : ((VariableDefinition) result).getValue();
+        return result == VOID_OBJECT ? VOID_OBJECT : ((VariableDefinition) result).getValue();
     }
 
     public ObjectType getVariableDefinition(String name) {
-        ObjectType result = variables.getOrDefault(name, VOID);
-        if (result == VOID && parentContext != null) {
+        ObjectType result = variables.getOrDefault(name, VOID_OBJECT);
+        if (result == VOID_OBJECT && parentContext != null) {
             return parentContext.getVariableDefinition(name);
         }
         return result;
@@ -58,7 +58,7 @@ public class Context {
             return;
         }
         final VariableDefinition variableDefinition = ((VariableDefinition) definition);
-        if (variableDefinition.isConstant()) Register.throwException("Variable that has const cannot be edited");
+        if (variableDefinition.isConstant() && variableDefinition.getValue() != VOID_OBJECT) Register.throwException("Variable that has const cannot be edited");
         variableDefinition.setValue(value);
     }
 
@@ -74,20 +74,21 @@ public class Context {
                     return d;
                 }
             }
-            return parentContext != null ? parentContext.getFunction(name, paramsSize) : VOID;
+            return parentContext != null ? parentContext.getFunction(name, paramsSize) : VOID_OBJECT;
         }
-        return parentContext != null ? parentContext.getFunction(name, paramsSize) : VOID;
+        return parentContext != null ? parentContext.getFunction(name, paramsSize) : VOID_OBJECT;
     }
 
     public void defineClass(String name, ClassDefinition definition) {
         if (classes.putIfAbsent(name, definition) != null) {
-            throw new IllegalStateException("Declaring an already declared class: " + name);
+            Register.throwException("Declaring an already declared class: " + name);
         }
     }
 
     public ObjectType getClass(String name) {
-        ObjectType result = classes.getOrDefault(name, VOID);
-        return result == VOID && parentContext != null ? parentContext.getClass(name) : result;
+        if (name == null) return null;
+        ObjectType result = classes.getOrDefault(name, VOID_OBJECT);
+        return result == VOID_OBJECT && parentContext != null ? parentContext.getClass(name) : result;
     }
 
 
@@ -113,5 +114,18 @@ public class Context {
 
     public Context parentContext() {
         return parentContext;
+    }
+
+    @Override
+    public String toString() {
+        return "Context{" +
+                "variables=" + variables +
+                ", functions=" + functions +
+                ", classes=" + classes +
+                ", natives=" + natives +
+                ", currentClassName='" + currentClassName + '\'' +
+                ", currentFunctionName='" + currentFunctionName + '\'' +
+                ", parentContext=" + parentContext +
+                '}';
     }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 
 abstract class NativeFunction<R> {
 
-    protected static final VoidObject VOID = VoidObject.VOID;
+    protected static final VoidObject VOID = VoidObject.VOID_OBJECT;
 
     private final String name;
 

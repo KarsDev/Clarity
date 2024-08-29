@@ -1,10 +1,12 @@
 package me.kuwg.clarity.nmh;
 
+import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.register.Register;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeFunction;
 import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
 import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeFunction;
 import me.kuwg.clarity.nmh.natives.impl.clazz.MathNativeClass;
+import me.kuwg.clarity.nmh.natives.impl.clazz.ReflectionsNativeClass;
 import me.kuwg.clarity.nmh.natives.impl.def.*;
 import me.kuwg.clarity.nmh.natives.impl.pkg.error.ExceptNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.ExitNative;
@@ -42,6 +44,7 @@ public class NativeMethodHandler {
 
     private void initializeNativeClasses() {
         registerNativeClass(new MathNativeClass());
+        registerNativeClass(new ReflectionsNativeClass());
     }
 
     private void registerDefaultFunction(final DefaultNativeFunction<?> function) {
@@ -77,10 +80,14 @@ public class NativeMethodHandler {
         return null;
     }
 
-    public Object callClassNative(final String name, final String method, final List<Object> params) {
+    public Object callClassNative(final String name, final String method, final List<Object> params, final Context context) {
         NativeClass clazz = nativeClasses.get(name);
         if (clazz != null) {
-            return clazz.handleCall(method, params);
+            try {
+                return clazz.handleCall(method, params, context);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         Register.throwException("Default native function " + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");

@@ -1,5 +1,6 @@
 package me.kuwg.clarity.nmh.natives.aclass;
 
+import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.register.Register;
 import me.kuwg.clarity.interpreter.types.VoidObject;
 
@@ -7,7 +8,7 @@ import java.util.List;
 
 public abstract class NativeClass {
 
-    protected static final VoidObject VOID = VoidObject.VOID;
+    protected static final VoidObject VOID = VoidObject.VOID_OBJECT;
 
     private final String name;
 
@@ -19,7 +20,7 @@ public abstract class NativeClass {
         return name;
     }
 
-    public abstract Object handleCall(final String name, final List<Object> params);
+    public abstract Object handleCall(final String name, final List<Object> params, final Context context) throws Exception;
 
     protected final void check(final String err, final boolean... condos) {
         for (final boolean condo : condos) if (!condo) Register.throwException(err);

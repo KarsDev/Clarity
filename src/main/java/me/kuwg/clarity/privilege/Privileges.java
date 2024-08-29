@@ -7,6 +7,8 @@ public class Privileges {
     private static final String[] PRIVILEGED_CLASS_NAMES = new String[] {
             "System",
             "Math",
+            "Reflections",
+            "Class",
 
     };
 

@@ -1,5 +1,6 @@
 package me.kuwg.clarity.nmh.natives.impl.clazz;
 
+import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
 
 import java.util.List;
@@ -10,7 +11,7 @@ public class MathNativeClass extends NativeClass {
     }
 
     @Override
-    public Object handleCall(final String name, final List<Object> params) {
+    public Object handleCall(final String name, final List<Object> params, final Context ignore) {
         switch (name) {
             case "sqrt": {
                 check("Invalid parameters", params.size() == 1 && params.get(0) instanceof Number);

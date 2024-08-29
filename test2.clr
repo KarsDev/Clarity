@@ -1,6 +1,15 @@
-include native math
-
 fn main() {
-    const var x = 2
-    x = 3
+    var x = 5
+    select x {
+        when 2 {
+            native.println(2)
+        }
+        when 3 + 2 {
+        native.println(3 + 2)
+            break
+        }
+        default {
+            native.println("def")
+        }
+    }
 }

@@ -1,0 +1,12 @@
+include native system
+
+native class Reflections {
+    constructor() {
+        System.initExcept()
+    }
+
+    static native fn editVariable(name, value)
+    static native fn createVariable(name, value, isStatic, isConstant)
+    static native fn getCallerClass()
+
+}

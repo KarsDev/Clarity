@@ -3,14 +3,14 @@ package me.kuwg.clarity.parser;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.ast.nodes.block.BreakNode;
+import me.kuwg.clarity.ast.nodes.block.ContinueNode;
 import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
-import me.kuwg.clarity.ast.nodes.statements.ForNode;
-import me.kuwg.clarity.ast.nodes.statements.ForeachNode;
-import me.kuwg.clarity.ast.nodes.statements.IfNode;
+import me.kuwg.clarity.ast.nodes.statements.*;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
@@ -19,7 +19,6 @@ import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
-import me.kuwg.clarity.ast.nodes.statements.WhileNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.LocalVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
@@ -120,6 +119,12 @@ public final class ASTParser {
                 return parseForDeclaration();
             case WHILE:
                 return parseWhileDeclaration();
+            case SELECT:
+                return parseSelectDeclaration();
+            case BREAK:
+                return parseBreakDeclaration();
+            case CONTINUE:
+                return parseContinueDeclaration();
             default:
                 throw new UnsupportedOperationException("Unsupported keyword: " + keyword);
         }
@@ -216,7 +221,7 @@ public final class ASTParser {
         consume(); // consume native
 
         if (matchAndConsume(KEYWORD, "class")) {
-            return parseNativeClassDeclaration();
+            return parseNativeClassDeclaration().setLine(current().getLine());
         }
 
         consume(OPERATOR, ".");
@@ -307,13 +312,11 @@ public final class ASTParser {
         ASTNode left = parsePrimary();
         while (true) {
             int currentPrecedence = getPrecedence(current());
-
             if (currentPrecedence < precedence) {
                 break;
             }
 
             final int line = current().getLine();
-
             Token operatorToken = consume();
             ASTNode right = parsePrecedence(currentPrecedence + 1);
             left = new BinaryExpressionNode(left, operatorToken.getValue(), right).setLine(line);
@@ -415,10 +418,10 @@ public final class ASTParser {
                     return parseKeyword().setLine(line);
                 }
             case BOOLEAN:
-                return new BooleanNode(Boolean.parseBoolean(token.getValue()));
+                return new BooleanNode(Boolean.parseBoolean(token.getValue())).setLine(line);
             case OPERATOR:
                 if (token.getValue().equals("-")) {
-                    ASTNode right = parsePrimary();
+                    ASTNode right = parsePrimary().setLine(line);
                     return new BinaryExpressionNode(new IntegerNode(0).setLine(line), "-", right).setLine(line);
                 }
                 break;
@@ -461,7 +464,7 @@ public final class ASTParser {
         if (matchAndConsume(OPERATOR, "."))
             return new ContextReferenceNode(ContextReferenceNode.ReferenceType.LOCAL).setLine(line);
         undo();
-        return parseVariableDeclaration();
+        return parseVariableDeclaration().setLine(line);
     }
 
     private ASTNode parseNewDeclaration() {
@@ -537,7 +540,7 @@ public final class ASTParser {
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream(path);
             if (inputStream == null) {
                 try {
-                    throw new IOException("Native library not found: " + path);
+                    throw new IOException("Native library not found: '" + path + "'");
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -605,16 +608,15 @@ public final class ASTParser {
             }
         }
 
-        return node;
+        return node.setLine(current().getLine());
     }
 
     private ASTNode parseNullDeclaration() {
-        consume(); // consume "null"
-        return new NullNode();
+        return new NullNode().setLine(consume().getLine());
     }
 
     private ASTNode parseForDeclaration() {
-        consume(); // consume "for"
+        final int line = consume().getLine(); // consume "for"
 
         if (lookahead().is(OPERATOR, ":")) {
             // foreach
@@ -624,36 +626,37 @@ public final class ASTParser {
 
             final ASTNode list = parseExpression();
 
-            return new ForeachNode(var, list, parseBlock());
+            return new ForeachNode(var, list, parseBlock()).setLine(line);
         }
 
         final ASTNode declaration;
-        if (!match(DIVIDER, ",")) declaration = parseVariableDeclaration();
+        if (!match(DIVIDER, ",")) declaration = current().is(DIVIDER, "{") ? null : parseVariableDeclaration();
         else declaration = null;
 
         consume(DIVIDER, ",");
 
         final ASTNode condition;
-        if (!match(DIVIDER, ",")) condition = parseExpression();
+        if (!match(DIVIDER, ",")) condition = current().is(DIVIDER, "{") ? null : parseExpression();
         else condition = null;
 
         consume(DIVIDER, ",");
 
         final ASTNode incrementation;
-        if (!match(DIVIDER, ",")) incrementation = parseExpression();
+        if (!match(DIVIDER, ",")) incrementation = current().is(DIVIDER, "{") ? null : parseExpression();
+
         else incrementation = null;
 
         final BlockNode block = parseBlock();
-        return new ForNode(declaration, condition, incrementation, block);
+        return new ForNode(declaration, condition, incrementation, block).setLine(line);
     }
 
     private ASTNode parseWhileDeclaration(){
-        consume(); // consume "while"
+        final int line = consume().getLine(); // consume "while"
 
         final ASTNode condition = parseExpression();
 
         final BlockNode block = parseBlock();
-        return new WhileNode(condition, block);
+        return new WhileNode(condition, block).setLine(line);
     }
 
     private ASTNode parseNativeClassDeclaration() {
@@ -675,6 +678,47 @@ public final class ASTParser {
         }
         return new NativeClassDeclarationNode(name, fileName, constructor, body).setLine(line);
     }
+
+    private ASTNode parseSelectDeclaration() {
+        final int line = consume().getLine(); // consume "select"
+
+        final ASTNode condition = parseExpression();
+
+        final List<SelectNode.WhenNode> cases = new ArrayList<>();
+
+        BlockNode defaultBlock = null;
+
+        consume(DIVIDER, "{");
+        while (!match(DIVIDER, "}")) {
+
+            if (matchAndConsume(KEYWORD, "when")) {
+                final ASTNode whenCondition = parseExpression();
+                final BlockNode whenBlock = parseBlock();
+                cases.add(new SelectNode.WhenNode(whenCondition, whenBlock));
+                continue;
+            } else if (match(KEYWORD, "default")) {
+                if (defaultBlock != null) throw new IllegalStateException("Multiple default blocks: " + current());
+                final int defaultLine = consume().getLine(); // consume "default"
+                defaultBlock = parseBlock().setLine(defaultLine);
+                continue;
+            }
+
+            throw new UnsupportedOperationException("Unsupported token in switch: " + current());
+        }
+
+        consume(DIVIDER, "}");
+        return new SelectNode(condition, cases, defaultBlock).setLine(line);
+    }
+
+    private ASTNode parseBreakDeclaration() {
+        return new ReturnNode(new BreakNode().setLine(consume().getLine()));
+    }
+
+    private ASTNode parseContinueDeclaration() {
+        return new ReturnNode(new ContinueNode().setLine(consume().getLine()));
+    }
+
+
 
 
 
