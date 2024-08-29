@@ -5,6 +5,7 @@ import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
@@ -82,6 +83,7 @@ public class ASTData {
         registerNode(ClassDeclarationNode.class, 0x700);
         registerNode(ClassInstantiationNode.class, 0x701);
         registerNode(NativeClassDeclarationNode.class, 0x702);
+        registerNode(NativeCastNode.class, 0x703);
 
         // Context (0x800)
         registerNode(ContextReferenceNode.class, 0x800);

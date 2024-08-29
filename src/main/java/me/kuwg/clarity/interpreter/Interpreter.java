@@ -9,6 +9,7 @@ import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
@@ -147,6 +148,7 @@ public class Interpreter {
         if (node instanceof SelectNode) return interpretSelect((SelectNode) node, context);
         if (node instanceof BreakNode) return BREAK;
         if (node instanceof ContinueNode) return CONTINUE;
+        if (node instanceof NativeCastNode) return interpretNativeCast((NativeCastNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -1049,5 +1051,67 @@ public class Interpreter {
         }
 
         return interpretBlock(node.getDefaultBlock(), context);
+    }
+
+    private Number interpretNativeCast(final NativeCastNode node, final Context context) {
+        final Object expression = interpretNode(node.getCasted(), context);
+
+        if (expression == null) {
+            return node.getType() == NativeCastNode.CastType.FLOAT ? 0d : 0;
+        }
+
+        switch (node.getType()) {
+            case FLOAT: {
+                if (expression instanceof String) {
+                    try {
+                        return Double.parseDouble((String) expression);
+                    } catch (final NumberFormatException ignore) {
+                        Register.throwException("Could not cast to float", node.getLine());
+                        return null;
+                    }
+                }
+                if (expression instanceof Integer) {
+                    return (double) ((int) expression);
+                }
+
+                try {
+                    return (double) expression;
+                } catch (final NumberFormatException ignore) {
+                    Register.throwException("Could not cast to int", node.getLine());
+                    return null;
+                }
+            }
+
+            case INT: {
+                if (expression instanceof String) {
+                    final String exprString = (String) expression;
+                    try {
+                        return Integer.parseInt(exprString);
+                    } catch (final NumberFormatException ignore) {
+                        if (exprString.contains(".")) {
+                            return Integer.parseInt(exprString.split("\\.")[0]);
+                        }
+
+                        Register.throwException("Could not cast to int", node.getLine());
+                        return null;
+                    }
+                }
+                if (expression instanceof Double) {
+                    return ((Double) expression).intValue();
+                }
+
+                try {
+                    return (int) expression;
+                } catch (final NumberFormatException ignore) {
+                    Register.throwException("Could not cast to int", node.getLine());
+                    return null;
+                }
+            }
+
+            default: {
+                Register.throwException("Unknown cast: " + node.getType().name().toLowerCase(), node.getLine());
+                return null;
+            }
+        }
     }
 }

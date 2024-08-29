@@ -9,6 +9,7 @@ import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
 import me.kuwg.clarity.ast.nodes.statements.*;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
@@ -125,6 +126,10 @@ public final class ASTParser {
                 return parseBreakDeclaration();
             case CONTINUE:
                 return parseContinueDeclaration();
+            case FLOAT:
+                return parseFloatDeclaration();
+            case INT:
+                return parseIntDeclaration();
             default:
                 throw new UnsupportedOperationException("Unsupported keyword: " + keyword);
         }
@@ -716,6 +721,16 @@ public final class ASTParser {
 
     private ASTNode parseContinueDeclaration() {
         return new ReturnNode(new ContinueNode().setLine(consume().getLine()));
+    }
+
+    private ASTNode parseFloatDeclaration() {
+        final int line = consume().getLine(); // consume "float"
+        return new NativeCastNode(NativeCastNode.CastType.FLOAT, parseExpression()).setLine(line);
+    }
+
+    private ASTNode parseIntDeclaration() {
+        final int line = consume().getLine(); // consume "float"
+        return new NativeCastNode(NativeCastNode.CastType.INT, parseExpression()).setLine(line);
     }
 
 

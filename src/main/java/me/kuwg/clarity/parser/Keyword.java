@@ -27,6 +27,8 @@ public enum Keyword {
     DEFAULT,
     BREAK,
     CONTINUE,
+    FLOAT,
+    INT,
 
     ;
 
@@ -55,6 +57,8 @@ public enum Keyword {
             case "default": return DEFAULT;
             case "break": return BREAK;
             case "continue": return CONTINUE;
+            case "float": return FLOAT;
+            case "int": return INT;
 
             default: throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
         }
