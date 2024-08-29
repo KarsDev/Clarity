@@ -18,7 +18,6 @@ Clarity is a high-level, object-oriented programming language designed to priori
    - [Using a Class](#using-a-class)
    - [Looping Over a List](#looping-over-a-list)
    - [Static Properties and Methods](#static-properties-and-methods)
-5. [Conclusion](#conclusion)
 
 ## Features
 
@@ -153,6 +152,3 @@ for var i = 1, i <= 100, i = i + 1 {
     native.print(Test.getName() + " loves you " + i + " times\n")
 }
 ```
-## Conclusion
-
-Clarity is designed to be straightforward and easy to learn, offering both powerful features and a simple syntax. With its dynamic typing, flexible structure, and access to native libraries, Clarity is an ideal language for developing various types of applications while maintaining clean and readable code.
