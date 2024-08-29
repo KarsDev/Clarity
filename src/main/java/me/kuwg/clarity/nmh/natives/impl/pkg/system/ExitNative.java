@@ -15,8 +15,4 @@ public class ExitNative extends SystemNativeFunction<VoidObject> {
         return VOID;
     }
 
-    @Override
-    protected boolean applies0(final List<Object> params) {
-        return params.size() == 1 && params.get(0) instanceof Integer;
-    }
 }

@@ -1,6 +1,7 @@
 package me.kuwg.clarity.nmh;
 
 import me.kuwg.clarity.interpreter.context.Context;
+import me.kuwg.clarity.nmh.natives.impl.pkg.system.CheckNativeTypeNative;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeFunction;
 import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
@@ -40,6 +41,7 @@ public class NativeMethodHandler {
         registerPackagedFunction(new CreateListNative());
         registerPackagedFunction(new ExceptNative());
         registerPackagedFunction(new ExitNative());
+        registerPackagedFunction(new CheckNativeTypeNative());
     }
 
     private void initializeNativeClasses() {
