@@ -1,8 +1,20 @@
 fn main() {
-    var x = int("5.6")
-    // test
-    /#
-    multiline
-    #/
-    native.println(x)
+    var ext = new Extender("Karji")
+    ext.execute()
+}
+
+class ToExtend {
+    constructor(name) {
+        native.println("Constructing with name " + name)
+    }
+
+    fn execute() {
+        native.println("Executing")
+    }
+ }
+
+class Extender inherits ToExtend {
+    constructor(name) {
+        native.println(name)
+    }
 }

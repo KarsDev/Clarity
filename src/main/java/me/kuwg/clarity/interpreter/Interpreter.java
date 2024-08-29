@@ -194,7 +194,22 @@ public class Interpreter {
         final String name = node.getName();
         context.setCurrentClassName(name);
 
-        final ClassDefinition definition = new ClassDefinition(name, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), false);
+        final ClassDefinition inheritedClass;
+
+        final ObjectType type = context.getClass(node.getInheritedClass());
+
+        if (node.getInheritedClass() != null) {
+            if (!(type instanceof ClassDefinition)) {
+                Register.throwException("Inherited class not found: " + node.getInheritedClass(), node.getLine());
+                return null;
+            } else {
+                inheritedClass = (ClassDefinition) type;
+            }
+        } else {
+            inheritedClass = null;
+        }
+
+        final ClassDefinition definition = new ClassDefinition(name, inheritedClass, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), false);
         context.defineClass(name, definition);
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
@@ -471,6 +486,15 @@ public class Interpreter {
         if (val != VOID_OBJECT)
             except("Return in class body", node.getLine());
 
+        final ClassDefinition inheritedClass = definition.getInheritedClass();
+
+        if (inheritedClass != null) {
+            final FunctionDefinition inheritedConstructor = inheritedClass.getConstructor();
+            final ClassObject inheritedObject = interpretConstructor(inheritedConstructor, params, classContext, inheritedClass.getName());
+
+            classContext.mergeContext(inheritedObject.getContext());
+        }
+
         final Object result = interpretConstructor(definition.getConstructor(), params, classContext, name);
         context.setCurrentClassName(null);
 
@@ -483,7 +507,7 @@ public class Interpreter {
         }
 
         if (constructor.getParams().size() != params.size()) {
-            System.out.println("Params length do not match for initialization of class " + cn);
+            Register.throwException("Params length do not match for initialization of class " + cn);
         }
 
         List<String> constructorParams = constructor.getParams();
@@ -515,130 +539,109 @@ public class Interpreter {
         final Object caller = context.getVariable(node.getCaller());
 
         if (caller instanceof VoidObject) {
-            final ObjectType rawDefinition = context.getClass(node.getCaller());
-            if (rawDefinition instanceof VoidObject) {
-                except("Accessing a static function of a non-existent class: " + node.getCaller(), node.getLine());
-                return null;
-            }
-            final ClassDefinition classDefinition = (ClassDefinition) rawDefinition;
-
-            context.setCurrentClassName(classDefinition.getName());
-            context.setCurrentFunctionName(node.getCalled());
-
-            final FunctionDefinition definition = classDefinition.staticFunctions.get(node.getCalled());
-
-            if (definition == null) {
-                except("Accessing a static function that does not exist: " + node.getCaller() + "#" + node.getCalled() + "(...)", node.getLine());
-                return null;
-            }
-
-
-            final List<Object> params = new ArrayList<>();
-
-            for (final ASTNode param : node.getParams()) {
-                final Object returned = interpretNode(param, context);
-                if (returned == VOID_OBJECT) {
-                    Register.throwException("Passing void as parameter function");
-                    return null;
-                }
-                params.add(returned);
-            }
-
-            if (params.size() > definition.getParams().size()) {
-                except("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + definition.getName(), node.getLine());
-            } else if (params.size() < definition.getParams().size()) {
-                except("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + definition.getName(), node.getLine());
-            }
-
-            final Context functionContext = new Context(context);
-
-            List<String> definitionParams = definition.getParams();
-            for (int i = 0; i < definitionParams.size(); i++) {
-                final String name = definitionParams.get(i);
-                final Object value = params.get(i);
-
-                functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
-            }
-
-            Register.register(new Register.RegisterElement(Register.RegisterElementType.STATICCALL, node.getCalled() + getParams(params), node.getLine(), context.getCurrentClassName()));
-            final Object result = interpretBlock(definition.getBlock(), functionContext);
-            context.setCurrentClassName(null);
-            context.setCurrentFunctionName(null);
-            return result;
-        }
-
-        if (caller instanceof Object[]) {
-            final Object[] array = (Object[]) caller;
-
-            final List<Object> params = new ArrayList<>();
-
-            for (final ASTNode param : node.getParams()) {
-                final Object returned = interpretNode(param, context);
-                if (returned == VOID_OBJECT) {
-                    except("Passing void as a parameter in a array function", node.getLine());
-                }
-                params.add(returned);
-            }
-
-            final String fn = node.getCalled();
-
-            switch (fn) {
-                case "at":
-                    if (params.size() == 1 && params.get(0) instanceof Integer) {
-                        try {
-                            return array[(int) params.get(0)];
-                        } catch (final ArrayIndexOutOfBoundsException ex) {
-                            except("Array out of bounds: " + params.get(0), node.getLine());
-                        }
-                    }
-                    break;
-
-                case "size":
-                    if (params.isEmpty()) {
-                        return array.length;
-                    }
-                    break;
-                case "set":
-                    if (params.size() == 2 && params.get(0) instanceof Integer) {
-                        array[(int)params.get(0)] = params.get((int)params.get(0));
-                        return VOID_OBJECT;
-                    }
-                default:
-                    except("Illegal function in array context: " + fn + " with params " + params, node.getLine());
-                    return null;
-            }
-
-            Register.register(new Register.RegisterElement(Register.RegisterElementType.ARRAYCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
-        }
-
-        if (!(caller instanceof ClassObject)) {
+            return handleStaticFunctionCall(node, context);
+        } else if (caller instanceof Object[]) {
+            return handleArrayFunctionCall(node, context, (Object[]) caller);
+        } else if (caller instanceof ClassObject) {
+            return handleInstanceMethodCall(node, context, (ClassObject) caller);
+        } else {
             except("You can't call a function out of a " + caller.getClass().getSimpleName(), node.getLine());
             return null;
         }
+    }
 
+    private Object handleStaticFunctionCall(final ObjectFunctionCallNode node, final Context context) {
+        final ObjectType rawDefinition = context.getClass(node.getCaller());
+        if (rawDefinition instanceof VoidObject) {
+            except("Accessing a static function of a non-existent class: " + node.getCaller(), node.getLine());
+            return null;
+        }
 
-        ClassObject classObject = (ClassObject) caller;
+        final ClassDefinition classDefinition = (ClassDefinition) rawDefinition;
 
+        context.setCurrentClassName(classDefinition.getName());
+        context.setCurrentFunctionName(node.getCalled());
+
+        final FunctionDefinition definition = classDefinition.staticFunctions.get(node.getCalled());
+
+        if (definition == null) {
+            except("Accessing a static function that does not exist: " + node.getCaller() + "#" + node.getCalled() + "(...)", node.getLine());
+            return null;
+        }
+
+        final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
+        if (params == null) return null;
+
+        final Context functionContext = new Context(context);
+        defineFunctionParameters(functionContext, definition, params);
+
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.STATICCALL, node.getCalled() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        final Object result = interpretBlock(definition.getBlock(), functionContext);
+        context.setCurrentClassName(null);
+        context.setCurrentFunctionName(null);
+        return result;
+    }
+
+    private Object handleArrayFunctionCall(final ObjectFunctionCallNode node, final Context context, final Object[] array) {
+        final List<Object> params = getFunctionParameters(node, context, -1);
+        if (params == null) return null;
+
+        final String fn = node.getCalled();
+
+        switch (fn) {
+            case "at":
+                if (params.size() == 1 && params.get(0) instanceof Integer) {
+                    try {
+                        return array[(int) params.get(0)];
+                    } catch (final ArrayIndexOutOfBoundsException ex) {
+                        except("Array out of bounds: " + params.get(0), node.getLine());
+                    }
+                }
+                break;
+            case "size":
+                if (params.isEmpty()) {
+                    return array.length;
+                }
+                break;
+            case "set":
+                if (params.size() == 2 && params.get(0) instanceof Integer) {
+                    array[(int) params.get(0)] = params.get(1);
+                    return VOID_OBJECT;
+                }
+                break;
+            default:
+                except("Illegal function in array context: " + fn + " with params " + params, node.getLine());
+                return null;
+        }
+
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.ARRAYCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+        return null;
+    }
+
+    private Object handleInstanceMethodCall(final ObjectFunctionCallNode node, final Context context, final ClassObject classObject) {
         context.setCurrentClassName(classObject.getName());
         context.setCurrentFunctionName(node.getCalled());
 
-        final ObjectType rawDefinition = classObject.getContext().getFunction(node.getCalled(), node.getParams().size());
+        // Attempt to find the function in the current class's context
+        ObjectType rawDefinition = classObject.getContext().getFunction(node.getCalled(), node.getParams().size());
+
+        // Check for function in parent classes if it is not found in the current class
+        if (rawDefinition == VOID_OBJECT) {
+            rawDefinition = findFunctionInInheritedClasses(node, context, classObject);
+        }
 
         if (rawDefinition == VOID_OBJECT) {
-            except("Called a non existent function: " + classObject.getName() + "#" + node.getCalled(), node.getLine());
+            except("Called a non-existent function: " + classObject.getName() + "#" + node.getCalled(), node.getLine());
             return null;
         }
 
         FunctionDefinition definition = (FunctionDefinition) rawDefinition;
-
         final Context functionContext = new Context(classObject.getContext());
 
-        if (node.getParams().size() != definition.getParams().size())
-            except("Called a function but params size is different: " + classObject.getName() + "#" + node.getCalled(), node.getLine());
+        final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
+        if (params == null) return null;
 
-        for (int i = 0; i < definition.getParams().size(); i++) {
-            functionContext.defineVariable(definition.getParams().get(i), new VariableDefinition(definition.getParams().get(i), interpretNode(node.getParams().get(i), context), false, false));
-        }
+        defineFunctionParameters(functionContext, definition, params);
 
         Register.register(new Register.RegisterElement(Register.RegisterElementType.NATIVECALL, node.getCalled() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
 
@@ -646,6 +649,60 @@ public class Interpreter {
         context.setCurrentClassName(null);
         context.setCurrentFunctionName(null);
         return result;
+    }
+
+    private ObjectType findFunctionInInheritedClasses(final ObjectFunctionCallNode node, final Context context, final ClassObject classObject) {
+        ClassDefinition classDefinition = (ClassDefinition) context.getClass(classObject.getName());
+
+        while (classDefinition != null && classDefinition.getInheritedClass() != null) {
+
+            classDefinition = classDefinition.getInheritedClass();
+
+            FunctionDefinition functionDefinition = null;
+
+            for (final ASTNode astNode : classDefinition.getBody()) {
+                if (astNode instanceof FunctionDeclarationNode) {
+                    final FunctionDeclarationNode declaration = (FunctionDeclarationNode) astNode;
+                    if (!declaration.getFunctionName().equals(node.getCalled()) && declaration.getParameterNodes().size() == node.getParams().size()) continue;
+                    functionDefinition = new FunctionDefinition(declaration);
+                    break;
+                }
+            }
+
+
+            if (functionDefinition != null) {
+                return functionDefinition;
+            }
+        }
+
+        return VOID_OBJECT;
+    }
+
+    private List<Object> getFunctionParameters(final ObjectFunctionCallNode node, final Context context, int expectedSize) {
+        final List<Object> params = new ArrayList<>();
+        for (final ASTNode param : node.getParams()) {
+            final Object returned = interpretNode(param, context);
+            if (returned == VOID_OBJECT) {
+                Register.throwException("Passing void as a parameter function");
+                return null;
+            }
+            params.add(returned);
+        }
+
+        if (expectedSize != -1 && (params.size() > expectedSize || params.size() < expectedSize)) {
+            except("Parameter size mismatch. Expected: " + expectedSize + ", Found: " + params.size(), node.getLine());
+            return null;
+        }
+        return params;
+    }
+
+    private void defineFunctionParameters(final Context functionContext, final FunctionDefinition definition, final List<Object> params) {
+        List<String> definitionParams = definition.getParams();
+        for (int i = 0; i < definitionParams.size(); i++) {
+            final String name = definitionParams.get(i);
+            final Object value = params.get(i);
+            functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
+        }
     }
 
     private Object interpretLocalVariableReferenceNode(final LocalVariableReferenceNode node, final Context context) {
@@ -994,7 +1051,9 @@ public class Interpreter {
         final String name = node.getName();
         context.setCurrentClassName(name);
 
-        final ClassDefinition definition = new ClassDefinition(name, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), true);
+        final ClassDefinition inheritedClass = (ClassDefinition) context.getClass(node.getInheritedClass()); // no need to check, native class do not have errors (we hope)
+
+        final ClassDefinition definition = new ClassDefinition(name, inheritedClass, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), true);
         context.defineClass(name, definition);
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());

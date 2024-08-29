@@ -29,6 +29,7 @@ public enum Keyword {
     CONTINUE,
     FLOAT,
     INT,
+    INHERITS,
 
     ;
 
@@ -59,6 +60,7 @@ public enum Keyword {
             case "continue": return CONTINUE;
             case "float": return FLOAT;
             case "int": return INT;
+            case "inherits": return INHERITS;
 
             default: throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
         }

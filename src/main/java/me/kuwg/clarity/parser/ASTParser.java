@@ -444,6 +444,14 @@ public final class ASTParser {
         consume(); // consume "class"
         final String name = consume(VARIABLE).getValue();
 
+        final String inheritedClass;
+
+        if (matchAndConsume(KEYWORD, "inherits")) {
+            inheritedClass = consume(VARIABLE).getValue();
+        } else {
+            inheritedClass = null;
+        }
+
         final int line = current().getLine();
 
         final BlockNode body = parseBlock();
@@ -460,7 +468,7 @@ public final class ASTParser {
             }
         }
 
-        return new ClassDeclarationNode(name, fileName, constructor, body).setLine(line);
+        return new ClassDeclarationNode(name, inheritedClass, fileName, constructor, body).setLine(line);
     }
 
     private ASTNode parseLocalDeclaration() {
@@ -666,6 +674,15 @@ public final class ASTParser {
 
     private ASTNode parseNativeClassDeclaration() {
         final String name = consume(VARIABLE).getValue();
+
+        final String inheritedClass;
+
+        if (matchAndConsume(KEYWORD, "inherits")) {
+            inheritedClass = consume(VARIABLE).getValue();
+        } else {
+            inheritedClass = null;
+        }
+
         final int line = current().getLine();
 
         final BlockNode body = parseBlock();
@@ -681,7 +698,7 @@ public final class ASTParser {
                 }
             }
         }
-        return new NativeClassDeclarationNode(name, fileName, constructor, body).setLine(line);
+        return new NativeClassDeclarationNode(name, inheritedClass, fileName, constructor, body).setLine(line);
     }
 
     private ASTNode parseSelectDeclaration() {

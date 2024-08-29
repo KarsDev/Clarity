@@ -116,16 +116,44 @@ public class Context {
         return parentContext;
     }
 
+    public void mergeContext(final Context source) {
+        if (source == null) return;
+
+        for (final Map.Entry<String, ObjectType> entry : source.variables.entrySet()) {
+            this.variables.putIfAbsent(entry.getKey(), entry.getValue());
+        }
+
+        for (final Map.Entry<String, List<FunctionDefinition>> entry : source.functions.entrySet()) {
+            final List<FunctionDefinition> targetFunctions = this.functions.computeIfAbsent(entry.getKey(), k -> new ArrayList<>());
+            for (final FunctionDefinition function : entry.getValue()) {
+                if (!targetFunctions.contains(function)) {
+                    targetFunctions.add(function);
+                }
+            }
+        }
+
+        for (final Map.Entry<String, ObjectType> entry : source.classes.entrySet()) {
+            this.classes.putIfAbsent(entry.getKey(), entry.getValue());
+        }
+
+        for (final String nativeName : source.natives) {
+            if (!this.natives.contains(nativeName)) {
+                this.natives.add(nativeName);
+            }
+        }
+    }
+
+
     @Override
     public String toString() {
-        return "Context{" +
+        return "Context{\n" +
                 "variables=" + variables +
-                ", functions=" + functions +
-                ", classes=" + classes +
-                ", natives=" + natives +
-                ", currentClassName='" + currentClassName + '\'' +
-                ", currentFunctionName='" + currentFunctionName + '\'' +
-                ", parentContext=" + parentContext +
-                '}';
+                ",\n functions=" + functions +
+                ",\n classes=" + classes +
+                ",\n natives=" + natives +
+                ",\n currentClassName='" + currentClassName + '\'' +
+                ",\n currentFunctionName='" + currentFunctionName + '\'' +
+                ",\n parentContext=" + parentContext +
+                "\n}";
     }
 }

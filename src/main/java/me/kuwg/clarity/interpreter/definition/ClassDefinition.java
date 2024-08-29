@@ -12,12 +12,14 @@ public class ClassDefinition extends ObjectType {
     public final Map<String, FunctionDefinition> staticFunctions = new HashMap<>();
 
     private final String name;
+    private final ClassDefinition inheritedClass;
     private final FunctionDefinition constructor;
     private final BlockNode body;
     private final boolean isNative;
 
-    public ClassDefinition(final String name, final FunctionDefinition constructor, final BlockNode body, final boolean isNative) {
+    public ClassDefinition(final String name, final ClassDefinition inheritedClass, final FunctionDefinition constructor, final BlockNode body, final boolean isNative) {
         this.name = name;
+        this.inheritedClass = inheritedClass;
         this.constructor = constructor;
         this.body = body;
         this.isNative = isNative;
@@ -25,6 +27,10 @@ public class ClassDefinition extends ObjectType {
 
     public final String getName() {
         return name;
+    }
+
+    public final ClassDefinition getInheritedClass() {
+        return inheritedClass;
     }
 
     public final FunctionDefinition getConstructor() {
@@ -45,6 +51,7 @@ public class ClassDefinition extends ObjectType {
                 "staticVariables=" + staticVariables +
                 ", staticFunctions=" + staticFunctions +
                 ", name='" + name + '\'' +
+                ", inheritedClass='" + inheritedClass + '\'' +
                 ", constructor=" + constructor +
                 ", body=" + body +
                 ", isNative=" + isNative +

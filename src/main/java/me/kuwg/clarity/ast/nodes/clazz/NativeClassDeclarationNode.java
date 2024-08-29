@@ -11,12 +11,14 @@ import java.io.IOException;
 public class NativeClassDeclarationNode extends ASTNode {
 
     private String name;
+    private String inheritedClass;
     private String fileName;
     private FunctionDeclarationNode constructor;
     private BlockNode body;
 
-    public NativeClassDeclarationNode(final String name, final String fileName, final FunctionDeclarationNode constructor, final BlockNode body) {
+    public NativeClassDeclarationNode(final String name, final String inheritedClass, final String fileName, final FunctionDeclarationNode constructor, final BlockNode body) {
         this.name = name;
+        this.inheritedClass = inheritedClass;
         this.fileName = fileName;
         this.constructor = constructor;
         this.body = body;
@@ -27,6 +29,10 @@ public class NativeClassDeclarationNode extends ASTNode {
 
     public final String getName() {
         return name;
+    }
+
+    public final String getInheritedClass() {
+        return inheritedClass;
     }
 
     public final String getFileName() {
@@ -44,6 +50,9 @@ public class NativeClassDeclarationNode extends ASTNode {
     @Override
     public void print(final StringBuilder sb, final String indent) {
         sb.append(indent).append("Native Class: ").append(name).append("\n");
+        if (inheritedClass != null) {
+            sb.append(indent).append("    ").append("Inherits: ").append(inheritedClass).append("\n");
+        }
         sb.append(indent).append(indent).append("File: ").append(fileName).append("\n");
         if (constructor != null) {
             sb.append(indent).append("    ").append("Constructor:\n");
@@ -59,6 +68,7 @@ public class NativeClassDeclarationNode extends ASTNode {
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
+        out.writeString(inheritedClass);
         out.writeString(fileName);
         out.writeNode(constructor);
         out.writeNode(body);
@@ -67,6 +77,7 @@ public class NativeClassDeclarationNode extends ASTNode {
     @Override
     public void load0(final ASTInputStream in) throws IOException {
         this.name = in.readString();
+        this.inheritedClass = in.readString();
         this.fileName = in.readString();
         this.constructor = (FunctionDeclarationNode) in.readNode();
         this.body = (BlockNode) in.readNode();
