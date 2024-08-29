@@ -1,3 +1,7 @@
-include native math
+include compiled test2
 
-native.println(5^0.5)
+fn exe(val) {
+    native.throw()
+}
+
+exe("LOL")

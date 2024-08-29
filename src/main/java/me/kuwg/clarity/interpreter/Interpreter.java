@@ -177,7 +177,7 @@ public class Interpreter {
             variableDefinition = new VariableDefinition(node.getName(), VOID_OBJECT, node.isConstant(), node.isStatic());
         } else {
             variableDefinition = new VariableDefinition(node.getName(), interpretNode(node.getValue(), context), node.isConstant(), node.isStatic());
-            if (variableDefinition.getValue() == VOID_OBJECT) Register.throwException("Creating a void variable: " + node.getName());
+            if (variableDefinition.getValue() instanceof VoidObject) Register.throwException("Creating a void variable: " + node.getName());
         }
 
         context.defineVariable(node.getName(), variableDefinition);
@@ -534,7 +534,9 @@ public class Interpreter {
     }
 
     private Object interpretVariableReassignment(final VariableReassignmentNode node, final Context context) {
-        context.setVariable(node.getName(), interpretNode(node.getValue(), context));
+        final Object result = interpretNode(node.getValue(), context);
+        if (result instanceof VoidObject) Register.throwException("Reassigning variable with void value: " + node.getName(), node.getLine());
+        context.setVariable(node.getName(), result);
         return VOID_OBJECT;
     }
 

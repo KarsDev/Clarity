@@ -58,12 +58,18 @@ public class Context {
             return;
         }
         final VariableDefinition variableDefinition = ((VariableDefinition) definition);
-        if (variableDefinition.isConstant() && variableDefinition.getValue() != VOID_OBJECT) Register.throwException("Variable that has const cannot be edited");
+        if (variableDefinition.isConstant() && variableDefinition.getValue() != VOID_OBJECT) {
+            Register.throwException("Variable that has const cannot be edited");
+        }
         variableDefinition.setValue(value);
     }
 
     public void defineFunction(String name, FunctionDefinition definition) {
-        functions.computeIfAbsent(name, k -> new ArrayList<>()).add(definition);
+        List<FunctionDefinition> existingDefinitions = functions.computeIfAbsent(name, k -> new ArrayList<>());
+        for (FunctionDefinition existingDefinition : existingDefinitions)
+            if (existingDefinition.getParams().size() == definition.getParams().size())
+                Register.throwException("Declaring an already declared function: " + name + " with the same number of parameters.");
+        existingDefinitions.add(definition);
     }
 
     public ObjectType getFunction(String name, int paramsSize) {
@@ -90,7 +96,6 @@ public class Context {
         ObjectType result = classes.getOrDefault(name, VOID_OBJECT);
         return result == VOID_OBJECT && parentContext != null ? parentContext.getClass(name) : result;
     }
-
 
     public final List<String> getNatives() {
         return natives;
@@ -142,7 +147,6 @@ public class Context {
             }
         }
     }
-
 
     @Override
     public String toString() {
