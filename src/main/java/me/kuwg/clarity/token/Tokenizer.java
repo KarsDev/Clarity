@@ -22,7 +22,6 @@ public class Tokenizer {
                     if (type == TokenType.NEWLINE) line++;
                     else if (type != TokenType.COMMENT && type != TokenType.WHITESPACE) tokens.add(new Token(type, tokenValue, line));
 
-
                     remainingSrc = remainingSrc.substring(tokenValue.length());
                     matched = true;
                     break;

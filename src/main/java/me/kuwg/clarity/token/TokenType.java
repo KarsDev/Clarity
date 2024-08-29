@@ -3,7 +3,7 @@ package me.kuwg.clarity.token;
 import java.util.regex.Pattern;
 
 public enum TokenType {
-    COMMENT("(//.*)|(/#.*?#/)"), // Matches single-line comments (//...) and block comments (/#...#/).
+    COMMENT("//[^\r\n]*|/#.*?#/"), // Matches single-line comments (//...) and block comments (/#...#/).
     NEWLINE("\r\n|\n|\r"), // Matches newlines
     WHITESPACE("\\s+"), // Matches any whitespace characters
     KEYWORD("\\b(class|var|constructor|local|fn|native|if|else|return|new|void|include|static|const|compiled|null|for|while|select|when|default|break|continue|float|int)\\b"), // All keywords
