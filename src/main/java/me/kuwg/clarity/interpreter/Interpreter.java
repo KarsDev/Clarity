@@ -204,12 +204,15 @@ public class Interpreter {
                 return null;
             } else {
                 inheritedClass = (ClassDefinition) type;
+                if (inheritedClass.isConstant()) {
+                    Register.throwException("Inheriting a const class: " + node.getInheritedClass(), node.getLine());
+                }
             }
         } else {
             inheritedClass = null;
         }
 
-        final ClassDefinition definition = new ClassDefinition(name, inheritedClass, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), false);
+        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), false);
         context.defineClass(name, definition);
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
@@ -1053,7 +1056,7 @@ public class Interpreter {
 
         final ClassDefinition inheritedClass = (ClassDefinition) context.getClass(node.getInheritedClass()); // no need to check, native class do not have errors (we hope)
 
-        final ClassDefinition definition = new ClassDefinition(name, inheritedClass, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), true);
+        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), true);
         context.defineClass(name, definition);
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());

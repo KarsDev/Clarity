@@ -11,13 +11,15 @@ import java.io.IOException;
 public class ClassDeclarationNode extends ASTNode {
 
     private String name;
+    private boolean isConstant;
     private String fileName;
     private FunctionDeclarationNode constructor;
     private BlockNode body;
     private String inheritedClass;
 
-    public ClassDeclarationNode(final String name, final String inheritedClass, final String fileName, final FunctionDeclarationNode constructor, final BlockNode body) {
+    public ClassDeclarationNode(final String name, final boolean isConstant, final String inheritedClass, final String fileName, final FunctionDeclarationNode constructor, final BlockNode body) {
         this.name = name;
+        this.isConstant = isConstant;
         this.fileName = fileName;
         this.constructor = constructor;
         this.body = body;
@@ -29,6 +31,10 @@ public class ClassDeclarationNode extends ASTNode {
 
     public final String getName() {
         return name;
+    }
+
+    public final boolean isConstant() {
+        return isConstant;
     }
 
     public final String getFileName() {
@@ -50,6 +56,9 @@ public class ClassDeclarationNode extends ASTNode {
     @Override
     public void print(final StringBuilder sb, final String indent) {
         sb.append(indent).append("Class: ").append(name).append("\n");
+
+        sb.append(indent).append("    ").append("Constant: ").append(isConstant);
+
         if (inheritedClass != null) {
             sb.append(indent).append("    ").append("Inherits: ").append(inheritedClass).append("\n");
         }
@@ -70,6 +79,7 @@ public class ClassDeclarationNode extends ASTNode {
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
+        out.writeBoolean(isConstant);
         out.writeString(inheritedClass != null ? inheritedClass : "null");
         out.writeString(fileName);
         out.writeNode(constructor);
@@ -79,6 +89,7 @@ public class ClassDeclarationNode extends ASTNode {
     @Override
     public void load0(final ASTInputStream in) throws IOException {
         this.name = in.readString();
+        this.isConstant = in.readBoolean();
         this.inheritedClass = in.readString();
         if (this.inheritedClass.equals("null")) this.inheritedClass = null;
         this.fileName = in.readString();

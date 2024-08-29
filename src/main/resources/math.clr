@@ -1,6 +1,6 @@
 include native system
 
-native class Math {
+native const class Math {
     static const var PI = 3.141592653589793
     static const var E = 2.7182818284590452
 

@@ -37,8 +37,10 @@ public final class Register {
     }
 
     private static void printRegister() {
-        System.err.println("Register:");
-        for (int i = stack.size() - 1; i >= 0; i--) System.err.println("    " + stack.pop());
+        if (!stack.isEmpty()) {
+            System.err.println("Register:");
+            for (int i = stack.size() - 1; i >= 0; i--) System.err.println("    " + stack.pop());
+        } else System.err.println("Register is empty.");
     }
 
     private static void exit() {

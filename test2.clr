@@ -1,6 +1,9 @@
 include native math
 
-fn main() {
-    var x = Math.sqrt(2)
-    native.println(x)
+const class LOL {
+
+}
+
+class extender inherits LOL {
+
 }

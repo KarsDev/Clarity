@@ -136,6 +136,11 @@ public final class ASTParser {
     }
 
     private ASTNode parseVariableDeclaration() {
+
+        if (lookahead().is(KEYWORD, "class")) {
+            return parseClassDeclaration();
+        }
+
         boolean isConst = false;
         boolean isStatic = false;
 
@@ -153,7 +158,7 @@ public final class ASTParser {
 
         if (!matchAndConsume(KEYWORD, "var")) {
             if (isStatic) undo();
-            if (isConst) throw new UnsupportedOperationException("Constant methods still not supported.");
+            if (isConst) throw new UnsupportedOperationException("Constant functions still not supported.");
             return parseFunctionDeclaration().setLine(line);
         }
 
@@ -225,7 +230,7 @@ public final class ASTParser {
     private ASTNode parseNativeDeclaration() {
         consume(); // consume native
 
-        if (matchAndConsume(KEYWORD, "class")) {
+        if (matchAndConsume(KEYWORD, "class") || match(KEYWORD, "const")) {
             return parseNativeClassDeclaration().setLine(current().getLine());
         }
 
@@ -441,6 +446,9 @@ public final class ASTParser {
     }
 
     private ASTNode parseClassDeclaration() {
+
+        final boolean isConstant = matchAndConsume(KEYWORD, "const");
+
         consume(); // consume "class"
         final String name = consume(VARIABLE).getValue();
 
@@ -468,7 +476,7 @@ public final class ASTParser {
             }
         }
 
-        return new ClassDeclarationNode(name, inheritedClass, fileName, constructor, body).setLine(line);
+        return new ClassDeclarationNode(name, isConstant, inheritedClass, fileName, constructor, body).setLine(line);
     }
 
     private ASTNode parseLocalDeclaration() {
@@ -673,6 +681,11 @@ public final class ASTParser {
     }
 
     private ASTNode parseNativeClassDeclaration() {
+
+        boolean isConstant = matchAndConsume(KEYWORD);
+
+        consume(KEYWORD, "class");
+
         final String name = consume(VARIABLE).getValue();
 
         final String inheritedClass;
@@ -698,7 +711,7 @@ public final class ASTParser {
                 }
             }
         }
-        return new NativeClassDeclarationNode(name, inheritedClass, fileName, constructor, body).setLine(line);
+        return new NativeClassDeclarationNode(name, isConstant, inheritedClass, fileName, constructor, body).setLine(line);
     }
 
     private ASTNode parseSelectDeclaration() {
@@ -763,6 +776,13 @@ public final class ASTParser {
 
 
 
+
+
+    private boolean matchAndConsume(final TokenType type) {
+        final boolean match = match(type);
+        if (match) consume();
+        return match;
+    }
 
     private void undo() {
         currentTokenIndex--;

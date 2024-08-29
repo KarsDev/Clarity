@@ -10,6 +10,7 @@ public class Privileges {
             "Reflections",
             "Class",
 
+
     };
 
     public static void checkClassName(final String name, final int line) {
