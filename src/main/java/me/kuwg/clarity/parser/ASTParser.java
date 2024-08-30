@@ -72,12 +72,12 @@ public final class ASTParser {
 
     private BlockNode parseBlock() {
         final BlockNode node = new BlockNode();
-
+        final int line = current().getLine();
         if (!matchAndConsume(DIVIDER, "{")) {
             final ASTNode result = parseExpression();
             if (result != null) node.addChild(result);
             else throw new IllegalStateException("Block has no expression at line " + node.getLine());
-            return node;
+            return node.setLine(result.getLine());
         }
 
         while (!matchAndConsume(DIVIDER, "}")) {
@@ -85,7 +85,7 @@ public final class ASTParser {
             if (result != null) node.addChild(result);
         }
 
-        return node;
+        return node.setLine(line);
     }
 
     private ASTNode parseKeyword() {
