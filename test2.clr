@@ -1,6 +1,19 @@
 include native map
 
+class IDK2 {
+    const var TOGET = "printing"
+}
+class IDK {
+    const var LOL = new IDK2()
+    fn print() {
+        native.println("printing")
+    }
+}
+class Test {
+    const var X = new IDK()
+}
+
 fn main() {
-    return 1 when 1 == 1
-    return 0
+    var test = new Test()
+    native.print(test.X.LOL.TOGET)
 }

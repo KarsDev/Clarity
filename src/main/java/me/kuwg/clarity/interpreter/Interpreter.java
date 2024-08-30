@@ -15,6 +15,7 @@ import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
+import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.statements.*;
 import me.kuwg.clarity.ast.nodes.variable.assign.LocalVariableReassignmentNode;
@@ -147,6 +148,7 @@ public class Interpreter {
         if (node instanceof ContinueNode) return CONTINUE;
         if (node instanceof NativeCastNode) return interpretNativeCast((NativeCastNode) node, context);
         if (node instanceof ConditionedReturnNode) return interpretConditionedReturn((ConditionedReturnNode) node, context);
+        if (node instanceof MemberFunctionCallNode) return interpretMemberFunctionCall((MemberFunctionCallNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -412,9 +414,7 @@ public class Interpreter {
     }
 
     private Object interpretFunctionCall(final FunctionCallNode node, Context context) {
-
-        final String functionName = node.getName();
-
+        final String functionName = ((VariableReferenceNode) node.getCaller()).getName();
         context.setCurrentFunctionName(functionName);
 
         final ObjectType type = context.getFunction(functionName, node.getParams().size());
@@ -454,7 +454,7 @@ public class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
         }
 
-        Register.register(new Register.RegisterElement(Register.RegisterElementType.FUNCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.FUNCALL, node.getCaller() + getParams(params), node.getLine(), context.getCurrentClassName()));
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
         context.setCurrentFunctionName(null);
@@ -802,34 +802,42 @@ public class Interpreter {
     }
 
     private Object interpretObjectVariableReference(final ObjectVariableReferenceNode node, final Context context) {
-        final String callerObjectName = node.getCaller();
+        final Object callerObject = interpretNode(node.getCaller(), context);
         final String calledObjectName = node.getCalled();
-        final Object callerObjectRaw = context.getVariable(callerObjectName);
 
-        if (callerObjectRaw instanceof VoidObject) { // static init
-            final ObjectType rawDefinition = context.getClass(callerObjectName);
-            if (rawDefinition instanceof VoidObject) {
-                except("Accessing a static variable of a non-existent class: " + callerObjectName, node.getLine());
+        if (callerObject instanceof VoidObject) {
+            final ObjectType rawDefinition = null;//context.getClass(callerNode);
+
+            if (!(rawDefinition instanceof ClassDefinition)) {
+                except("Accessing a static variable of a non-existent or invalid class: " + node.getCaller(), node.getLine());
                 return null;
             }
-            final ClassDefinition definition = (ClassDefinition) rawDefinition;
 
+            final ClassDefinition definition = (ClassDefinition) rawDefinition;
             final VariableDefinition variable = definition.staticVariables.get(calledObjectName);
 
             if (variable == null) {
-                except("Accessing a static variable that does not exist: " + callerObjectName + "#" + calledObjectName, node.getLine());
+                except("Accessing a static variable that does not exist: " + node.getCaller() + "#" + calledObjectName, node.getLine());
                 return null;
             }
 
             return variable.getValue();
         }
 
-        if (!(callerObjectRaw instanceof ClassObject)) {
-            except("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object", node.getLine());
+        // Ensure the callerObject is an instance of ClassObject
+        if (!(callerObject instanceof ClassObject)) {
+            except("Expected Class Object, but found " + (callerObject != null ? callerObject.getClass().getSimpleName() : "null"), node.getLine());
             return null;
         }
-        final ClassObject callerObject = (ClassObject) callerObjectRaw;
-        return callerObject.getContext().getVariable(calledObjectName);
+
+        final Object calledVariable = ((ClassObject) callerObject).getContext().getVariable(calledObjectName);
+
+        if (calledVariable == null) {
+            except("Accessing an instance variable that does not exist: " + node.getCaller() + "." + calledObjectName, node.getLine());
+            return null;
+        }
+
+        return calledVariable;
     }
 
     private Object interpretObjectVariableReassignment(final ObjectVariableReassignmentNode node, final Context context) {
@@ -1249,4 +1257,51 @@ public class Interpreter {
         return apply ? new ReturnValue(interpretNode(node.getValue(), context)) : VOID_OBJECT;
 
     }
+
+    private Object interpretMemberFunctionCall(final MemberFunctionCallNode node, final Context context) {
+        final Object caller = interpretNode(node.getCaller(), context);
+        if (!(caller instanceof ClassObject)) {
+            except("Expected class object caller", node.getLine());
+            return null;
+        }
+        ClassObject object = (ClassObject) caller;
+
+        context.setCurrentClassName(object.getName());
+        context.setCurrentFunctionName(node.getName());
+
+        final FunctionDefinition definition = (FunctionDefinition) object.getContext().getFunction(node.getName(), node.getParams().size());
+
+        final Context functionContext = new Context(object.getContext());
+
+        final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
+        if (params == null) return null;
+
+        defineFunctionParameters(functionContext, definition, params);
+
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.NATIVECALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
+
+        final Object result = interpretBlock(definition.getBlock(), functionContext);
+        context.setCurrentClassName(null);
+        context.setCurrentFunctionName(null);
+        return result;
+    }
+
+    private List<Object> getFunctionParameters(final MemberFunctionCallNode node, final Context context, int expectedSize) {
+        final List<Object> params = new ArrayList<>();
+        for (final ASTNode param : node.getParams()) {
+            final Object returned = interpretNode(param, context);
+            if (returned == VOID_OBJECT) {
+                Register.throwException("Passing void as a parameter function");
+                return null;
+            }
+            params.add(returned);
+        }
+
+        if (expectedSize != -1 && (params.size() > expectedSize || params.size() < expectedSize)) {
+            except("Parameter size mismatch. Expected: " + expectedSize + ", Found: " + params.size(), node.getLine());
+            return null;
+        }
+        return params;
+    }
+
 }

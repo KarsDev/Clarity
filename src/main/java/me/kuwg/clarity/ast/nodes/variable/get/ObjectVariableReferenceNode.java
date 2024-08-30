@@ -7,10 +7,10 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 import java.io.IOException;
 
 public class ObjectVariableReferenceNode extends ASTNode {
-    private String caller;
+    private ASTNode caller;
     private String called;
 
-    public ObjectVariableReferenceNode(final String caller, final String called) {
+    public ObjectVariableReferenceNode(final ASTNode caller, final String called) {
         this.caller = caller;
         this.called = called;
     }
@@ -18,7 +18,7 @@ public class ObjectVariableReferenceNode extends ASTNode {
     public ObjectVariableReferenceNode(){
     }
 
-    public final String getCaller() {
+    public final ASTNode getCaller() {
         return caller;
     }
 
@@ -34,13 +34,13 @@ public class ObjectVariableReferenceNode extends ASTNode {
 
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
-        out.writeString(caller);
+        out.writeNode(caller);
         out.writeString(called);
     }
 
     @Override
     public void load0(final ASTInputStream in) throws IOException {
-        this.caller = in.readString();
+        this.caller = in.readNode();
         this.called = in.readString();
     }
 

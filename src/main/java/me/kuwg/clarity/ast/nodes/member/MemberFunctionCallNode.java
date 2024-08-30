@@ -1,4 +1,4 @@
-package me.kuwg.clarity.ast.nodes.function.call;
+package me.kuwg.clarity.ast.nodes.member;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
@@ -7,21 +7,27 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-public class FunctionCallNode extends ASTNode {
+public class MemberFunctionCallNode extends ASTNode {
 
     private ASTNode caller;
+    private String name;
     private List<ASTNode> params;
 
-    public FunctionCallNode(final ASTNode caller, final List<ASTNode> params) {
+    public MemberFunctionCallNode(final ASTNode caller, final String name, final List<ASTNode> params) {
         this.caller = caller;
+        this.name = name;
         this.params = params;
     }
 
-    public FunctionCallNode() {
+    public MemberFunctionCallNode() {
     }
 
     public final ASTNode getCaller() {
         return caller;
+    }
+
+    public final String getName() {
+        return name;
     }
 
     public final List<ASTNode> getParams() {
@@ -30,13 +36,16 @@ public class FunctionCallNode extends ASTNode {
 
     @Override
     public void print(final StringBuilder sb, final String indent) {
-        sb.append(indent).append("Function Call: ").append(caller).append("\n");
-        sb.append(indent).append("Parameters: ");
+        sb.append(indent).append("Function Call: ").append("\n");
+        final String paramIndent = indent + indent + "    ";
+        sb.append(indent).append(indent).append("Caller:").append("\n");
+        caller.print(sb, paramIndent);
+        sb.append(indent).append(indent).append("Name: ").append(name).append("\n");
+        sb.append(indent).append(indent).append("Parameters: ");
         if (params.isEmpty()) {
             sb.append("None\n");
         } else {
             sb.append("\n");
-            String paramIndent = indent + "    ";
             for (ASTNode param : params) {
                 param.print(sb, paramIndent);
             }

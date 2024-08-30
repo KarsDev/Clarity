@@ -8,6 +8,7 @@ import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
+import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.statements.*;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
@@ -340,64 +341,48 @@ public final class ASTParser {
 
     private ASTNode parsePrimary() {
         Token token = consume();
-
-        final int line = current().getLine();
+        final int line = token.getLine();
 
         switch (token.getType()) {
             case VARIABLE:
-                if (matchAndConsume(OPERATOR, "=")) {
-                    if (match(OPERATOR, ".")) {
-                        consume(); // consume the '.'
-                        final String called = consume(VARIABLE).getValue();
-                        return new ObjectVariableReassignmentNode(token.getValue(), called, parseExpression()).setLine(line);
-                    } else {
-                        return new VariableReassignmentNode(token.getValue(), parseExpression()).setLine(line);
-                    }
-                } else if (matchAndConsume(OPERATOR, ".")) {
-                    final String name = consume(VARIABLE).getValue();
+                ASTNode node = new VariableReferenceNode(token.getValue()).setLine(line);
 
-                    if (matchAndConsume(DIVIDER, "(")) {
-                        final List<ASTNode> params = new ArrayList<>();
-
-                        while (true) {
-                            if (match(DIVIDER, ")")) break;
+                while (true) {
+                    if (matchAndConsume(OPERATOR, ".")) {
+                        String name = consume(VARIABLE).getValue();
+                        if (matchAndConsume(DIVIDER, "(")) {
+                            List<ASTNode> params = new ArrayList<>();
+                            while (!match(DIVIDER, ")")) {
+                                params.add(parseExpression());
+                                if (!matchAndConsume(DIVIDER, ",")) break;
+                            }
+                            consume(DIVIDER, ")");
+                            node = new MemberFunctionCallNode(node, name, params).setLine(line);
+                        } else {
+                            node = new ObjectVariableReferenceNode(node, name).setLine(line);
+                        }
+                    } else if (matchAndConsume(DIVIDER, "(")) {
+                        List<ASTNode> params = new ArrayList<>();
+                        while (!match(DIVIDER, ")")) {
                             params.add(parseExpression());
                             if (!matchAndConsume(DIVIDER, ",")) break;
                         }
-
                         consume(DIVIDER, ")");
-
-                        return new ObjectFunctionCallNode(token.getValue(), name, params).setLine(line);
+                        node = new FunctionCallNode(node, params).setLine(line);
                     } else {
-                        return new ObjectVariableReferenceNode(token.getValue(), name).setLine(line);
+                        break;
                     }
-                } else if (matchAndConsume(DIVIDER, "(")) {
-                    final List<ASTNode> params = new ArrayList<>();
-
-                    while (true) {
-                        if (match(DIVIDER, ")")) break;
-                        params.add(parseExpression());
-                        if (!matchAndConsume(DIVIDER, ",")) break;
-                    }
-
-                    consume(DIVIDER, ")");
-
-                    return new FunctionCallNode(token.getValue(), params).setLine(line);
                 }
 
-                return new VariableReferenceNode(token.getValue()).setLine(line);
+                if (matchAndConsume(OPERATOR, "=")) {
+                    ASTNode expression = parseExpression();
+                    return new VariableReassignmentNode(((VariableReferenceNode) node).getName(), expression).setLine(line);
+                }
+
+                return node;
 
             case NUMBER:
-                final String value = token.getValue();
-                try {
-                    return new IntegerNode(Integer.parseInt(value)).setLine(line);
-                } catch (NumberFormatException e) {
-                    try {
-                        return new DecimalNode(Double.parseDouble(value)).setLine(line);
-                    } catch (NumberFormatException e1) {
-                        throw new RuntimeException(e1);
-                    }
-                }
+                return parseNumber(token);
 
             case STRING:
                 return new LiteralNode(token.getValue()).setLine(line);
@@ -408,46 +393,57 @@ public final class ASTParser {
                     consume(DIVIDER, ")");
                     return expression;
                 } else if (token.getValue().equals("[")) {
-
-                    final List<ASTNode> nodes = new ArrayList<>();
-
-                    while (true) {
-                        if (match(DIVIDER, "]")) break;
-                        nodes.add(parseExpression());
-                        if (!matchAndConsume(DIVIDER, ",")) break;
-                    }
-
-                    consume(DIVIDER, "]");
-
-                    return new ArrayNode(nodes).setLine(line);
+                    return parseArray(line);
                 }
-
-                break;
-
             case KEYWORD:
                 undo();
-                if (token.getValue().equals("local")) {
-                    return parsePrimaryLocalDeclaration();
-                } else {
-                    return parseKeyword();
-                }
+                return parseKeyword();
+
             case BOOLEAN:
                 return new BooleanNode(Boolean.parseBoolean(token.getValue())).setLine(line);
-            case OPERATOR:
-                switch (token.getValue()) {
-                    case "-": {
-                        final ASTNode right = parsePrimary();
-                        return new BinaryExpressionNode(new IntegerNode(0).setLine(line), "-", right).setLine(line);
-                    }
-                    case "!": {
-                        final ASTNode right = parsePrimary();
-                        return new BinaryExpressionNode(new BooleanNode(false), "==", right).setLine(line);
-                    }
-                }
-                break;
-        }
 
-        throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " (type=" + token.getType() + ") at line " + token.getLine());
+            case OPERATOR:
+                return parseUnaryOperator(token, line);
+
+            default:
+                throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " (type=" + token.getType() + ") at line " + token.getLine());
+        }
+    }
+
+    private ASTNode parseNumber(Token token) {
+        final int line = token.getLine();
+        final String value = token.getValue();
+        try {
+            return new IntegerNode(Integer.parseInt(value)).setLine(line);
+        } catch (NumberFormatException e) {
+            try {
+                return new DecimalNode(Double.parseDouble(value)).setLine(line);
+            } catch (NumberFormatException e1) {
+                throw new RuntimeException(e1);
+            }
+        }
+    }
+
+    private ASTNode parseArray(int line) {
+        List<ASTNode> nodes = new ArrayList<>();
+        while (!match(DIVIDER, "]")) {
+            nodes.add(parseExpression());
+            if (!matchAndConsume(DIVIDER, ",")) break;
+        }
+        consume(DIVIDER, "]");
+        return new ArrayNode(nodes).setLine(line);
+    }
+
+    private ASTNode parseUnaryOperator(final Token token, int line) {
+        final ASTNode right = parsePrimary();
+        switch (token.getValue()) {
+            case "-":
+                return new BinaryExpressionNode(new IntegerNode(0).setLine(line), "-", right).setLine(line);
+            case "!":
+                return new BinaryExpressionNode(new BooleanNode(false), "==", right).setLine(line);
+            default:
+                throw new UnsupportedOperationException("Unsupported unary operator: " + token.getValue() + " at line " + line);
+        }
     }
 
     private ASTNode parseReturnDeclaration() {
