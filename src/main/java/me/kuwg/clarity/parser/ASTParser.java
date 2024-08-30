@@ -799,8 +799,8 @@ public final class ASTParser {
     private ASTNode parseAssertDeclaration() {
         final int line = consume().getLine(); // consume "assert"
         final ASTNode condition = parseExpression();
-        final ASTNode message = matchAndConsume(KEYWORD, "else") ? parseExpression() : new LiteralNode("Assertion error at line " + line);
-        return new AssertNode(condition, message);
+        final ASTNode message = matchAndConsume(KEYWORD, "else") ? parseExpression() : new LiteralNode("\"Assertion error at line " + line + "\"");
+        return new AssertNode(condition, message).setLine(line);
     }
 
 

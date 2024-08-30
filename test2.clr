@@ -1,5 +1,2 @@
-class Test {
-    static var LOL = "lol"
-}
-var x = Test.LOL
-native.println(x)
+var x = int(native.input("Write a number from 1 to 3: "))
+assert x >= 1 && x <= 3

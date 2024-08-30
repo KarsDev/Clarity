@@ -1352,7 +1352,7 @@ public class Interpreter {
             apply = (boolean) result;
         }
         if (!apply) {
-            return interpretNode(node.getOrElse(), context);
+            Register.throwException(String.valueOf(interpretNode(node.getOrElse(), context)), node.getLine());
         }
         return VOID_OBJECT;
     }
