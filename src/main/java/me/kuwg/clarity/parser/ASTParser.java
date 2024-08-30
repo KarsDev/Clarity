@@ -437,8 +437,11 @@ public final class ASTParser {
                 return new BooleanNode(Boolean.parseBoolean(token.getValue())).setLine(line);
             case OPERATOR:
                 if (token.getValue().equals("-")) {
-                    ASTNode right = parsePrimary();
+                    final ASTNode right = parsePrimary();
                     return new BinaryExpressionNode(new IntegerNode(0).setLine(line), "-", right).setLine(line);
+                } else if (token.getValue().equals("!")) {
+                    final ASTNode right = parsePrimary();
+                    return new BinaryExpressionNode(new BooleanNode(false), "==", right).setLine(line);
                 }
                 break;
         }
