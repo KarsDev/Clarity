@@ -3,14 +3,12 @@ package me.kuwg.clarity.interpreter.definition;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.interpreter.types.ObjectType;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ClassDefinition extends ObjectType {
 
     public final Map<String, VariableDefinition> staticVariables = new HashMap<>();
-    public final Map<String, FunctionDefinition> staticFunctions = new HashMap<>();
+    public final List<FunctionDefinition> staticFunctions = new ArrayList<>();
 
     private final String name;
     private final boolean isConstant;
@@ -50,6 +48,15 @@ public class ClassDefinition extends ObjectType {
 
     public final boolean isNative() {
         return isNative;
+    }
+
+    public final FunctionDefinition getStaticFunction(final String name, final int params) {
+        for (final FunctionDefinition staticFunction : staticFunctions) {
+            if (staticFunction.getName().equals(name) && staticFunction.getParams().size() == params) {
+                return staticFunction;
+            }
+        }
+        return null;
     }
 
     @Override

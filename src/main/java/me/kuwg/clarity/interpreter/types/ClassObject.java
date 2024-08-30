@@ -12,7 +12,6 @@ public class ClassObject {
         this.context = context;
     }
 
-
     public final String getName() {
         return name;
     }

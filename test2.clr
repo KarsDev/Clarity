@@ -1,18 +1,5 @@
-include native map
-
-class IDK2 {
-    const var TOGET = "printing"
-}
-class IDK {
-    const var LOL = new IDK2()
-    fn print() {
-        native.println("printing")
-    }
-}
 class Test {
-    const var X = new IDK()
+    static var LOL = "lol"
 }
-
-fn main() {
-    native.print(new Test().X.LOL.TOGET)
-}
+var x = Test.LOL
+native.println(x)

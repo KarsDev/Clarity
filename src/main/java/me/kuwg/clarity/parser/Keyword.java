@@ -30,6 +30,7 @@ public enum Keyword {
     FLOAT,
     INT,
     INHERITS,
+    ASSERT,
 
     ;
 
@@ -61,6 +62,7 @@ public enum Keyword {
             case "float": return FLOAT;
             case "int": return INT;
             case "inherits": return INHERITS;
+            case "assert": return ASSERT;
 
             default: throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
         }

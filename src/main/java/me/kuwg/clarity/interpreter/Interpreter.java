@@ -149,6 +149,7 @@ public class Interpreter {
         if (node instanceof NativeCastNode) return interpretNativeCast((NativeCastNode) node, context);
         if (node instanceof ConditionedReturnNode) return interpretConditionedReturn((ConditionedReturnNode) node, context);
         if (node instanceof MemberFunctionCallNode) return interpretMemberFunctionCall((MemberFunctionCallNode) node, context);
+        if (node instanceof AssertNode) return interpretAssert((AssertNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -230,13 +231,13 @@ public class Interpreter {
                 declarationNode.getParameterNodes().forEach(param -> params.add(param.getName()));
 
                 if (declarationNode.isStatic()) {
-                    definition.staticFunctions.put(declarationNode.getFunctionName(), new FunctionDefinition(declarationNode.getFunctionName(), true, params, declarationNode.getBlock()));
+                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), true, params, declarationNode.getBlock()));
                 }
             } else if (statement instanceof ReflectedNativeFunctionDeclaration) {
                 final Object o = interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) statement, context);
                 if (o instanceof FunctionDefinition) {
                     FunctionDefinition def = (FunctionDefinition) o;
-                    definition.staticFunctions.put(def.getName(), def);
+                    definition.staticFunctions.add(def);
                 }
             }
         });
@@ -406,11 +407,7 @@ public class Interpreter {
     }
 
     private Object interpretVariableReference(final VariableReferenceNode node, final Context context) {
-        final Object ret = context.getVariable(node.getName());
-        if (ret == VOID_OBJECT) {
-            except("Referencing a non-created variable: " + node.getName(), node.getLine());
-        }
-        return ret;
+        return context.getVariable(node.getName());
     }
 
     private Object interpretFunctionCall(final FunctionCallNode node, Context context) {
@@ -593,7 +590,7 @@ public class Interpreter {
         context.setCurrentClassName(classDefinition.getName());
         context.setCurrentFunctionName(node.getCalled());
 
-        final FunctionDefinition definition = classDefinition.staticFunctions.get(node.getCalled());
+        final FunctionDefinition definition = classDefinition.getStaticFunction(node.getCalled(), node.getParams().size());
 
         if (definition == null) {
             except("Accessing a static function that does not exist: " + node.getCaller() + "#" + node.getCalled() + "(...)", node.getLine());
@@ -805,26 +802,26 @@ public class Interpreter {
         final Object callerObject = interpretNode(node.getCaller(), context);
         final String calledObjectName = node.getCalled();
 
-        if (callerObject instanceof VoidObject) {
-            final ObjectType rawDefinition = null;//context.getClass(callerNode);
+        if (callerObject == VOID_OBJECT) {
+            final String className = ((VariableReferenceNode) node.getCaller()).getName();
+            final ObjectType classDefinitionRaw = context.getClass(className);
 
-            if (!(rawDefinition instanceof ClassDefinition)) {
-                except("Accessing a static variable of a non-existent or invalid class: " + node.getCaller(), node.getLine());
+            if (!(classDefinitionRaw instanceof ClassDefinition)) {
+                except("Accessing a static variable of a non-existent class: " + className, node.getLine());
                 return null;
             }
 
-            final ClassDefinition definition = (ClassDefinition) rawDefinition;
-            final VariableDefinition variable = definition.staticVariables.get(calledObjectName);
+            final ClassDefinition classDefinition = (ClassDefinition) classDefinitionRaw;
+            final VariableDefinition staticVariable = classDefinition.staticVariables.get(calledObjectName);
 
-            if (variable == null) {
-                except("Accessing a static variable that does not exist: " + node.getCaller() + "#" + calledObjectName, node.getLine());
+            if (staticVariable == null) {
+                except("Accessing a static variable that does not exist: " + className + "#" + calledObjectName, node.getLine());
                 return null;
             }
 
-            return variable.getValue();
+            return staticVariable.getValue();
         }
 
-        // Ensure the callerObject is an instance of ClassObject
         if (!(callerObject instanceof ClassObject)) {
             except("Expected Class Object, but found " + (callerObject != null ? callerObject.getClass().getSimpleName() : "null"), node.getLine());
             return null;
@@ -1085,7 +1082,7 @@ public class Interpreter {
 
         if (node.isStatic()) {
             final ObjectType obj = context.getClass(node.getFileName());
-            if (obj != VOID_OBJECT) ((ClassDefinition) obj).staticFunctions.put(node.getName(), function);
+            if (obj != VOID_OBJECT) ((ClassDefinition) obj).staticFunctions.add(function);
             else return function;
         } else {
             context.defineFunction(node.getName(), function);
@@ -1118,13 +1115,13 @@ public class Interpreter {
                 declarationNode.getParameterNodes().forEach(param -> params.add(param.getName()));
 
                 if (declarationNode.isStatic()) {
-                    definition.staticFunctions.put(declarationNode.getFunctionName(), new FunctionDefinition(declarationNode.getFunctionName(), true, params, declarationNode.getBlock()));
+                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), true, params, declarationNode.getBlock()));
                 }
             } else if (statement instanceof ReflectedNativeFunctionDeclaration) {
                 final Object o = interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) statement, context);
                 if (o instanceof FunctionDefinition) {
                     FunctionDefinition def = (FunctionDefinition) o;
-                    definition.staticFunctions.put(def.getName(), def);
+                    definition.staticFunctions.add(def);
                 }
             }
         });
@@ -1260,10 +1257,41 @@ public class Interpreter {
 
     private Object interpretMemberFunctionCall(final MemberFunctionCallNode node, final Context context) {
         final Object caller = interpretNode(node.getCaller(), context);
+
+        if (caller == VOID_OBJECT) {
+            final ObjectType rawClassDefinition = context.getClass(((VariableReferenceNode) node.getCaller()).getName());
+
+            if (!(rawClassDefinition instanceof ClassDefinition)) {
+                except("Class not found for static call: " + node.getName(), node.getLine());
+                return null;
+            }
+
+            final ClassDefinition classDefinition = (ClassDefinition) rawClassDefinition;
+
+            final FunctionDefinition definition = classDefinition.getStaticFunction(node.getName(), node.getParams().size());
+
+            if (definition == null) {
+                except("Static function not found: " + node.getName() + "#" + node.getName(), node.getLine());
+                return null;
+            }
+
+            final Context functionContext = new Context(context);
+
+            final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
+            if (params == null) return null;
+
+            defineFunctionParameters(functionContext, definition, params);
+
+            Register.register(new Register.RegisterElement(Register.RegisterElementType.NATIVECALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
+
+            return interpretBlock(definition.getBlock(), functionContext);
+        }
+
         if (!(caller instanceof ClassObject)) {
             except("Expected class object caller", node.getLine());
             return null;
         }
+
         ClassObject object = (ClassObject) caller;
 
         context.setCurrentClassName(object.getName());
@@ -1302,6 +1330,31 @@ public class Interpreter {
             return null;
         }
         return params;
+    }
+
+    private Object interpretAssert(final AssertNode node, final Context context) {
+        final Object result = interpretNode(node.getCondition(), context);
+        final boolean apply;
+        if (result instanceof Integer) {
+            final int val = (int) result;
+            if (val == 0) {
+                apply = false;
+            } else if (val == 1) {
+                apply = true;
+            } else {
+                except("Assert condition with int must be 0 or 1", node.getLine());
+                return null;
+            }
+        } else if (!(result instanceof Boolean)) {
+            except("Assert condition must have a boolean value or int (0 or 1)", node.getLine());
+            return null;
+        } else {
+            apply = (boolean) result;
+        }
+        if (!apply) {
+            return interpretNode(node.getOrElse(), context);
+        }
+        return VOID_OBJECT;
     }
 
 }

@@ -17,6 +17,7 @@ import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
+import me.kuwg.clarity.ast.nodes.statements.AssertNode;
 import me.kuwg.clarity.ast.nodes.statements.ForNode;
 import me.kuwg.clarity.ast.nodes.statements.IfNode;
 import me.kuwg.clarity.ast.nodes.statements.WhileNode;
@@ -96,6 +97,7 @@ public class ASTData {
         registerNode(IfNode.class, 0x900);
         registerNode(WhileNode.class, 0x901);
         registerNode(ForNode.class, 0x902);
+        registerNode(AssertNode.class, 0x902);
     }
 
     private static void registerNode(Class<? extends ASTNodeCompiler> clazz, int id) {

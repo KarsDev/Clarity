@@ -18,11 +18,8 @@ import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
-import me.kuwg.clarity.ast.nodes.variable.assign.LocalVariableReassignmentNode;
-import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
-import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import me.kuwg.clarity.compiler.ASTLoader;
@@ -129,8 +126,11 @@ public final class ASTParser {
                 return parseFloatDeclaration();
             case INT:
                 return parseIntDeclaration();
+            case ASSERT:
+                return parseAssertDeclaration();
             default:
-                throw new UnsupportedOperationException("Unsupported keyword: " + keyword);
+                Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
+                return null;
         }
     }
 
@@ -350,7 +350,7 @@ public final class ASTParser {
 
                 while (true) {
                     if (matchAndConsume(OPERATOR, ".")) {
-                        String name = consume(VARIABLE).getValue();
+                        final String name = consume(VARIABLE).getValue();
                         if (matchAndConsume(DIVIDER, "(")) {
                             List<ASTNode> params = new ArrayList<>();
                             while (!match(DIVIDER, ")")) {
@@ -360,7 +360,7 @@ public final class ASTParser {
                             consume(DIVIDER, ")");
                             node = new MemberFunctionCallNode(node, name, params).setLine(line);
                         } else {
-                            node = new ObjectVariableReferenceNode(node, name).setLine(line);
+                            node = new ObjectVariableReferenceNode(node, name).setLine(current().getLine());
                         }
                     } else if (matchAndConsume(DIVIDER, "(")) {
                         List<ASTNode> params = new ArrayList<>();
@@ -379,7 +379,6 @@ public final class ASTParser {
                     ASTNode expression = parseExpression();
                     return new VariableReassignmentNode(((VariableReferenceNode) node).getName(), expression).setLine(line);
                 }
-
                 return node;
 
             case NUMBER:
@@ -531,7 +530,7 @@ public final class ASTParser {
                     if (match(DIVIDER, "(")) {
                         node = parseMethodCall(nextPart, node);
                     } else {
-                        node = parseVariableAccess(nextPart, node);
+                        node = new ObjectVariableReferenceNode(node, nextPart).setLine(current().getLine());
                     }
                 } else {
                     Register.throwException("Expected variable or method after '.'", current().getLine());
@@ -557,30 +556,6 @@ public final class ASTParser {
 
         consume(DIVIDER, ")");
         return new MemberFunctionCallNode(receiver, methodName, params).setLine(current().getLine());
-    }
-
-    private ASTNode parseVariableAccess(String variableName, ASTNode receiver) {
-        return new ObjectVariableReferenceNode(receiver, variableName).setLine(current().getLine());
-    }
-
-
-    private ASTNode parsePrimaryLocalDeclaration() {
-        consume(); // consume "local"
-        consume(OPERATOR, ".");
-        final int line = current().getLine();
-        final String name = consume(VARIABLE).getValue();
-        if (matchAndConsume(DIVIDER, "(")) {
-            final List<ASTNode> params = new ArrayList<>();
-            do if (match(VARIABLE)) params.add(parseExpression());
-            while (matchAndConsume(DIVIDER, ","));
-            consume(DIVIDER, ")");
-            return new LocalFunctionCallNode(name, params).setLine(line);
-        } else {
-            if (matchAndConsume(OPERATOR, "=")) {
-                return new LocalVariableReassignmentNode(current().getValue(), parseExpression()).setLine(line);
-            }
-            return new LocalVariableReferenceNode(name).setLine(line);
-        }
     }
 
     private VoidNode parseVoidDeclaration() {
@@ -819,6 +794,13 @@ public final class ASTParser {
     private ASTNode parseIntDeclaration() {
         final int line = consume().getLine(); // consume "int"
         return new NativeCastNode(NativeCastNode.CastType.INT, parseExpression()).setLine(line);
+    }
+
+    private ASTNode parseAssertDeclaration() {
+        final int line = consume().getLine(); // consume "assert"
+        final ASTNode condition = parseExpression();
+        final ASTNode message = matchAndConsume(KEYWORD, "else") ? parseExpression() : new LiteralNode("Assertion error at line " + line);
+        return new AssertNode(condition, message);
     }
 
 
