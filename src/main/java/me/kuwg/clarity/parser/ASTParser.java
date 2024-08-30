@@ -195,9 +195,10 @@ public final class ASTParser {
                 } while (true);
             }
 
+            final int line = current().getLine();
             consume(DIVIDER, ")");
 
-            return new ReflectedNativeFunctionDeclaration(name, fileName, params, isStatic);
+            return new ReflectedNativeFunctionDeclaration(name, fileName, params, isStatic).setLine(line);
         }
 
         matchAndConsume(KEYWORD, "fn");
@@ -211,7 +212,8 @@ public final class ASTParser {
         consume(DIVIDER, "(");
         if (match(VARIABLE)) {
             do {
-                params.add(new ParameterNode(consume(VARIABLE).getValue()));
+                final Token consumed = consume(VARIABLE);
+                params.add(new ParameterNode(consumed.getValue()).setLine(consumed.getLine()));
                 if (match(DIVIDER, ",")) {
                     consume();
                 } else {
@@ -235,7 +237,7 @@ public final class ASTParser {
         consume(); // consume native
 
         if (matchAndConsume(KEYWORD, "class") || match(KEYWORD, "const")) {
-            return parseNativeClassDeclaration().setLine(current().getLine());
+            return parseNativeClassDeclaration();
         }
 
         consume(OPERATOR, ".");
@@ -406,10 +408,10 @@ public final class ASTParser {
                 if (token.getValue().equals("(")) {
                     ASTNode expression = parseExpression();
                     consume(DIVIDER, ")");
-                    return expression.setLine(line);
+                    return expression;
                 } else if (token.getValue().equals("[")) {
 
-                    List<ASTNode> nodes = new ArrayList<>();
+                    final List<ASTNode> nodes = new ArrayList<>();
 
                     while (true) {
                         if (match(DIVIDER, "]")) break;
@@ -427,15 +429,15 @@ public final class ASTParser {
             case KEYWORD:
                 undo();
                 if (token.getValue().equals("local")) {
-                    return parsePrimaryLocalDeclaration().setLine(line);
+                    return parsePrimaryLocalDeclaration();
                 } else {
-                    return parseKeyword().setLine(line);
+                    return parseKeyword();
                 }
             case BOOLEAN:
                 return new BooleanNode(Boolean.parseBoolean(token.getValue())).setLine(line);
             case OPERATOR:
                 if (token.getValue().equals("-")) {
-                    ASTNode right = parsePrimary().setLine(line);
+                    ASTNode right = parsePrimary();
                     return new BinaryExpressionNode(new IntegerNode(0).setLine(line), "-", right).setLine(line);
                 }
                 break;
@@ -445,8 +447,8 @@ public final class ASTParser {
     }
 
     private ASTNode parseReturnDeclaration() {
-        consume(); // consume "return"
-        return new ReturnNode(parseExpression());
+        final int line = consume().getLine(); // consume "return"
+        return new ReturnNode(parseExpression()).setLine(line);
     }
 
     private ASTNode parseClassDeclaration() {
@@ -486,10 +488,13 @@ public final class ASTParser {
     private ASTNode parseLocalDeclaration() {
         consume(); // consume "local"
         final int line = current().getLine();
-        if (matchAndConsume(OPERATOR, "."))
+
+        if (matchAndConsume(OPERATOR, ".")) {
             return new ContextReferenceNode(ContextReferenceNode.ReferenceType.LOCAL).setLine(line);
+        }
+
         undo();
-        return parseVariableDeclaration().setLine(line);
+        return parseVariableDeclaration();
     }
 
     private ASTNode parseNewDeclaration() {
@@ -533,8 +538,7 @@ public final class ASTParser {
     }
 
     private VoidNode parseVoidDeclaration() {
-        final int line = current().getLine();
-        consume();
+        final int line = consume().getLine();
         return new VoidNode().setLine(line);
     }
 
@@ -544,6 +548,8 @@ public final class ASTParser {
 
         if (isNative && isCompiled) throw new UnsupportedOperationException("Native compiled files do not exist, at line " + current().getLine());
 
+        final int line = current().getLine();
+
         final String path = parseIncludePath(isCompiled);
 
         if (isCompiled) {
@@ -551,7 +557,7 @@ public final class ASTParser {
             File file = new File(path);
             ASTLoader loader = new ASTLoader(file);
             try {
-                return new IncludeNode(path, loader.load().getRoot(), false);
+                return new IncludeNode(path, loader.load().getRoot(), false).setLine(line);
             } catch (IOException e) {
                 System.err.println("Failed to load the AST:");
                 if (e instanceof NoSuchFileException) {
@@ -581,7 +587,7 @@ public final class ASTParser {
             final List<Token> tokens = Tokenizer.tokenize(content);
             final ASTParser parser = new ASTParser(ORIGINAL, path, tokens);
             final AST ast = parser.parse();
-            return new IncludeNode(path, ast.getRoot(), true).setLine(current().getLine());
+            return new IncludeNode(path, ast.getRoot(), true).setLine(line);
         }
 
         final String content;
@@ -594,7 +600,7 @@ public final class ASTParser {
         final List<Token> tokens = Tokenizer.tokenize(content);
         final ASTParser parser = new ASTParser(ORIGINAL, path, tokens);
         final AST ast = parser.parse();
-        return new IncludeNode(path, ast.getRoot(), false).setLine(current().getLine());
+        return new IncludeNode(path, ast.getRoot(), false).setLine(line);
     }
 
     private String parseIncludePath(final boolean compiled) {
@@ -614,7 +620,7 @@ public final class ASTParser {
 
     private ASTNode parseIfDeclaration() {
 
-        consume(); // consume "if"
+        final int line = consume().getLine(); // consume "if"
 
         final ASTNode condition = parseExpression();
         final BlockNode ifBlock = parseBlock();
@@ -622,10 +628,11 @@ public final class ASTParser {
         final IfNode node = new IfNode(condition, ifBlock);
 
         while (matchAndConsume(KEYWORD, "else")) {
-            if (matchAndConsume(KEYWORD, "if")) {
+            if (match(KEYWORD, "if")) {
+                final int elifLine = consume().getLine();
                 final ASTNode elseIfCondition = parseExpression();
                 final BlockNode elseIfBlock = parseBlock();
-                node.addElseIfStatement(new IfNode(elseIfCondition, elseIfBlock));
+                node.addElseIfStatement(new IfNode(elseIfCondition, elseIfBlock).setLine(elifLine));
             } else {
                 final BlockNode elseBlock = parseBlock();
                 node.setElseBlock(elseBlock);
@@ -633,7 +640,7 @@ public final class ASTParser {
             }
         }
 
-        return node.setLine(current().getLine());
+        return node.setLine(line);
     }
 
     private ASTNode parseNullDeclaration() {
@@ -641,7 +648,7 @@ public final class ASTParser {
     }
 
     private ASTNode parseForDeclaration() {
-        final int line = consume().getLine();
+        final int line = consume().getLine(); // consume "for"
 
         if (lookahead().is(OPERATOR, ":")) {
             final String var = consume(VARIABLE).getValue();
@@ -735,8 +742,8 @@ public final class ASTParser {
             if (matchAndConsume(KEYWORD, "when")) {
                 final int whenLine = current().getLine(); // line of "when"
                 final ASTNode whenCondition = parseExpression();
-                final BlockNode whenBlock = parseBlock().setLine(whenLine);
-                cases.add(new SelectNode.WhenNode(whenCondition, whenBlock));
+                final BlockNode whenBlock = parseBlock();
+                cases.add(new SelectNode.WhenNode(whenCondition, whenBlock).setLine(whenLine));
                 continue;
             } else if (match(KEYWORD, "default")) {
                 if (defaultBlock != null) throw new IllegalStateException("Multiple default blocks: " + current());
