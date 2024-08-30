@@ -6,6 +6,7 @@ import me.kuwg.clarity.ast.nodes.block.*;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
@@ -150,6 +151,7 @@ public class Interpreter {
         if (node instanceof ConditionedReturnNode) return interpretConditionedReturn((ConditionedReturnNode) node, context);
         if (node instanceof MemberFunctionCallNode) return interpretMemberFunctionCall((MemberFunctionCallNode) node, context);
         if (node instanceof AssertNode) return interpretAssert((AssertNode) node, context);
+        if (node instanceof IsNode) return interpretIs((IsNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -1156,11 +1158,11 @@ public class Interpreter {
         return interpretBlock(node.getDefaultBlock(), context);
     }
 
-    private Number interpretNativeCast(final NativeCastNode node, final Context context) {
+    private Object interpretNativeCast(final NativeCastNode node, final Context context) {
         final Object expression = interpretNode(node.getCasted(), context);
 
         if (expression == null) {
-            return node.getType() == NativeCastNode.CastType.FLOAT ? 0d : 0;
+            return node.getType() == CastType.FLOAT ? 0d : 0;
         }
 
         switch (node.getType()) {
@@ -1168,13 +1170,15 @@ public class Interpreter {
                 return castToFloat(expression, node);
             case INT:
                 return castToInt(expression, node);
+            case ARR:
+                return castToArr(expression, node);
             default:
                 Register.throwException("Unknown cast: " + node.getType().name().toLowerCase(), node.getLine());
                 return null;
         }
     }
 
-    private Double castToFloat(Object expression, NativeCastNode node) {
+    private Double castToFloat(final Object expression, final NativeCastNode node) {
         if (expression instanceof String) {
             return parseDoubleOrThrow((String) expression, node);
         }
@@ -1202,6 +1206,15 @@ public class Interpreter {
 
         Register.throwException("Could not cast to int", node.getLine());
         return null;
+    }
+
+    private Object[] castToArr(final Object expression, final NativeCastNode node) {
+        try {
+            return (Object[]) expression;
+        } catch (final ClassCastException ignore) {
+            Register.throwException("Could not cast to arr", node.getLine());
+            return null;
+        }
     }
 
     private Double parseDoubleOrThrow(final String expression,final  NativeCastNode node) {
@@ -1355,6 +1368,26 @@ public class Interpreter {
             Register.throwException(String.valueOf(interpretNode(node.getOrElse(), context)), node.getLine());
         }
         return VOID_OBJECT;
+    }
+
+    private Object interpretIs(final IsNode node, final Context context) {
+        final Object result = interpretNode(node.getExpression(), context);
+
+        if (result instanceof VoidObject) {
+            Register.throwException("Void can't be any type", node.getLine());
+        }
+
+        switch (node.getType()) {
+            case FLOAT:
+                return result instanceof Double;
+            case INT:
+                return result instanceof Integer;
+            case ARR:
+                return result instanceof Object[];
+            default:
+                Register.throwException("Unknown cast: " + node.getType().name().toLowerCase(), node.getLine());
+                return null;
+        }
     }
 
 }

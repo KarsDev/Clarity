@@ -45,33 +45,4 @@ public class NativeCastNode extends ASTNode {
         return casted;
     }
 
-    public enum CastType {
-        FLOAT,
-        INT;
-
-        private byte toStreamByte() {
-            switch (this) {
-                case FLOAT:
-                    return 0x0;
-
-                case INT:
-                    return 0x1;
-
-                default:
-                    throw new RuntimeException("Unreachable");
-            }
-        }
-        private static CastType fromStreamByte(final byte val) {
-            switch (val) {
-                case 0x0:
-                    return FLOAT;
-
-                case 0x1:
-                    return INT;
-
-                default:
-                    throw new RuntimeException("Unreachable");
-            }
-        }
-    }
 }

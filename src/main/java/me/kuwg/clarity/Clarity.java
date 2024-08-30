@@ -14,7 +14,7 @@ import java.nio.file.Files;
 import java.util.List;
 
 public class Clarity {
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) {
         new Thread("Clarity Main Thread") {
             @Override
             public void run() {

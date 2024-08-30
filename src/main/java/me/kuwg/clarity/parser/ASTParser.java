@@ -6,6 +6,7 @@ import me.kuwg.clarity.ast.nodes.block.*;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
 import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
@@ -128,6 +129,8 @@ public final class ASTParser {
                 return parseIntDeclaration();
             case ASSERT:
                 return parseAssertDeclaration();
+            case IS:
+                return parseIsDeclaration();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -292,38 +295,34 @@ public final class ASTParser {
     }
 
     private int getPrecedence(Token token) {
-        if (token.getType() == OPERATOR) {
-            String op = token.getValue();
-            switch (op) {
-                case "||":
-                    return 1;
-                case "&&":
-                    return 2;
-                case "==":
-                case "!=":
-                    return 3;
-                case "<":
-                case "<=":
-                case ">":
-                case ">=":
-                    return 4;
-                case "+":
-                case "-":
-                    return 5;
-                case "*":
-                case "/":
-                case "%":
-                    return 6;
-                case "^":
-                    return 7;
-                default:
-                    return -1;
-            }
+        switch (token.getValue()) {
+            case "||":
+                return 1;
+            case "&&":
+                return 2;
+            case "==":
+            case "!=":
+                return 3;
+            case "<":
+            case "<=":
+            case ">":
+            case ">=":
+            case "is":
+                return 4;
+            case "+":
+            case "-":
+                return 5;
+            case "*":
+            case "/":
+            case "%":
+                return 6;
+            case "^":
+                return 7;
+            default:
+                return -1;
         }
-        return -1;
     }
 
-    @SuppressWarnings("InfiniteRecursion")
     private ASTNode parsePrecedence(int precedence) {
         ASTNode left = parsePrimary();
         while (true) {
@@ -334,6 +333,16 @@ public final class ASTParser {
 
             final int line = current().getLine();
             Token operatorToken = consume();
+
+            if (operatorToken.is(KEYWORD, "is")) {
+                final CastType valueOf = CastType.fromValue(consume(KEYWORD).getValue());
+                if (valueOf == null) {
+                    Register.throwException("Unknown native type: " + lookahead(-1).getValue());
+                    return null;
+                }
+                return new IsNode(left, valueOf);
+            }
+
             ASTNode right = parsePrecedence(currentPrecedence + 1);
             left = new BinaryExpressionNode(left, operatorToken.getValue(), right).setLine(line);
         }
@@ -788,12 +797,12 @@ public final class ASTParser {
 
     private ASTNode parseFloatDeclaration() {
         final int line = consume().getLine(); // consume "float"
-        return new NativeCastNode(NativeCastNode.CastType.FLOAT, parseExpression()).setLine(line);
+        return new NativeCastNode(CastType.FLOAT, parseExpression()).setLine(line);
     }
 
     private ASTNode parseIntDeclaration() {
         final int line = consume().getLine(); // consume "int"
-        return new NativeCastNode(NativeCastNode.CastType.INT, parseExpression()).setLine(line);
+        return new NativeCastNode(CastType.INT, parseExpression()).setLine(line);
     }
 
     private ASTNode parseAssertDeclaration() {
@@ -802,6 +811,12 @@ public final class ASTParser {
         final ASTNode message = matchAndConsume(KEYWORD, "else") ? parseExpression() : new LiteralNode("\"Assertion error at line " + line + "\"");
         return new AssertNode(condition, message).setLine(line);
     }
+
+    private ASTNode parseIsDeclaration() {
+        throw new RuntimeException();
+    }
+
+
 
 
 

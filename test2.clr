@@ -1,2 +1,0 @@
-var x = int(native.input("Write a number from 1 to 3: "))
-assert x >= 1 && x <= 3

@@ -136,6 +136,10 @@ const native class Math {
         else return y
     }
 
+    static fn fact(x) {
+        
+    }
+
     /##
      # Native Method: isPrime
      #
