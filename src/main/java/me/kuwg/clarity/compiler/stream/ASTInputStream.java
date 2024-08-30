@@ -118,4 +118,40 @@ public class ASTInputStream extends DataInputStream {
 
         return value;
     }
+
+    /**
+     * Reads an array of {@link ASTNode} from the input stream.
+     *
+     * <p>This method first reads the length of the array as a variable-length integer (VarInt).
+     * It then reads each node ID, retrieves the corresponding class, creates an instance,
+     * and initializes it from the stream.</p>
+     *
+     * @return An array of {@link ASTNode} read from the input stream.
+     * @throws IOException If an I/O error occurs or if any node cannot be instantiated.
+     */
+    public ASTNode[] readNodeArray() throws IOException {
+        int length = readVarInt();
+        ASTNode[] nodes = new ASTNode[length];
+
+        for (int i = 0; i < length; i++) {
+            int id = readVarInt();
+            Class<? extends ASTNodeCompiler> nodeClass = ASTData.getClassFromId(id);
+
+            if (nodeClass == null) {
+                throw new IOException("Unknown node ID: " + id);
+            }
+
+            ASTNodeCompiler node;
+            try {
+                node = nodeClass.getDeclaredConstructor().newInstance();
+            } catch (ReflectiveOperationException e) {
+                throw new IOException("Failed to instantiate node class: " + nodeClass.getName(), e);
+            }
+
+            node.load(this);
+            nodes[i] = (ASTNode) node;
+        }
+
+        return nodes;
+    }
 }

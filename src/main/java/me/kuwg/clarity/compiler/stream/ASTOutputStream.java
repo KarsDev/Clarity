@@ -1,6 +1,7 @@
 package me.kuwg.clarity.compiler.stream;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.compiler.ASTData;
 import me.kuwg.clarity.compiler.ASTNodeCompiler;
 
@@ -99,6 +100,29 @@ public class ASTOutputStream extends DataOutputStream {
             }
             writeByte((int) ((value & SEGMENT_BITS) | CONTINUE_BIT));
             value >>>= 7;
+        }
+    }
+
+    /**
+     * Writes an array of {@link FunctionDeclarationNode} to the output stream.
+     *
+     * <p>This method first writes the length of the array as a variable-length
+     * integer (VarInt). If the array is {@code null}, a length of 0 is written.
+     * Then, it iterates through the array, writing each {@link FunctionDeclarationNode}
+     * using the {@link #writeNode(ASTNodeCompiler)} method.</p>
+     *
+     * @param constructors The array of {@link FunctionDeclarationNode} to be written.
+     *                     It can be {@code null}.
+     * @throws IOException If an I/O error occurs while writing to the stream.
+     */
+    public void writeNodeArray(final FunctionDeclarationNode[] constructors) throws IOException {
+        if (constructors == null) {
+            writeVarInt(0);
+        } else {
+            writeVarInt(constructors.length);
+            for (FunctionDeclarationNode constructor : constructors) {
+                writeNode(constructor);
+            }
         }
     }
 }

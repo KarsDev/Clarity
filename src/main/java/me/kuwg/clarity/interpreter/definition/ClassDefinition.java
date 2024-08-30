@@ -3,6 +3,7 @@ package me.kuwg.clarity.interpreter.definition;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.interpreter.types.ObjectType;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,15 +15,15 @@ public class ClassDefinition extends ObjectType {
     private final String name;
     private final boolean isConstant;
     private final ClassDefinition inheritedClass;
-    private final FunctionDefinition constructor;
+    private final FunctionDefinition[] constructors;
     private final BlockNode body;
     private final boolean isNative;
 
-    public ClassDefinition(final String name, final boolean isConstant, final ClassDefinition inheritedClass, final FunctionDefinition constructor, final BlockNode body, final boolean isNative) {
+    public ClassDefinition(final String name, final boolean isConstant, final ClassDefinition inheritedClass, final FunctionDefinition[] constructors, final BlockNode body, final boolean isNative) {
         this.name = name;
         this.isConstant = isConstant;
         this.inheritedClass = inheritedClass;
-        this.constructor = constructor;
+        this.constructors = constructors;
         this.body = body;
         this.isNative = isNative;
     }
@@ -39,8 +40,8 @@ public class ClassDefinition extends ObjectType {
         return inheritedClass;
     }
 
-    public final FunctionDefinition getConstructor() {
-        return constructor;
+    public final FunctionDefinition[] getConstructors() {
+        return constructors;
     }
 
     public final BlockNode getBody() {
@@ -58,7 +59,7 @@ public class ClassDefinition extends ObjectType {
                 ", staticFunctions=" + staticFunctions +
                 ", name='" + name + '\'' +
                 ", inheritedClass='" + inheritedClass + '\'' +
-                ", constructor=" + constructor +
+                ", constructors=" + Arrays.toString(constructors) +
                 ", body=" + body +
                 ", isNative=" + isNative +
                 '}';

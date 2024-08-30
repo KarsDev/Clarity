@@ -212,7 +212,7 @@ public class Interpreter {
             inheritedClass = null;
         }
 
-        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), false);
+        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, getConstructors(node.getConstructors()),node.getBody(), false);
         context.defineClass(name, definition);
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
@@ -244,6 +244,16 @@ public class Interpreter {
         context.setCurrentClassName(null);
 
         return VOID_OBJECT;
+    }
+
+    private FunctionDefinition[] getConstructors(FunctionDeclarationNode[] nodes) {
+        final FunctionDefinition[] constructors = new FunctionDefinition[nodes.length];
+
+        for (int i = 0; i < nodes.length; i++) {
+            constructors[i] = new FunctionDefinition(nodes[i]);
+        }
+
+        return constructors;
     }
 
     private Object interpretBinaryExpressionNode(final BinaryExpressionNode node, final Context context) {
@@ -492,28 +502,37 @@ public class Interpreter {
         final ClassDefinition inheritedClass = definition.getInheritedClass();
 
         if (inheritedClass != null) {
-            final FunctionDefinition inheritedConstructor = inheritedClass.getConstructor();
-            final ClassObject inheritedObject = interpretConstructor(inheritedConstructor, params, classContext, inheritedClass.getName());
+            final FunctionDefinition[] inheritedConstructors = inheritedClass.getConstructors();
+            final ClassObject inheritedObject = interpretConstructors(inheritedConstructors, params, classContext, inheritedClass.getName());
 
             classContext.mergeContext(inheritedObject.getContext());
         }
 
-        final Object result = interpretConstructor(definition.getConstructor(), params, classContext, name);
+        final Object result = interpretConstructors(definition.getConstructors(), params, classContext, name);
         context.setCurrentClassName(null);
 
         return result;
     }
 
-    private ClassObject interpretConstructor(final FunctionDefinition constructor, final List<Object> params, final Context context, final String cn) {
-        if (constructor == null) {
+    private ClassObject interpretConstructors(final FunctionDefinition[] constructors, final List<Object> params, final Context context, final String cn) {
+        if (constructors.length == 0) {
             return new ClassObject(cn, new Context(context));
         }
 
-        if (constructor.getParams().size() != params.size()) {
-            Register.throwException("Params length do not match for initialization of class " + cn);
+        FunctionDefinition matchingConstructor = null;
+        for (FunctionDefinition constructor : constructors) {
+            if (constructor.getParams().size() == params.size()) {
+                matchingConstructor = constructor;
+                break;
+            }
         }
 
-        List<String> constructorParams = constructor.getParams();
+        if (matchingConstructor == null) {
+            Register.throwException("No matching constructor found for class " + cn + " with " + params.size() + " parameters.");
+            return new ClassObject(null, null); // for notnull errors
+        }
+
+        final List<String> constructorParams = matchingConstructor.getParams();
 
         final Context constructorContext = new Context(context);
 
@@ -524,10 +543,15 @@ public class Interpreter {
             constructorContext.defineVariable(constructorParams.get(i), new VariableDefinition(constructorParams.get(i), params.get(i), false, false));
         }
 
-        final Object result = interpretBlock(constructor.getBlock(), constructorContext);
-        if (result != VOID_OBJECT) except("You can't return in a constructor!", constructor.getBlock().getLine());
+        final Object result = interpretBlock(matchingConstructor.getBlock(), constructorContext);
+
+        if (result != VOID_OBJECT) {
+            except("You can't return in a constructor!", matchingConstructor.getBlock().getLine());
+        }
+
         return new ClassObject(cn, constructorContext);
     }
+
 
     private Object interpretContextReference(final Context context) {
         return context.parentContext();
@@ -1066,7 +1090,7 @@ public class Interpreter {
 
         final ClassDefinition inheritedClass = (ClassDefinition) context.getClass(node.getInheritedClass()); // no need to check, native class do not have errors (we hope)
 
-        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, node.getConstructor() == null ? null : new FunctionDefinition(node.getConstructor()), node.getBody(), true);
+        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, getConstructors(node.getConstructors()), node.getBody(), true);
         context.defineClass(name, definition);
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());

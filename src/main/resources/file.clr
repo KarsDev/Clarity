@@ -1,0 +1,7 @@
+const class File {
+    const var name
+    const var path
+
+    constructor() {
+    }
+}

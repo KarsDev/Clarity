@@ -470,19 +470,18 @@ public final class ASTParser {
 
         final BlockNode body = parseBlock();
 
-        FunctionDeclarationNode constructor = null;
+        List<FunctionDeclarationNode> constructors = new ArrayList<>();
         for (ASTNode node : body.getChildrens()) {
             if (node instanceof FunctionDeclarationNode) {
                 FunctionDeclarationNode cast = (FunctionDeclarationNode) node;
                 if (cast.getFunctionName().equals("constructor")) {
-                    constructor = cast;
+                    constructors.add(cast);
                     body.getChildrens().remove(node);
-                    break;
                 }
             }
         }
 
-        return new ClassDeclarationNode(name, isConstant, inheritedClass, fileName, constructor, body).setLine(line);
+        return new ClassDeclarationNode(name, isConstant, inheritedClass, fileName, constructors.toArray(new FunctionDeclarationNode[0]), body).setLine(line);
     }
 
     private ASTNode parseLocalDeclaration() {
@@ -716,18 +715,17 @@ public final class ASTParser {
         final int line = current().getLine();
         final BlockNode body = parseBlock();
 
-        FunctionDeclarationNode constructor = null;
+        final List<FunctionDeclarationNode> constructors = new ArrayList<>();
         for (ASTNode node : body.getChildrens()) {
             if (node instanceof FunctionDeclarationNode) {
                 FunctionDeclarationNode cast = (FunctionDeclarationNode) node;
                 if (cast.getFunctionName().equals("constructor")) {
-                    constructor = cast;
+                    constructors.add(cast);
                     body.getChildrens().remove(node);
-                    break;
                 }
             }
         }
-        return new NativeClassDeclarationNode(name, isConstant, inheritedClass, fileName, constructor, body).setLine(line);
+        return new NativeClassDeclarationNode(name, isConstant, inheritedClass, fileName, constructors.toArray(new FunctionDeclarationNode[0]), body).setLine(line);
     }
 
     private ASTNode parseSelectDeclaration() {
