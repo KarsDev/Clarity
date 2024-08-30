@@ -28,6 +28,8 @@ public class CheckNativeTypeNative extends SystemNativeFunction<Boolean> {
                 return got instanceof Integer;
             case "bool":
                 return got instanceof Boolean;
+            case "arr":
+                return got instanceof Object[];
             default:
                 Register.throwException("Unknown native type: " + required);
         }

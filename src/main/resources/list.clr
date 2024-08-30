@@ -1,0 +1,176 @@
+native class List {
+    // Variable to store the list elements
+    var elements
+
+    /##
+     # Constructor: List
+     #
+     # Description:
+     # Initializes the List object with elements from the provided array or as an empty list if no array is provided.
+     #
+     # Parameters:
+     # - arr: An array to initialize the list with. Must be an array; otherwise, an exception is thrown.
+     #
+     # Throws:
+     # - An exception if the provided parameter is not an array.
+     #
+     # Example:
+     # var list = new List([1, 2, 3]);  // Initializes the list with elements 1, 2, 3.
+     #/
+    constructor(arr) {
+        if !System.checkNativeType("arr", arr) System.throw("Expected array value in List constructor");
+        
+        local.elements = arr;
+    }
+
+    /##
+     # Constructor: List (default)
+     #
+     # Description:
+     # Initializes an empty List object when no parameters are provided.
+     #
+     # Example:
+     # var list = new List();  // Initializes an empty list.
+     #/
+    constructor() {
+        local.elements = [];
+    }
+
+    /##
+     # Function: add
+     #
+     # Description:
+     # Adds an item to the end of the list.
+     #
+     # Parameters:
+     # - item: The item to be added to the list.
+     #
+     # Returns:
+     # - None.
+     #
+     # Example:
+     # list.add(10);  // Adds 10 to the end of the list.
+     #/
+    fn add(item) {
+        const var size = local.elements.size();
+        local.elements.setSize(size + 1);
+        local.elements.set(size, item);
+    }
+
+    /##
+     # Function: remove
+     #
+     # Description:
+     # Removes the first occurrence of the specified item from the list.
+     #
+     # Parameters:
+     # - item: The item to be removed from the list.
+     #
+     # Returns:
+     # - bool value: `true` if the item was found and removed, `false` otherwise.
+     #
+     # Example:
+     # list.remove(10);  // Removes the first occurrence of 10 from the list.
+     #/
+    fn remove(item) {
+        const var size = local.elements.size();
+        for var i = 0; i < size; i++ {
+            if local.elements.at(i) === item {
+                for var j = i; j < size - 1; j++ {
+                    local.elements.set(j, local.elements.at(j + 1));
+                }
+                local.elements.setSize(size - 1);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /##
+     # Function: get
+     #
+     # Description:
+     # Retrieves the item at the specified index.
+     #
+     # Parameters:
+     # - index: The index of the item to retrieve.
+     #
+     # Returns:
+     # - The item at the specified index.
+     #
+     # Throws:
+     # - An exception if the index is out of bounds.
+     #
+     # Example:
+     # var item = list.get(0);  // Retrieves the first item in the list.
+     #/
+    fn get(index) {
+        if index < 0 || index >= local.elements.size() {
+            System.throw("Index out of bounds");
+        }
+
+        return local.elements.at(index);
+    }
+
+    /##
+     # Function: size
+     #
+     # Description:
+     # Returns the number of elements currently in the list.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - An integer representing the number of elements in the list.
+     #
+     # Example:
+     # var count = list.size();  // Returns the number of elements in the list.
+     #/
+    fn size() {
+        return local.elements.size();
+    }
+
+    /##
+     # Function: clear
+     #
+     # Description:
+     # Removes all elements from the list.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - None.
+     #
+     # Example:
+     # list.clear();  // Clears all elements from the list.
+     #/
+    fn clear() {
+        local.elements.setSize(0);
+    }
+
+    /##
+     # Function: toArray
+     #
+     # Description:
+     # Returns a new array containing all elements of the list.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - A new array with all the list elements.
+     #
+     # Example:
+     # var array = list.toArray();  // Gets a copy of the list elements as an array.
+     #/
+    fn toArray() {
+        const arr = [];
+        const size = local.elements.size();
+        for var i = 0; i < size; i++ {
+            arr.push(local.elements.at(i));
+        }
+        return arr;
+    }
+}
