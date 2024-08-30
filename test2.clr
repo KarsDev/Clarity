@@ -1,5 +1,7 @@
 include native list
 
-var list = new List([1, 2])
+native.println(get())
 
-native.println(list)
+fn get() {
+    return 0
+}

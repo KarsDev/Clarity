@@ -464,7 +464,7 @@ public class Interpreter {
     }
 
     private Object interpretReturnNode(final ReturnNode node, final Context context) {
-        return interpretNode(node.getValue(), context);
+        return new ReturnValue(interpretNode(node.getValue(), context));
     }
 
     private Object interpretClassInstantiation(final ClassInstantiationNode node, final Context context) {
