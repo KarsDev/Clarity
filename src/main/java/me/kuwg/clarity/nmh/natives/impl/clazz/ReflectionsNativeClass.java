@@ -14,22 +14,23 @@ public class ReflectionsNativeClass extends NativeClass {
 
     @Override
     public Object handleCall(final String name, final List<Object> params, final Context context) {
-
         switch (name) {
             case "editVariable": {
-                check("Invalid params", params.size() == 2 && params.get(0) instanceof String);
+                check("Invalid parameters for 'editVariable'. Expected 2 parameters (String variableName, Object value), got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 2 && params.get(0) instanceof String);
                 final String var = (String) params.get(0);
                 final Object val = params.get(1);
 
                 try {
                     ((VariableDefinition) context.getVariableDefinition(var)).setValue(val);
                 } catch (final ClassCastException e) {
-                    Register.throwException("Editing a non created variable: " + var);
+                    Register.throwException("Error editing variable '" + var + "': " + e.getMessage());
                 }
                 break;
             }
             case "createVariable": {
-                check("Invalid params", params.size() == 4 && params.get(0) instanceof String && params.get(2) instanceof Boolean && params.get(3) instanceof Boolean);
+                check("Invalid parameters for 'createVariable'. Expected 4 parameters (String variableName, Object initialValue, Boolean isStatic, Boolean isConstant), got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 4 && params.get(0) instanceof String && params.get(2) instanceof Boolean && params.get(3) instanceof Boolean);
                 final String var = (String) params.get(0);
                 final Object val = params.get(1);
                 final boolean isStatic = (Boolean) params.get(2);
@@ -39,13 +40,29 @@ public class ReflectionsNativeClass extends NativeClass {
                 break;
             }
             case "getCallerClass": {
-                check("Invalid params", params.isEmpty());
+                check("Invalid parameters for 'getCallerClass'. Expected no parameters, got " + params.size() + " with types " + getParamTypes(params),
+                        params.isEmpty());
                 final Register.RegisterElement element = Register.getStack().size() > 3 ? Register.getStack().at(Register.getStack().size() - 4) : null;
                 if (element == null) return null;
                 return element.getCurrentClass();
             }
         }
+        Register.throwException("Unsupported method name: " + name);
+        return null;
+    }
 
-        return VOID;
+    private String getParamTypes(List<Object> params) {
+        StringBuilder sb = new StringBuilder();
+        for (Object param : params) {
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(param == null ? "null" : param.getClass().getSimpleName());
+        }
+        return sb.toString();
+    }
+
+    private void check(String message, boolean condition) {
+        if (!condition) {
+            throw new IllegalArgumentException(message);
+        }
     }
 }

@@ -1072,7 +1072,7 @@ public class Interpreter {
                 node.getName(),
                 node.getFileName().substring(0, node.getFileName().length() - 3),
                 nodes
-        );
+        ).setLine(node.getLine());
 
         block.addChild(astnode);
 

@@ -6,8 +6,7 @@ import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeFunction;
 import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
 import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeFunction;
-import me.kuwg.clarity.nmh.natives.impl.clazz.MathNativeClass;
-import me.kuwg.clarity.nmh.natives.impl.clazz.ReflectionsNativeClass;
+import me.kuwg.clarity.nmh.natives.impl.clazz.*;
 import me.kuwg.clarity.nmh.natives.impl.def.*;
 import me.kuwg.clarity.nmh.natives.impl.pkg.error.ExceptNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.ExitNative;
@@ -48,6 +47,7 @@ public class NativeMethodHandler {
     private void initializeNativeClasses() {
         registerNativeClass(new MathNativeClass());
         registerNativeClass(new ReflectionsNativeClass());
+        registerNativeClass(new FileNativeClass());
     }
 
     private void registerDefaultFunction(final DefaultNativeFunction<?> function) {
@@ -89,7 +89,9 @@ public class NativeMethodHandler {
             try {
                 return clazz.handleCall(method, params, context);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                e.printStackTrace(System.err);
+                System.exit(1);
+                return null;
             }
         }
 

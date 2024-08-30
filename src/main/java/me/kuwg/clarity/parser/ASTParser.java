@@ -243,6 +243,11 @@ public final class ASTParser {
             return parseNativeClassDeclaration();
         }
 
+        if (match(KEYWORD, "fn")) {
+            undo();
+            return parseFunctionDeclaration();
+        }
+
         consume(OPERATOR, ".");
 
         final int line = current().getLine();
@@ -386,7 +391,8 @@ public final class ASTParser {
 
                 if (matchAndConsume(OPERATOR, "=")) {
                     ASTNode expression = parseExpression();
-                    return new VariableReassignmentNode(((VariableReferenceNode) node).getName(), expression).setLine(line);
+                    if (node instanceof ObjectVariableReferenceNode) return new VariableReassignmentNode(((ObjectVariableReferenceNode) node).getCalled(), expression).setLine(line);
+                    else return new VariableReassignmentNode(((VariableReferenceNode) node).getName(), expression).setLine(line);
                 }
                 return node;
 
@@ -864,9 +870,9 @@ public final class ASTParser {
     }
 
     private void consume(final TokenType expectedType, final String expectedValue) {
-        final Token consumed = consume(expectedType);
-        if (!consumed.getValue().equals(expectedValue)) {
-            throw new IllegalStateException("Expected value " + expectedValue + " but found " + consumed.getValue() + " at line " + consumed.getLine());
+        final Token token = consume();
+        if (token.getType() != expectedType || !token.getValue().equals(expectedValue)) {
+            throw new IllegalStateException("Expected value " + expectedValue + " but found " + token.getValue() + " at line " + token.getLine());
         }
     }
 

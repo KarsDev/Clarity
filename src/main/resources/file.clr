@@ -1,8 +1,359 @@
-const class File {
-    const var name
-    const var path
+const native class File {
+    var path
 
-    constructor() {
-    // TODO
+    /##
+     # Constructor: File
+     #
+     # Description:
+     # Initializes the File object with the given file path.
+     #
+     # Parameters:
+     # - path: The path to the file.
+     #
+     # Example:
+     # var file = new File("/path/to/file.txt")  // Initializes a File object for "file.txt".
+     #/
+    constructor(path) {
+        this.path = path
     }
+
+    /##
+     # Function: exists
+     #
+     # Description:
+     # Checks if the file exists at the specified path.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - bool value: `true` if the file exists, `false` otherwise.
+     #
+     # Example:
+     # var exists = file.exists()  // Checks if the file exists.
+     #/
+    native fn exists()
+
+    /##
+     # Function: delete
+     #
+     # Description:
+     # Deletes the file at the specified path.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - bool value: `true` if the file was successfully deleted, `false` otherwise.
+     #
+     # Example:
+     # var deleted = file.delete()  // Deletes the file.
+     #/
+    native fn delete()
+
+    /##
+     # Function: renameTo
+     #
+     # Description:
+     # Renames the file to the specified new name.
+     #
+     # Parameters:
+     # - newName: The new name for the file.
+     #
+     # Returns:
+     # - bool value: `true` if the file was successfully renamed, `false` otherwise.
+     #
+     # Example:
+     # var renamed = file.renameTo("newFile.txt")  // Renames the file to "newFile.txt".
+     #/
+    native fn renameTo(newName)
+
+    /##
+     # Function: size
+     #
+     # Description:
+     # Returns the size of the file in bytes.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - An integer representing the size of the file in bytes.
+     #
+     # Example:
+     # var fileSize = file.size()  // Gets the size of the file.
+     #/
+    native fn size()
+
+    /##
+     # Function: read
+     #
+     # Description:
+     # Reads the entire content of the file as a string.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - A string containing the content of the file.
+     #
+     # Example:
+     # var content = file.read()  // Reads the content of the file.
+     #/
+    native fn read()
+
+    /##
+     # Function: write
+     #
+     # Description:
+     # Writes the given content to the file. If the file already exists, it overwrites the content.
+     #
+     # Parameters:
+     # - content: The string content to be written to the file.
+     #
+     # Returns:
+     # - None.
+     #
+     # Example:
+     # file.write("Hello, World!")  // Writes "Hello, World!" to the file.
+     #/
+    native fn write(content)
+
+    /##
+     # Function: append
+     #
+     # Description:
+     # Appends the given content to the end of the file.
+     #
+     # Parameters:
+     # - content: The string content to be appended to the file.
+     #
+     # Returns:
+     # - None.
+     #
+     # Example:
+     # file.append(" More text")  // Appends " More text" to the end of the file.
+     #/
+    native fn append(content)
+
+    /##
+     # Function: createNewFile
+     #
+     # Description:
+     # Creates a new, empty file at the specified path. If the file already exists, it does nothing.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - bool value: `true` if the file was successfully created, `false` otherwise.
+     #
+     # Example:
+     # var created = file.createNewFile()  // Creates a new empty file.
+     #/
+    native fn createNewFile()
+
+    /##
+     # Function: isDirectory
+     #
+     # Description:
+     # Checks if the path is a directory.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - bool value: `true` if the path is a directory, `false` otherwise.
+     #
+     # Example:
+     # var isDir = file.isDirectory()  // Checks if the path is a directory.
+     #/
+    native fn isDirectory()
+
+    /##
+     # Function: listFiles
+     #
+     # Description:
+     # Lists all the files in the directory at the specified path.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - An array of strings, each representing a file name in the directory.
+     #
+     # Example:
+     # var files = file.listFiles()  // Lists all files in the directory.
+     #/
+    native fn listFiles()
+
+    /##
+     # Function: lastModified
+     #
+     # Description:
+     # Returns the last modified time of the file.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - A long integer representing the last modified time of the file in milliseconds since the epoch.
+     #
+     # Example:
+     # var lastModified = file.lastModified()  // Gets the last modified time of the file.
+     #/
+    native fn lastModified()
+
+    /##
+     # Function: mkdir
+     #
+     # Description:
+     # Creates a directory at the specified path.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - bool value: `true` if the directory was successfully created, `false` otherwise.
+     #
+     # Example:
+     # var dirCreated = file.mkdir()  // Creates a directory.
+     #/
+    native fn mkdir()
+
+    /##
+     # Function: mkdirs
+     #
+     # Description:
+     # Creates the directory along with any necessary but nonexistent parent directories.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - bool value: `true` if the directory and any necessary parent directories were created, `false` otherwise.
+     #
+     # Example:
+     # var dirsCreated = file.mkdirs()  // Creates the directory and necessary parent directories.
+     #/
+    native fn mkdirs()
+
+    /##
+     # Function: canRead
+     #
+     # Description:
+     # Checks if the file is readable.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - bool value: `true` if the file is readable, `false` otherwise.
+     #
+     # Example:
+     # var readable = file.canRead()  // Checks if the file is readable.
+     #/
+    native fn canRead()
+
+    /##
+     # Function: canWrite
+     #
+     # Description:
+     # Checks if the file is writable.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - bool value: `true` if the file is writable, `false` otherwise.
+     #
+     # Example:
+     # var writable = file.canWrite()  // Checks if the file is writable.
+     #/
+    native fn canWrite()
+
+    /##
+     # Function: canExecute
+     #
+     # Description:
+     # Checks if the file is executable.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - bool value: `true` if the file is executable, `false` otherwise.
+     #
+     # Example:
+     # var executable = file.canExecute()  // Checks if the file is executable.
+     #/
+    native fn canExecute()
+
+    /##
+     # Function: getPath
+     #
+     # Description:
+     # Returns the path of the file as a string.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - A string representing the file path.
+     #
+     # Example:
+     # var path = file.getPath()  // Gets the file path.
+     #/
+    native fn getPath()
+
+    /##
+     # Function: getName
+     #
+     # Description:
+     # Returns the name of the file or directory represented by this File object.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - A string representing the name of the file or directory.
+     #
+     # Example:
+     # var name = file.getName()  // Gets the name of the file.
+     #/
+    native fn getName()
+
+    /##
+     # Function: getParent
+     #
+     # Description:
+     # Returns the parent directory of the file.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - A string representing the parent directory of the file, or null if the file does not have a parent.
+     #
+     # Example:
+     # var parent = file.getParent()  // Gets the parent directory of the file.
+     #/
+    native fn getParent()
+
+    /##
+     # Function: setReadOnly
+     #
+     # Description:
+     # Sets the file to read-only mode.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - bool value: `true` if the operation was successful, `false` otherwise.
+     #
+     # Example:
+     # var readOnly = file.setReadOnly()  // Sets the file to read-only.
+     #/
+    native fn setReadOnly()
 }
