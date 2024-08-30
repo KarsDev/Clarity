@@ -88,15 +88,69 @@ Clarity supports common control structures like loops and conditionals.
 For Loop:
 
 ```clarity
-
+// foreach
 for i : [1, 2, 3] {
     native.println(i)
 }
 
+// for
 for var i = 1, i <= 100, i = i + 1 {
     native.print("Iteration: " + i + "\n")
 }
 ```
+
+While Loop:
+
+```clarity
+var i = 0
+var finished = false
+while !finished {
+    native.println("Not finished")
+    i = i + 1
+    finished = i > 100
+}
+```
+
+Select Statement:
+
+```clarity
+var i = native.input("Write a number from 1 to 3: ")
+select i {
+    when 1 {
+        native.println("You wrote 1")
+    }
+    when 1 {
+        native.println("You wrote 2")
+    }
+    when 1 {
+        native.println("You wrote 3")
+    }
+    default {
+        native.println(i + " is not a number between 1 and 3")
+    }
+}
+```
+
+If Statement:
+
+```clarity
+var x = int(native.input("Write a number: ")) // asking for a number and converting it to integer
+if x > 0 {
+    native.println("Your number is greater than 0")
+} else if x < 0 {
+    native.println("Your number is less than 0")
+} else {
+    native.println("Your number is equal to 0")
+}
+```
+
+Assert Statement:
+
+```clarity
+var x = int(native.input("Write a number from 1 to 3: "))
+assert x >= 1 && x <= 3 else "The number " + x + " is not between i and 3!"
+```
+
 ## Native Libraries
 
 Clarity includes a set of built-in libraries that provide essential functions for various operations. You can include these libraries using the include keyword.
