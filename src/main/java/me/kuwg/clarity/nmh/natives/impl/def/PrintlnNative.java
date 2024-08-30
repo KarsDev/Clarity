@@ -25,7 +25,8 @@ public class PrintlnNative extends DefaultNativeFunction<VoidObject> {
 
     private String paramsToString(final List<Object> params) {
         if (params.size() == 1)
-            return params.get(0).toString();
+            if (params.get(0) instanceof Object[]) return Arrays.toString((Object[]) params.get(0));
+
         StringBuilder s = new StringBuilder();
         for (final Object param : params) {
             if (param instanceof Object[]) s.append(Arrays.toString((Object[]) param));

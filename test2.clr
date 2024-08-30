@@ -1,7 +1,5 @@
 include native list
 
-native.println(get())
-
-fn get() {
-    return 0
-}
+var list = new List()
+list.add(5)
+native.println(list.toArray())

@@ -162,7 +162,7 @@ public final class ASTParser {
 
         if (!matchAndConsume(KEYWORD, "var")) {
             if (isStatic) undo();
-            if (isConst) throw new UnsupportedOperationException("Constant functions still not supported.");
+            if (isConst) throw new UnsupportedOperationException("Constant functions still not supported, at line " + line);
             return parseFunctionDeclaration().setLine(line);
         }
 
@@ -236,7 +236,8 @@ public final class ASTParser {
     private ASTNode parseNativeDeclaration() {
         consume(); // consume native
 
-        if (matchAndConsume(KEYWORD, "class") || match(KEYWORD, "const")) {
+        if (match(KEYWORD, "class") || match(KEYWORD, "const")) {
+            undo();
             return parseNativeClassDeclaration();
         }
 
@@ -436,12 +437,15 @@ public final class ASTParser {
             case BOOLEAN:
                 return new BooleanNode(Boolean.parseBoolean(token.getValue())).setLine(line);
             case OPERATOR:
-                if (token.getValue().equals("-")) {
-                    final ASTNode right = parsePrimary();
-                    return new BinaryExpressionNode(new IntegerNode(0).setLine(line), "-", right).setLine(line);
-                } else if (token.getValue().equals("!")) {
-                    final ASTNode right = parsePrimary();
-                    return new BinaryExpressionNode(new BooleanNode(false), "==", right).setLine(line);
+                switch (token.getValue()) {
+                    case "-": {
+                        final ASTNode right = parsePrimary();
+                        return new BinaryExpressionNode(new IntegerNode(0).setLine(line), "-", right).setLine(line);
+                    }
+                    case "!": {
+                        final ASTNode right = parsePrimary();
+                        return new BinaryExpressionNode(new BooleanNode(false), "==", right).setLine(line);
+                    }
                 }
                 break;
         }

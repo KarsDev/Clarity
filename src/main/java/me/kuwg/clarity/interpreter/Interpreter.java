@@ -638,7 +638,11 @@ public class Interpreter {
                 }
             case "set":
                 if (params.size() == 2 && params.get(0) instanceof Integer) {
-                    array[(int) params.get(0)] = params.get(1);
+                    try {
+                        array[(int) params.get(0)] = params.get(1);
+                    } catch (final IndexOutOfBoundsException e) {
+                        except("Array index out of bounds: " + params.get(0), node.getLine());
+                    }
                     return VOID_OBJECT;
                 }
             case "setSize":
