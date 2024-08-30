@@ -2,10 +2,7 @@ package me.kuwg.clarity.parser;
 
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
-import me.kuwg.clarity.ast.nodes.block.BlockNode;
-import me.kuwg.clarity.ast.nodes.block.BreakNode;
-import me.kuwg.clarity.ast.nodes.block.ContinueNode;
-import me.kuwg.clarity.ast.nodes.block.ReturnNode;
+import me.kuwg.clarity.ast.nodes.block.*;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
@@ -455,7 +452,15 @@ public final class ASTParser {
 
     private ASTNode parseReturnDeclaration() {
         final int line = consume().getLine(); // consume "return"
-        return new ReturnNode(parseExpression()).setLine(line);
+
+        final ASTNode expr = parseExpression();
+
+        if (matchAndConsume(KEYWORD, "when")) {
+
+            return new ConditionedReturnNode(expr, parseExpression()).setLine(line);
+        }
+
+        return new ReturnNode(expr).setLine(line);
     }
 
     private ASTNode parseClassDeclaration() {

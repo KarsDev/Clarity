@@ -1,6 +1,7 @@
 package me.kuwg.clarity.compiler;
 
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.ast.nodes.block.ConditionedReturnNode;
 import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
@@ -44,6 +45,7 @@ public class ASTData {
         // Block (0x100)
         registerNode(BlockNode.class, 0x100);
         registerNode(ReturnNode.class, 0x101);
+        registerNode(ConditionedReturnNode.class, 0x102);
 
         // Expression (0x200)
         registerNode(BinaryExpressionNode.class, 0x200);

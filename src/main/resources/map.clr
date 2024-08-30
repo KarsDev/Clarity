@@ -1,0 +1,252 @@
+native class Map {
+    // Variable to store keys and values
+    var keys
+    var values
+
+    /##
+     # Constructor: Map
+     #
+     # Description:
+     # Initializes an empty Map object.
+     #
+     # Example:
+     # var map = new Map()  // Initializes an empty map.
+     #/
+    constructor() {
+        keys = []
+        values = []
+    }
+
+    /##
+     # Function: put
+     #
+     # Description:
+     # Adds a key-value pair to the map. If the key already exists, the value is updated.
+     #
+     # Parameters:
+     # - key: The key to be added or updated.
+     # - value: The value associated with the key.
+     #
+     # Returns:
+     # - None.
+     #
+     # Example:
+     # map.put("key1", 100)  // Adds the key-value pair ("key1", 100) to the map.
+     #/
+    fn put(key, value) {
+        const var index = indexOfKey(key)
+        if index != -1 {
+            values.set(index, value)
+        } else {
+            const var size = keys.size()
+            keys.setSize(size + 1)
+            values.setSize(size + 1)
+            keys.set(size, key)
+            values.set(size, value)
+        }
+    }
+
+    /##
+     # Function: get
+     #
+     # Description:
+     # Retrieves the value associated with the specified key.
+     #
+     # Parameters:
+     # - key: The key whose associated value is to be returned.
+     #
+     # Returns:
+     # - The value associated with the specified key, or null if the key does not exist.
+     #
+     # Example:
+     # var value = map.get("key1")  // Retrieves the value associated with "key1".
+     #/
+    fn get(key) {
+        const var index = indexOfKey(key)
+        if index != -1 {
+            return values.at(index)
+        }
+        return null
+    }
+
+    /##
+     # Function: remove
+     #
+     # Description:
+     # Removes the key-value pair associated with the specified key.
+     #
+     # Parameters:
+     # - key: The key to be removed from the map.
+     #
+     # Returns:
+     # - bool value: `true` if the key was found and removed, `false` otherwise.
+     #
+     # Example:
+     # map.remove("key1")  // Removes the key-value pair associated with "key1".
+     #/
+    fn remove(key) {
+        const var index = indexOfKey(key)
+        if index != -1 {
+            const var size = keys.size()
+            for var i = index, i < size - 1, i = i + 1 {
+                keys.set(i, keys.at(i + 1))
+                values.set(i, values.at(i + 1))
+            }
+            keys.setSize(size - 1)
+            values.setSize(size - 1)
+            return true
+        }
+        return false
+    }
+
+    /##
+     # Function: size
+     #
+     # Description:
+     # Returns the number of key-value pairs in the map.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - An integer representing the number of key-value pairs in the map.
+     #
+     # Example:
+     # var count = map.size()  // Returns the number of key-value pairs in the map.
+     #/
+    fn size() {
+        return keys.size()
+    }
+
+    /##
+     # Function: clear
+     #
+     # Description:
+     # Removes all key-value pairs from the map.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - None.
+     #
+     # Example:
+     # map.clear()  // Clears all key-value pairs from the map.
+     #/
+    fn clear() {
+        keys.setSize(0)
+        values.setSize(0)
+    }
+
+    /##
+     # Function: containsKey
+     #
+     # Description:
+     # Checks if the map contains the specified key.
+     #
+     # Parameters:
+     # - key: The key to check for in the map.
+     #
+     # Returns:
+     # - bool value: `true` if the key exists in the map, `false` otherwise.
+     #
+     # Example:
+     # var exists = map.containsKey("key1")  // Returns true if "key1" exists in the map.
+     #/
+    fn containsKey(key) {
+        return indexOfKey(key) != -1
+    }
+
+    /##
+     # Function: indexOfKey
+     #
+     # Description:
+     # Helper function to find the index of a key in the keys array.
+     #
+     # Parameters:
+     # - key: The key to find in the keys array.
+     #
+     # Returns:
+     # - The index of the key if found, otherwise -1.
+     #
+     # Example:
+     # var index = map.indexOfKey("key1")  // Returns the index of "key1" in the keys array.
+     #/
+    fn indexOfKey(key) {
+        const var size = keys.size()
+        for var i = 0, i < size, i = i + 1 {
+            if keys.at(i) == key {
+                return i
+            }
+        }
+        return -1
+    }
+
+    /##
+     # Function: keys
+     #
+     # Description:
+     # Returns an array of all keys in the map.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - An array containing all the keys in the map.
+     #
+     # Example:
+     # var allKeys = map.keys()  // Retrieves all keys in the map.
+     #/
+    fn keys() {
+        return keys.toArray()
+    }
+
+    /##
+     # Function: values
+     #
+     # Description:
+     # Returns an array of all values in the map.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - An array containing all the values in the map.
+     #
+     # Example:
+     # var allValues = map.values()  // Retrieves all values in the map.
+     #/
+    fn values() {
+        return values.toArray()
+    }
+
+/##
+     # Function: print
+     #
+     # Description:
+     # Returns a string representation of the map.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - A string that represents the map in the format "{key1=value1, key2=value2, ...}".
+     #
+     # Example:
+     # var output = map.print()  // Returns the string representation of the map.
+     #/
+    fn print() {
+        const var size = keys.size()
+        var result = "{"
+
+        for var i = 0, i < size, i = i + 1 {
+            result = result + keys.at(i) + "=" + values.at(i)
+            if i < size - 1 {
+                result = result + ", "
+            }
+        }
+
+        result = result + "}"
+        return result
+    }
+}

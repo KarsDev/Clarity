@@ -2,10 +2,7 @@ package me.kuwg.clarity.interpreter;
 
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
-import me.kuwg.clarity.ast.nodes.block.BlockNode;
-import me.kuwg.clarity.ast.nodes.block.BreakNode;
-import me.kuwg.clarity.ast.nodes.block.ContinueNode;
-import me.kuwg.clarity.ast.nodes.block.ReturnNode;
+import me.kuwg.clarity.ast.nodes.block.*;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
@@ -149,6 +146,7 @@ public class Interpreter {
         if (node instanceof BreakNode) return BREAK;
         if (node instanceof ContinueNode) return CONTINUE;
         if (node instanceof NativeCastNode) return interpretNativeCast((NativeCastNode) node, context);
+        if (node instanceof ConditionedReturnNode) return interpretConditionedReturn((ConditionedReturnNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -1225,4 +1223,30 @@ public class Interpreter {
         }
     }
 
+    private Object interpretConditionedReturn(final ConditionedReturnNode node, final Context context) {
+        final ASTNode condo = node.getCondition();
+
+        final Object result = interpretNode(condo, context);
+
+        final boolean apply;
+        if (result instanceof Integer) {
+            final int val = (int) result;
+            if (val == 0) {
+                apply = false;
+            } else if (val == 1) {
+                apply = true;
+            } else {
+                except("Conditioned return with int condition must be 0 or 1", node.getLine());
+                return null;
+            }
+        } else if (!(result instanceof Boolean)) {
+            except("Conditioned return without a boolean condition", node.getLine());
+            return null;
+        } else {
+            apply = (boolean) result;
+        }
+
+        return apply ? new ReturnValue(interpretNode(node.getValue(), context)) : VOID_OBJECT;
+
+    }
 }
