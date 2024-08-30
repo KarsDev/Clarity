@@ -1,0 +1,4 @@
+var arr = [1, 2]
+native.println(arr.size())
+arr.setSize(5)
+native.println(arr.size())

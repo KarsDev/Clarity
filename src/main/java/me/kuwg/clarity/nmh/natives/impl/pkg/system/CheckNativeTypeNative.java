@@ -11,7 +11,6 @@ public class CheckNativeTypeNative extends SystemNativeFunction<Boolean> {
 
     @Override
     public Boolean call(final List<Object> params) {
-
         if (!(params.get(0) instanceof String)) {
             Register.throwException("Native type must be string");
             return null;

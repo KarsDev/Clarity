@@ -542,11 +542,15 @@ public class Interpreter {
 
     private Object interpretObjectFunctionCall(final ObjectFunctionCallNode node, final Context context) {
         final Object caller = context.getVariable(node.getCaller());
-
         if (caller instanceof VoidObject) {
             return handleStaticFunctionCall(node, context);
         } else if (caller instanceof Object[]) {
-            return handleArrayFunctionCall(node, context, (Object[]) caller);
+            Object resultArray = handleArrayFunctionCall(node, context, (Object[]) caller);
+            if (resultArray instanceof Object[]) {
+                context.setVariable(node.getCaller(), resultArray);
+                return VOID_OBJECT;
+            }
+            return resultArray;
         } else if (caller instanceof ClassObject) {
             return handleInstanceMethodCall(node, context, (ClassObject) caller);
         } else {
@@ -593,6 +597,8 @@ public class Interpreter {
 
         final String fn = node.getCalled();
 
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.ARRAYCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+
         switch (fn) {
             case "at":
                 if (params.size() == 1 && params.get(0) instanceof Integer) {
@@ -602,25 +608,27 @@ public class Interpreter {
                         except("Array out of bounds: " + params.get(0), node.getLine());
                     }
                 }
-                break;
             case "size":
                 if (params.isEmpty()) {
                     return array.length;
                 }
-                break;
             case "set":
                 if (params.size() == 2 && params.get(0) instanceof Integer) {
                     array[(int) params.get(0)] = params.get(1);
                     return VOID_OBJECT;
                 }
-                break;
+            case "setSize":
+                if (params.size() == 1 && params.get(0) instanceof Integer) {
+                    int newSize = (int) params.get(0);
+                    if (newSize < 0) except("Negative array size: " + newSize, node.getLine());
+                    Object[] newArray = new Object[newSize];
+                    System.arraycopy(array, 0, newArray, 0, Math.min(array.length, newSize));
+                    return newArray;
+                }
             default:
                 except("Illegal function in array context: " + fn + " with params " + params, node.getLine());
                 return null;
         }
-
-        Register.register(new Register.RegisterElement(Register.RegisterElementType.ARRAYCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
-        return null;
     }
 
     private Object handleInstanceMethodCall(final ObjectFunctionCallNode node, final Context context, final ClassObject classObject) {
