@@ -55,4 +55,12 @@ public class ClassInstantiationNode extends ASTNode {
         this.name = in.readString();
         this.params = in.readNodeListNoCast();
     }
+
+    @Override
+    public String toString() {
+        return "ClassInstantiationNode{" +
+                "name='" + name + '\'' +
+                ", params=" + params +
+                '}';
+    }
 }

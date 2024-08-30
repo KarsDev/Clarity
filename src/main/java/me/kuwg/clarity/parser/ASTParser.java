@@ -26,6 +26,7 @@ import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import me.kuwg.clarity.compiler.ASTLoader;
+import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.TokenType;
 import me.kuwg.clarity.token.Tokenizer;
@@ -508,8 +509,7 @@ public final class ASTParser {
         consume(); // consume "new"
 
         final int line = current().getLine();
-
-        final String clazz = consume(VARIABLE).getValue();
+        final String clazz = consume(VARIABLE).getValue(); // get the class name
         consume(DIVIDER, "(");
 
         final List<ASTNode> params = new ArrayList<>();
@@ -522,8 +522,47 @@ public final class ASTParser {
 
         consume(DIVIDER, ")");
 
-        return new ClassInstantiationNode(clazz, params).setLine(line);
+        ASTNode node = new ClassInstantiationNode(clazz, params).setLine(line);
+
+        while (true) {
+            if (matchAndConsume(OPERATOR, ".")) {
+                if (match(VARIABLE)) {
+                    final String nextPart = consume(VARIABLE).getValue();
+                    if (match(DIVIDER, "(")) {
+                        node = parseMethodCall(nextPart, node);
+                    } else {
+                        node = parseVariableAccess(nextPart, node);
+                    }
+                } else {
+                    Register.throwException("Expected variable or method after '.'", current().getLine());
+                }
+            } else {
+                break;
+            }
+        }
+
+        return node;
     }
+
+    // Parse method call, assuming `nextPart` is the method name and `receiver` is the previous node
+    private ASTNode parseMethodCall(String methodName, ASTNode receiver) {
+        consume(DIVIDER, "(");
+
+        final List<ASTNode> params = new ArrayList<>();
+        while (true) {
+            if (match(DIVIDER, ")")) break;
+            params.add(parseExpression());
+            if (!matchAndConsume(DIVIDER, ",")) break;
+        }
+
+        consume(DIVIDER, ")");
+        return new MemberFunctionCallNode(receiver, methodName, params).setLine(current().getLine());
+    }
+
+    private ASTNode parseVariableAccess(String variableName, ASTNode receiver) {
+        return new ObjectVariableReferenceNode(receiver, variableName).setLine(current().getLine());
+    }
+
 
     private ASTNode parsePrimaryLocalDeclaration() {
         consume(); // consume "local"

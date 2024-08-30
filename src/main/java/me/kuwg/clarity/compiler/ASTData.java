@@ -15,6 +15,7 @@ import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
+import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.statements.ForNode;
 import me.kuwg.clarity.ast.nodes.statements.IfNode;
@@ -60,6 +61,7 @@ public class ASTData {
         registerNode(LocalFunctionCallNode.class, 0x306);
         registerNode(PackagedNativeFunctionCallNode.class, 0x307);
         registerNode(ReflectedNativeFunctionDeclaration.class, 0x308);
+        registerNode(MemberFunctionCallNode.class, 0x309);
 
         // Variable (0x400)
         registerNode(VariableDeclarationNode.class, 0x400);

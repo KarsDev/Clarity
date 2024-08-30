@@ -14,6 +14,5 @@ class Test {
 }
 
 fn main() {
-    var test = new Test()
-    native.print(test.X.LOL.TOGET)
+    native.print(new Test().X.LOL.TOGET)
 }
