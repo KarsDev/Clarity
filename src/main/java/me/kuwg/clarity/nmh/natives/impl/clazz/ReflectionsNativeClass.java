@@ -46,9 +46,11 @@ public class ReflectionsNativeClass extends NativeClass {
                 if (element == null) return null;
                 return element.getCurrentClass();
             }
+            default:
+                Register.throwException("Unsupported method name: " + name);
         }
-        Register.throwException("Unsupported method name: " + name);
-        return null;
+
+        return VOID;
     }
 
     private String getParamTypes(List<Object> params) {

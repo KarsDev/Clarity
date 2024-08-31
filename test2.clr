@@ -1,4 +1,0 @@
-include native math
-
-var x = Math.log(3, 15)
-native.println(x)
