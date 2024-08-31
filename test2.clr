@@ -1,2 +1,10 @@
-var x = str(1)
+include native reflections
+include native math
+
+const var x = str(3)
+
+Reflections.editVariable("x", 5)
+
 native.println(x)
+
+System.throw("lookup")

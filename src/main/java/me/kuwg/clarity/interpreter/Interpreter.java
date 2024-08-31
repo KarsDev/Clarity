@@ -1313,9 +1313,9 @@ public class Interpreter {
             final ClassDefinition classDefinition = (ClassDefinition) rawClassDefinition;
 
             final FunctionDefinition definition = classDefinition.getStaticFunction(node.getName(), node.getParams().size());
-
+            System.out.println(classDefinition);
             if (definition == null) {
-                except("Static function not found: " + caller + "#" + node.getName(), node.getLine());
+                except("Static function not found: " + classDefinition.getName() + "#" + node.getName(), node.getLine());
                 return null;
             }
 
