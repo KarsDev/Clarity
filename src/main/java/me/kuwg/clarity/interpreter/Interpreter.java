@@ -17,7 +17,6 @@ import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclara
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
-import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
 import me.kuwg.clarity.ast.nodes.statements.*;
 import me.kuwg.clarity.ast.nodes.variable.assign.LocalVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
@@ -124,7 +123,6 @@ public class Interpreter {
         if (node instanceof ClassInstantiationNode) return interpretClassInstantiation((ClassInstantiationNode) node, context);
         if (node instanceof FunctionDeclarationNode) return interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
         if (node instanceof ClassDeclarationNode) return interpretClassDeclaration((ClassDeclarationNode) node, context);
-        if (node instanceof ContextReferenceNode) return interpretContextReference(context);
         if (node instanceof VariableReassignmentNode) return interpretVariableReassignment((VariableReassignmentNode) node, context);
         if (node instanceof ObjectFunctionCallNode) return interpretObjectFunctionCall((ObjectFunctionCallNode) node, context);
         if (node instanceof LocalVariableReferenceNode) return interpretLocalVariableReferenceNode((LocalVariableReferenceNode) node, context);
@@ -546,11 +544,6 @@ public class Interpreter {
         }
 
         return new ClassObject(cn, constructorContext);
-    }
-
-
-    private Object interpretContextReference(final Context context) {
-        return context.parentContext();
     }
 
     private Object interpretVariableReassignment(final VariableReassignmentNode node, final Context context) {

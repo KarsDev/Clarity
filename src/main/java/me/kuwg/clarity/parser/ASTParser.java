@@ -18,9 +18,10 @@ import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
-import me.kuwg.clarity.ast.nodes.reference.ContextReferenceNode;
+import me.kuwg.clarity.ast.nodes.variable.assign.LocalVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
+import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import me.kuwg.clarity.compiler.ASTLoader;
@@ -512,8 +513,8 @@ public final class ASTParser {
         final int line = current().getLine();
 
         if (matchAndConsume(OPERATOR, ".")) {
-            if (lookahead().is(DIVIDER, "(")) {
-                final String name = consume(VARIABLE).getValue();
+            final String name = consume(VARIABLE).getValue();
+            if (match(DIVIDER, "(")) {
                 consume(); // consume open paren
                 List<ASTNode> params = new ArrayList<>();
                 while (!match(DIVIDER, ")")) {
@@ -522,8 +523,10 @@ public final class ASTParser {
                 }
                 consume(DIVIDER, ")");
                 return new LocalFunctionCallNode(name, params).setLine(line);
+            } else if (matchAndConsume(OPERATOR, "=")) {
+                return new LocalVariableReassignmentNode(name, parseExpression());
             }
-            return new ContextReferenceNode(ContextReferenceNode.ReferenceType.LOCAL).setLine(line);
+            return new LocalVariableReferenceNode(name);
         }
 
         undo();
