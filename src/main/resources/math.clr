@@ -160,7 +160,7 @@ const native class Math {
 
         var result = 1
         var term = 1
-        for (var n = 1; n < maxTerms; n++) {
+        for var n = 1, n < maxTerms, n++, {
             term *= x / n
             result += term
             if (Math.abs(term) < tolerance) break
