@@ -183,49 +183,17 @@ public final class ASTParser {
             consume(KEYWORD, "fn");
 
             final String name = consume(VARIABLE).getValue();
-
-            final List<ParameterNode> params = new ArrayList<>();
-
-            consume(DIVIDER, "(");
-            if (match(VARIABLE)) {
-                do {
-                    params.add(new ParameterNode(consume(VARIABLE).getValue()));
-                    if (match(DIVIDER, ",")) {
-                        consume();
-                    } else {
-                        break;
-                    }
-                } while (true);
-            }
+            final List<ParameterNode> params = parseParameters();
 
             final int line = current().getLine();
-            consume(DIVIDER, ")");
-
             return new ReflectedNativeFunctionDeclaration(name, fileName, params, isStatic).setLine(line);
         }
 
         matchAndConsume(KEYWORD, "fn");
 
         final String name = matchAndConsume(KEYWORD, "constructor") ? "constructor" : consume(VARIABLE).getValue();
-
-        final List<ParameterNode> params = new ArrayList<>();
-
         final int line = current().getLine();
-
-        consume(DIVIDER, "(");
-        if (match(VARIABLE)) {
-            do {
-                final Token consumed = consume(VARIABLE);
-                params.add(new ParameterNode(consumed.getValue()).setLine(consumed.getLine()));
-                if (match(DIVIDER, ",")) {
-                    consume();
-                } else {
-                    break;
-                }
-            } while (true);
-        }
-
-        consume(DIVIDER, ")");
+        final List<ParameterNode> params = parseParameters();
 
         final BlockNode block = parseBlock();
 
@@ -843,6 +811,29 @@ public final class ASTParser {
     private ASTNode parseIsDeclaration() {
         throw new RuntimeException();
     }
+
+    private List<ParameterNode> parseParameters() {
+        List<ParameterNode> params = new ArrayList<>();
+
+        consume(DIVIDER, "(");
+
+        if (match(VARIABLE)) {
+            do {
+                Token token = consume(VARIABLE); // Consume the parameter variable
+                params.add(new ParameterNode(token.getValue()).setLine(token.getLine()));
+
+                if (match(DIVIDER, ",")) {
+                    consume(); // Consume the comma separator
+                } else {
+                    break;
+                }
+            } while (true);
+        }
+
+        consume(DIVIDER, ")"); // Consume the closing parenthesis
+        return params;
+    }
+
 
 
 

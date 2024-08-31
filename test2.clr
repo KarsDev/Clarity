@@ -1,3 +1,11 @@
-select 2 {
-    when 1 {}
+fn add(params) {
+    var result = 0
+    for i : params {
+        result = result + i
+    }
+    return result
 }
+
+var i = add([1, 2, 3, 4, 5])
+
+native.println(i)
