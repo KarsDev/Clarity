@@ -1,8 +1,2 @@
-class Extend {
-}
-class Test inherits Extend {
-}
-
-var test = new Test()
-
-assert test is str
+var x = .542342
+native.println(x)

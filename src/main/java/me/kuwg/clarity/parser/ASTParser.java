@@ -425,6 +425,13 @@ public final class ASTParser {
                 return new BinaryExpressionNode(new IntegerNode(0).setLine(line), "-", right).setLine(line);
             case "!":
                 return new BinaryExpressionNode(new BooleanNode(false), "==", right).setLine(line);
+            case ".":
+                if (right instanceof IntegerNode) {
+                    final int integerValue = ((IntegerNode) right).getValue();
+                    final int numberOfDigits = (int) Math.log10(integerValue) + 1;
+                    final double divisor = Math.pow(10, numberOfDigits);
+                    return new DecimalNode(integerValue / divisor);
+                }
             default:
                 throw new UnsupportedOperationException("Unsupported unary operator: " + token.getValue() + " at line " + line);
         }
