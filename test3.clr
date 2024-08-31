@@ -1,4 +1,6 @@
-include math
+include native math
 
-var x = Math.sqrt(2)
-native.println(x)
+fn main() {
+    var x = Math.sqrt(2)
+    native.println(x)
+}

@@ -9,6 +9,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 import static me.kuwg.clarity.compiler.ASTData.CONTINUE_BIT;
@@ -115,14 +116,7 @@ public class ASTOutputStream extends DataOutputStream {
      *                     It can be {@code null}.
      * @throws IOException If an I/O error occurs while writing to the stream.
      */
-    public void writeNodeArray(final FunctionDeclarationNode[] constructors) throws IOException {
-        if (constructors == null) {
-            writeVarInt(0);
-        } else {
-            writeVarInt(constructors.length);
-            for (FunctionDeclarationNode constructor : constructors) {
-                writeNode(constructor);
-            }
-        }
+    public void writeConstructorNodeArray(final FunctionDeclarationNode[] constructors) throws IOException {
+        writeNodeList(Arrays.asList(constructors));
     }
 }
