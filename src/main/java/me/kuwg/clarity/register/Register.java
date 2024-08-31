@@ -48,7 +48,12 @@ public final class Register {
     }
 
     public enum RegisterElementType {
-        FUNCALL, NATIVECALL, CLASSINST, STATICCALL, ARRAYCALL, LOCALCALL
+        FUNCALL,
+        NATIVECALL,
+        CLASSINST,
+        STATICCALL,
+        ARRAYCALL,
+        LOCALCALL
     }
 
     public static class RegisterElement {

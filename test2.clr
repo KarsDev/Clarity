@@ -3,12 +3,12 @@ fn add(array) {
     assert array is arr else "Expected parameter of type array"
 
     var result = 0
-    for i : params {
+    for i : array {
         result = result + i
     }
     return result
 }
 
-var i = add([1, 2, 3, 4, 5])
+var i = add(1, 3)
 
 native.println(i)

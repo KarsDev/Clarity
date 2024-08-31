@@ -413,15 +413,6 @@ public class Interpreter {
         final String functionName = ((VariableReferenceNode) node.getCaller()).getName();
         context.setCurrentFunctionName(functionName);
 
-        final ObjectType type = context.getFunction(functionName, node.getParams().size());
-
-        if (type == VOID_OBJECT) {
-            except("Calling a function that doesn't exist: " + functionName, node.getLine());
-            return null;
-        }
-
-        final FunctionDefinition definition = (FunctionDefinition) type;
-
         final List<Object> params = new ArrayList<>();
 
         for (final ASTNode param : node.getParams()) {
@@ -431,6 +422,15 @@ public class Interpreter {
             }
             params.add(returned);
         }
+
+        final ObjectType type = context.getFunction(functionName, node.getParams().size());
+
+        if (type == VOID_OBJECT) {
+            except("Calling a function that doesn't exist: " + functionName + getParams(params), node.getLine());
+            return null;
+        }
+
+        final FunctionDefinition definition = (FunctionDefinition) type;
 
         if (params.size() > definition.getParams().size()) {
             except("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
@@ -450,7 +450,7 @@ public class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
         }
 
-        Register.register(new Register.RegisterElement(Register.RegisterElementType.FUNCALL, node.getCaller() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.FUNCALL, ((VariableReferenceNode) node.getCaller()).getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
         context.setCurrentFunctionName(null);
@@ -748,15 +748,6 @@ public class Interpreter {
 
         context.setCurrentFunctionName(functionName);
 
-        final ObjectType type = context.getFunction(functionName, node.getParams().size());
-
-        if (type == VOID_OBJECT) {
-            except("Calling a function that doesn't exist: " + functionName, node.getLine());
-            return null;
-        }
-
-        final FunctionDefinition definition = (FunctionDefinition) type;
-
         final List<Object> params = new ArrayList<>();
 
         for (final ASTNode param : node.getParams()) {
@@ -766,6 +757,15 @@ public class Interpreter {
             }
             params.add(returned);
         }
+
+        final ObjectType type = context.getFunction(functionName, node.getParams().size());
+
+        if (type == VOID_OBJECT) {
+            except("Calling a local function that doesn't exist: " + functionName + getParams(params), node.getLine());
+            return null;
+        }
+
+        final FunctionDefinition definition = (FunctionDefinition) type;
 
         if (params.size() > definition.getParams().size()) {
             except("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
@@ -905,7 +905,15 @@ public class Interpreter {
         final StringBuilder s = new StringBuilder("(");
         for (int i = 0, size = objects.size(); i < size; i++) {
             final Object o = objects.get(i);
-            s.append(o == null ? null : o.getClass().getSimpleName().toLowerCase());
+            if (o == null) {
+                s.append((String) null);
+            }
+            else {
+                if (o instanceof Integer) s.append("int");
+                else if (o instanceof Double) s.append("float");
+                else if (o instanceof Object[]) s.append("arr");
+                else s.append(o.getClass().getSimpleName().toLowerCase());
+            }
             if (i < size - 1) s.append(", ");
         }
         return s + ")";
