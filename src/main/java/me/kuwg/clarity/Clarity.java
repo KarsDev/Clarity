@@ -3,6 +3,7 @@ package me.kuwg.clarity;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
+import me.kuwg.clarity.installer.ClarityInstaller;
 import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.token.Token;
@@ -10,7 +11,9 @@ import me.kuwg.clarity.token.Tokenizer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 
 public class Clarity {
@@ -27,17 +30,23 @@ public class Clarity {
             }
 
             void exec() throws IOException {
+
                 if (args.length == 0) {
                     printUsage();
                     return;
                 }
 
                 if (args.length == 1) {
+                    if (args[0].equals("install")){
+                        System.out.println("Installing...");
+                        installClarity();
+                        return;
+                    }
                     printInputFileRequired();
                     return;
                 }
 
-                File file = new File(args[1]);
+                final File file = new File(args[1]);
 
                 if (!file.exists()) {
                     printFileNotFound(file);
@@ -71,8 +80,21 @@ public class Clarity {
         }.start();
     }
 
+    private static void installClarity() {
+        try {
+            final File destDir = new File(System.getProperty("user.home") + "\\Clarity");
+            if (!destDir.exists()) destDir.mkdirs();
+            System.out.println("Clarity will be installed successfully at: " + destDir.getAbsolutePath());
+            ClarityInstaller.install(destDir.getAbsolutePath());
+        } catch (final Exception e) {
+            System.err.println("Installation failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     private static void printUsage() {
         System.out.println("Usage:");
+        System.out.println("  install     - Installs clarity on the device and creates file associations");
         System.out.println("  interpret <source.clr>      - Interpret and run the source file");
         System.out.println("  run <compiled.cclr>         - Interpret the compiled source file");
         System.out.println("  compile <source.clr> [output.cclr] - Compile the source file to AST format");

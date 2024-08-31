@@ -600,7 +600,7 @@ public final class ASTParser {
         }
 
         if (isNative) {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(path);
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("natives\\" + path);
             if (inputStream == null) {
                 try {
                     throw new IOException("Native library not found: '" + path + "'");

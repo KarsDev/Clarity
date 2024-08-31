@@ -1,5 +1,5 @@
 include native reflections
-include native math
+include native system
 
 const var x = str(3)
 
