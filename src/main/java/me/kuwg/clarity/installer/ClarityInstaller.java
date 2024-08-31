@@ -63,6 +63,12 @@ public class ClarityInstaller {
             writer.write("    exit /b\n");
             writer.write(")\n\n");
 
+            writer.write(":: Set opening app as clarity.bat");
+            writer.write("assoc .clr=clrfile\n");
+            writer.write("for /f \"tokens=2 delims==\" %%a in ('assoc .clr') do set FILETYPE=%%a\n");
+            writer.write("echo setting %FYLETYPE%'s opening\n");
+            writer.write("ftype %FILETYPE%=\"%USERPROFILE%\\Clarity\\clarity.bat\" interpret %*\n");
+
             writer.write(":: Define variables\n");
             writer.write("set \"ext=.clr\"\n");
             writer.write("set \"iconPath=%userprofile%\\Clarity\\logo.ico\"\n");
@@ -77,16 +83,13 @@ public class ClarityInstaller {
             writer.write(":: Set the icon for the file type\n");
             writer.write("reg add \"HKEY_CLASSES_ROOT\\%fileType%\\DefaultIcon\" /v \"\" /t REG_SZ /d \"%iconPath%\" /f\n\n");
 
-            writer.write(":: Set opening app as clarity.bat");
-            writer.write("assoc .clr=clrfile\n");
-            writer.write("ftype clrfile=\"%USERPROFILE%\\Clarity\\clarity.bat\" interpret %*\n");
-
             writer.write(":: Refresh the icon cache (Restart Explorer)\n");
             writer.write("echo Restarting Explorer to apply changes...\n");
             writer.write("taskkill /f /im explorer.exe\n");
             writer.write("start explorer.exe\n\n");
 
             writer.write("echo Done!\n");
+            writer.write("pause");
         }
     }
 
@@ -136,6 +139,7 @@ public class ClarityInstaller {
             }
         }
 
+        System.out.println("Setting image logo and opener...");
         final String logoBatFile = new File(path, "setlogo.bat").getAbsolutePath();
         exe(logoBatFile);
         exe("del " + logoBatFile);
