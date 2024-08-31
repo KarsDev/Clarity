@@ -77,6 +77,10 @@ public class ClarityInstaller {
             writer.write(":: Set the icon for the file type\n");
             writer.write("reg add \"HKEY_CLASSES_ROOT\\%fileType%\\DefaultIcon\" /v \"\" /t REG_SZ /d \"%iconPath%\" /f\n\n");
 
+            writer.write(":: Set opening app as clarity.bat");
+            writer.write("assoc .clr=clrfile\n");
+            writer.write("ftype clrfile=\"%USERPROFILE%\\Clarity\\clarity.bat\" interpret %*\n");
+
             writer.write(":: Refresh the icon cache (Restart Explorer)\n");
             writer.write("echo Restarting Explorer to apply changes...\n");
             writer.write("taskkill /f /im explorer.exe\n");
