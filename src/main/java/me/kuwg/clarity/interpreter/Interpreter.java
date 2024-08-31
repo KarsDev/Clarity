@@ -156,8 +156,7 @@ public class Interpreter {
 
     private Object interpretBlock(final BlockNode block, final Context context) {
         if (block == null) {
-            Register.throwException("Null block");
-            return null;
+            return VOID_OBJECT;
         }
         for (final ASTNode node : block) {
             final Object result = interpretNode(node, context);

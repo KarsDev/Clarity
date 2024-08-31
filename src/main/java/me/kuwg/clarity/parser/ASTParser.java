@@ -791,12 +791,20 @@ public final class ASTParser {
             if (matchAndConsume(KEYWORD, "when")) {
                 final int whenLine = current().getLine(); // line of "when"
                 final ASTNode whenCondition = parseExpression();
+                if (!match(DIVIDER, "{")) {
+                    Register.throwException("When block must be declared with brackets");
+                    return null;
+                }
                 final BlockNode whenBlock = parseBlock();
                 cases.add(new SelectNode.WhenNode(whenCondition, whenBlock).setLine(whenLine));
                 continue;
             } else if (match(KEYWORD, "default")) {
                 if (defaultBlock != null) throw new IllegalStateException("Multiple default blocks: " + current());
                 final int defaultLine = consume().getLine(); // consume "default"
+                if (!match(DIVIDER, "{")) {
+                    Register.throwException("Default block must be declared with brackets");
+                    return null;
+                }
                 defaultBlock = parseBlock().setLine(defaultLine);
                 continue;
             }
