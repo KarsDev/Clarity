@@ -1172,6 +1172,8 @@ public class Interpreter {
         }
 
         switch (node.getType()) {
+            case STR:
+                return castToStr(expression, node);
             case FLOAT:
                 return castToFloat(expression, node);
             case INT:
@@ -1182,6 +1184,24 @@ public class Interpreter {
                 Register.throwException("Unknown cast: " + node.getType().name().toLowerCase(), node.getLine());
                 return null;
         }
+    }
+
+    private String castToStr(final Object expr, final NativeCastNode node) {
+        if (expr instanceof String) {
+            return (String) expr;
+        }
+        if (expr instanceof Integer) {
+            return Integer.toString((Integer) expr);
+        }
+        if (expr instanceof Double) {
+            return Double.toString((Double) expr);
+        }
+        if (expr instanceof Boolean) {
+            return Boolean.toString((Boolean) expr);
+        }
+
+        Register.throwException("Could not cast to string", node.getLine());
+        return null;
     }
 
     private Double castToFloat(final Object expression, final NativeCastNode node) {
@@ -1384,6 +1404,8 @@ public class Interpreter {
         }
 
         switch (node.getType()) {
+            case STR:
+                return result instanceof String;
             case FLOAT:
                 return result instanceof Double;
             case INT:

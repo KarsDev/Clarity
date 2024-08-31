@@ -5,4 +5,4 @@ class Test inherits Extend {
 
 var test = new Test()
 
-assert test is Test
+assert test is str

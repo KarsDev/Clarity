@@ -1,9 +1,10 @@
 package me.kuwg.clarity.ast.nodes.clazz.cast;
 
 public enum CastType {
-    FLOAT(""),
-    INT(""),
-    ARR(""),
+    STR(null),
+    FLOAT(null),
+    INT(null),
+    ARR(null),
     CLASS("");
 
     private String value;
@@ -33,6 +34,9 @@ public enum CastType {
 
             case "arr":
                 return ARR;
+
+            case "str":
+                return STR;
 
             default:
                 return null;

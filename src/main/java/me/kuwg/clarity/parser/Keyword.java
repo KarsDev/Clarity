@@ -32,7 +32,8 @@ public enum Keyword {
     INHERITS,
     ASSERT,
     IS,
-    ARR
+    ARR,
+    STR,
 
     ;
 
@@ -67,6 +68,7 @@ public enum Keyword {
             case "assert": return ASSERT;
             case "is": return IS;
             case "arr": return ARR;
+            case "str": return STR;
 
             default: throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
         }
