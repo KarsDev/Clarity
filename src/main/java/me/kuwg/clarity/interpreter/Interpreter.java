@@ -36,6 +36,7 @@ import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.privilege.Privileges;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -1199,6 +1200,9 @@ public class Interpreter {
         }
         if (expr instanceof Boolean) {
             return Boolean.toString((Boolean) expr);
+        }
+        if (expr instanceof Object[]) {
+            return Arrays.toString((Object[]) expr);
         }
 
         Register.throwException("Could not cast to string", node.getLine());

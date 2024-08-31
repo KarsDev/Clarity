@@ -132,6 +132,10 @@ public final class ASTParser {
                 return parseAssertDeclaration();
             case IS:
                 return parseIsDeclaration();
+            case STR:
+                return parseStrDeclaration();
+            case ARR:
+                return parseArrDeclaration();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -843,6 +847,17 @@ public final class ASTParser {
         consume(DIVIDER, ")"); // Consume the closing parenthesis
         return params;
     }
+
+    private ASTNode parseStrDeclaration() {
+        final int line = consume().getLine(); // consume "str"
+        return new NativeCastNode(CastType.STR, parseExpression()).setLine(line);
+    }
+
+    private ASTNode parseArrDeclaration() {
+        final int line = consume().getLine(); // consume "str"
+        return new NativeCastNode(CastType.ARR, parseExpression()).setLine(line);
+    }
+
 
 
 
