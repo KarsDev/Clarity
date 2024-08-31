@@ -53,15 +53,6 @@ public class ReflectionsNativeClass extends NativeClass {
         return VOID;
     }
 
-    private String getParamTypes(List<Object> params) {
-        StringBuilder sb = new StringBuilder();
-        for (Object param : params) {
-            if (sb.length() > 0) sb.append(", ");
-            sb.append(param == null ? "null" : param.getClass().getSimpleName());
-        }
-        return sb.toString();
-    }
-
     private void check(String message, boolean condition) {
         if (!condition) {
             throw new IllegalArgumentException(message);

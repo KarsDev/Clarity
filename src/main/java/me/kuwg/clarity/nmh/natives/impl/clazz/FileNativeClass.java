@@ -249,12 +249,4 @@ public class FileNativeClass extends NativeClass {
         }
     }
 
-    private String getParamTypes(List<Object> params) {
-        StringBuilder sb = new StringBuilder();
-        for (Object param : params) {
-            if (sb.length() > 0) sb.append(", ");
-            sb.append(param == null ? "null" : param.getClass().getSimpleName());
-        }
-        return sb.toString();
-    }
 }

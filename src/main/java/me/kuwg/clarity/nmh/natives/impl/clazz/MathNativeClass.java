@@ -77,13 +77,4 @@ public class MathNativeClass extends NativeClass {
 
         throw new UnsupportedOperationException("Unsupported math native: " + name);
     }
-
-    private String getParamTypes(List<Object> params) {
-        StringBuilder sb = new StringBuilder();
-        for (Object param : params) {
-            if (sb.length() > 0) sb.append(", ");
-            sb.append(param == null ? "null" : param.getClass().getSimpleName());
-        }
-        return sb.toString();
-    }
 }

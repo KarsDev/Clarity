@@ -25,4 +25,18 @@ public abstract class NativeClass {
     protected final void check(final String err, final boolean... condos) {
         for (final boolean condo : condos) if (!condo) Register.throwException(err);
     }
+
+    protected final String getParamTypes(List<Object> params) {
+        StringBuilder sb = new StringBuilder();
+        for (Object param : params) {
+            if (sb.length() > 0) sb.append(", ");
+            if (param == null) sb.append("null");
+            else if (param instanceof Integer) sb.append("int");
+            else if (param instanceof Double) sb.append("float");
+            else if (param instanceof String) sb.append("str");
+            else if (param instanceof Object[]) sb.append("arr");
+            else sb.append(param.getClass().getSimpleName());
+        }
+        return sb.toString();
+    }
 }
