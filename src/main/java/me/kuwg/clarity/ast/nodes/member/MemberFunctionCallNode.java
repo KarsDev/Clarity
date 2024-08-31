@@ -64,4 +64,13 @@ public class MemberFunctionCallNode extends ASTNode {
         this.caller = in.readNode();
         this.params = in.readNodeListNoCast();
     }
+
+    @Override
+    public String toString() {
+        return "MemberFunctionCallNode{" +
+                "caller=" + caller +
+                ", name='" + name + '\'' +
+                ", params=" + params +
+                '}';
+    }
 }

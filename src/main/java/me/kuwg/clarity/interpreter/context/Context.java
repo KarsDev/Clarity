@@ -150,6 +150,21 @@ public class Context {
 
     @Override
     public String toString() {
+        return "Context{" +
+                "variables=" + variables +
+                ", functions=" + functions +
+                ", classes=" + classes +
+                ", natives=" + natives +
+                ", currentClassName='" + currentClassName + '\'' +
+                ", currentFunctionName='" + currentFunctionName + '\'' +
+                ", parentContext=" + parentContext +
+                '}';
+    }
+
+    /*
+    NEWWLINE TOS
+    @Override
+    public String toString() {
         return "Context{\n" +
                 "variables=" + variables +
                 ",\n functions=" + functions +
@@ -160,4 +175,5 @@ public class Context {
                 ",\n parentContext=" + parentContext +
                 "\n}";
     }
+     */
 }

@@ -35,10 +35,9 @@ fn main() {
 
     native.println(x)
 
-    native.error.except()
+    native.error.except("except")
 }
 
 fn getVoid() {
-    native.println("Getting void val")
     return void
 }

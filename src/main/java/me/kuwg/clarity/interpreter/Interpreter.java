@@ -249,11 +249,11 @@ public class Interpreter {
         return VOID_OBJECT;
     }
 
-    private FunctionDefinition[] getConstructors(FunctionDeclarationNode[] nodes) {
-        final FunctionDefinition[] constructors = new FunctionDefinition[nodes.length];
+    private FunctionDefinition[] getConstructors(List<FunctionDeclarationNode> nodes) {
+        final FunctionDefinition[] constructors = new FunctionDefinition[nodes.size()];
 
-        for (int i = 0; i < nodes.length; i++) {
-            constructors[i] = new FunctionDefinition(nodes[i]);
+        for (int i = 0; i < nodes.size(); i++) {
+            constructors[i] = new FunctionDefinition(nodes.get(i));
         }
 
         return constructors;
@@ -507,7 +507,6 @@ public class Interpreter {
 
         final Object result = interpretConstructors(definition.getConstructors(), params, classContext, name);
         context.setCurrentClassName(null);
-
         return result;
     }
 

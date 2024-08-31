@@ -504,7 +504,7 @@ public final class ASTParser {
             }
         }
 
-        return new ClassDeclarationNode(name, isConstant, inheritedClass, fileName, constructors.toArray(new FunctionDeclarationNode[0]), body).setLine(line);
+        return new ClassDeclarationNode(name, isConstant, inheritedClass, fileName, constructors, body).setLine(line);
     }
 
     private ASTNode parseLocalDeclaration() {
@@ -512,6 +512,17 @@ public final class ASTParser {
         final int line = current().getLine();
 
         if (matchAndConsume(OPERATOR, ".")) {
+            if (lookahead().is(DIVIDER, "(")) {
+                final String name = consume(VARIABLE).getValue();
+                consume(); // consume open paren
+                List<ASTNode> params = new ArrayList<>();
+                while (!match(DIVIDER, ")")) {
+                    params.add(parseExpression());
+                    if (!matchAndConsume(DIVIDER, ",")) break;
+                }
+                consume(DIVIDER, ")");
+                return new LocalFunctionCallNode(name, params).setLine(line);
+            }
             return new ContextReferenceNode(ContextReferenceNode.ReferenceType.LOCAL).setLine(line);
         }
 
@@ -762,7 +773,7 @@ public final class ASTParser {
                 }
             }
         }
-        return new NativeClassDeclarationNode(name, isConstant, inheritedClass, fileName, constructors.toArray(new FunctionDeclarationNode[0]), body).setLine(line);
+        return new NativeClassDeclarationNode(name, isConstant, inheritedClass, fileName, constructors, body).setLine(line);
     }
 
     private ASTNode parseSelectDeclaration() {

@@ -7,17 +7,18 @@ import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
+import java.util.List;
 
 public class ClassDeclarationNode extends ASTNode {
 
     private String name;
     private boolean isConstant;
     private String fileName;
-    private FunctionDeclarationNode[] constructors;
+    private List<FunctionDeclarationNode> constructors;
     private BlockNode body;
     private String inheritedClass;
 
-    public ClassDeclarationNode(final String name, final boolean isConstant, final String inheritedClass, final String fileName, final FunctionDeclarationNode[] constructors, final BlockNode body) {
+    public ClassDeclarationNode(final String name, final boolean isConstant, final String inheritedClass, final String fileName, List<FunctionDeclarationNode> constructors, final BlockNode body) {
         this.name = name;
         this.isConstant = isConstant;
         this.fileName = fileName;
@@ -41,7 +42,7 @@ public class ClassDeclarationNode extends ASTNode {
         return fileName;
     }
 
-    public final FunctionDeclarationNode[] getConstructors() {
+    public final List<FunctionDeclarationNode> getConstructors() {
         return constructors;
     }
 
@@ -63,7 +64,7 @@ public class ClassDeclarationNode extends ASTNode {
             sb.append(indent).append("    ").append("Inherits: ").append(inheritedClass).append("\n");
         }
         sb.append(indent).append("    ").append("File: ").append(fileName).append("\n");
-        if (constructors.length != 0) {
+        if (constructors.size() != 0) {
             sb.append(indent).append("    ").append("Constructors:\n");
             for (final FunctionDeclarationNode constructor : constructors) {
                 constructor.print(sb, indent + "        -");
@@ -84,7 +85,7 @@ public class ClassDeclarationNode extends ASTNode {
         out.writeBoolean(isConstant);
         out.writeString(inheritedClass != null ? inheritedClass : "null");
         out.writeString(fileName);
-        out.writeNodeArray(constructors);
+        out.writeNodeList(constructors);
         out.writeNode(body);
     }
 
@@ -95,7 +96,7 @@ public class ClassDeclarationNode extends ASTNode {
         this.inheritedClass = in.readString();
         if (this.inheritedClass.equals("null")) this.inheritedClass = null;
         this.fileName = in.readString();
-        this.constructors = (FunctionDeclarationNode[]) in.readNodeArray();
+        this.constructors = in.readNodeListNoCast();
         this.body = (BlockNode) in.readNode();
     }
 }

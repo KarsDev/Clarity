@@ -55,4 +55,12 @@ public class FunctionCallNode extends ASTNode {
         this.caller = in.readNode();
         this.params = in.readNodeListNoCast();
     }
+
+    @Override
+    public String toString() {
+        return "FunctionCallNode{" +
+                "caller=" + caller +
+                ", params=" + params +
+                '}';
+    }
 }
