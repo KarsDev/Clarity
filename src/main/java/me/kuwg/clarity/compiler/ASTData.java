@@ -43,6 +43,7 @@ public class ASTData {
     static {
         // Null
         registerNode(null, 0x00);
+        registerNode(NullNode.class, 0x01);
 
         // Block (0x100)
         registerNode(BlockNode.class, 0x100);
