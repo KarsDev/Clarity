@@ -1,4 +1,7 @@
-fn add(params) {
+fn add(array) {
+
+    assert array is arr else "Expected parameter of type array"
+
     var result = 0
     for i : params {
         result = result + i
