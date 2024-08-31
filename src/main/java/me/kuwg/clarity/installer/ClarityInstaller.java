@@ -15,7 +15,6 @@ public class ClarityInstaller {
         cloneJar();
         createBatchFiles();
         setUserPath();
-        removeDuplicatesInUserPath();
         setLanguageLogo();
     }
 
@@ -111,31 +110,6 @@ public class ClarityInstaller {
         }
 
         System.out.println("PATH environment variable updated. Please restart your command prompt for changes to take effect.");
-    }
-
-    private void removeDuplicatesInUserPath() throws IOException {
-        final String currentPath = System.getenv("PATH");
-        final String[] paths = currentPath.split(File.pathSeparator);
-
-        final Set<String> uniquePaths = new LinkedHashSet<>();
-        for (final String p : paths) {
-            uniquePaths.add(p.trim());
-        }
-
-        final String updatedPath = String.join(File.pathSeparator, uniquePaths);
-
-        final String command = "setx PATH \"" + updatedPath + "\"";
-
-        try {
-            if (exe(command) != 0) {
-                throw new IOException("Failed to update PATH environment variable.");
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException("Error occurred while waiting for the process to complete.", e);
-        }
-
-        System.out.println("Duplicates removed from PATH environment variable.");
     }
 
     public void setLanguageLogo() throws Exception {
