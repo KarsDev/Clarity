@@ -94,7 +94,6 @@ public class Clarity {
 
     private static void printUsage() {
         System.out.println("Usage:");
-        System.out.println("  install     - Installs clarity on the device and creates file associations");
         System.out.println("  interpret <source.clr>      - Interpret and run the source file");
         System.out.println("  run <compiled.cclr>         - Interpret the compiled source file");
         System.out.println("  compile <source.clr> [output.cclr] - Compile the source file to AST format");
