@@ -83,7 +83,7 @@ public class NativeClassDeclarationNode extends ASTNode {
         out.writeBoolean(isConstant);
         out.writeString(inheritedClass != null ? inheritedClass : "null");
         out.writeString(fileName);
-        out.writeNodeArray(constructors);
+        out.writeConstructorNodeArray(constructors);
         out.writeNode(body);
     }
 
@@ -94,7 +94,7 @@ public class NativeClassDeclarationNode extends ASTNode {
         this.inheritedClass = in.readString();
         if (this.inheritedClass.equals("null")) this.inheritedClass = null;
         this.fileName = in.readString();
-        this.constructors = (FunctionDeclarationNode[]) in.readNodeArray();
+        this.constructors = in.readConstructorNodeArray();
         this.body = (BlockNode) in.readNode();
     }
 }
