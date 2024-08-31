@@ -217,7 +217,7 @@ public class Interpreter {
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
 
-        definition.getBody().forEach(statement -> {
+        for (final ASTNode statement : definition.getBody()) {
             if (statement instanceof VariableDeclarationNode) {
                 VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
                 if (declarationNode.isStatic()) {
@@ -239,7 +239,7 @@ public class Interpreter {
                     definition.staticFunctions.add(def);
                 }
             }
-        });
+        }
 
         context.setCurrentClassName(null);
 
@@ -877,6 +877,7 @@ public class Interpreter {
         final ObjectType rawCurrent =  context.getClass(context.getCurrentClassName());
 
         if (!(rawCurrent instanceof ClassDefinition)) {
+            System.out.println(rawCurrent);
             return new ReturnValue(nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params));
         }
 
@@ -885,7 +886,7 @@ public class Interpreter {
         if (current.isNative()) {
             return new ReturnValue(nmh.callClassNative(current.getName(), node.getName(), params, context));
         }
-        else return new ReturnValue(nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params));
+        return new ReturnValue(nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params));
     }
 
     private Object interpretArray(final ArrayNode node, final Context context) {
@@ -1065,7 +1066,6 @@ public class Interpreter {
     }
 
     private Object interpretReflectedNativeFunctionDeclaration(final ReflectedNativeFunctionDeclaration node, final Context context) {
-
         final BlockNode block = new BlockNode();
 
         final List<ASTNode> nodes = new ArrayList<>();
@@ -1073,10 +1073,10 @@ public class Interpreter {
         for (final ParameterNode parameterNode : node.getParams())
             nodes.add(new VariableReferenceNode(parameterNode.getName()));
 
-
+        final String pkg = node.getFileName().substring(0, node.getFileName().length() - 3);
         final ASTNode astnode = new PackagedNativeFunctionCallNode(
                 node.getName(),
-                node.getFileName().substring(0, node.getFileName().length() - 3),
+                pkg.substring(0, 1).toUpperCase() + pkg.substring(1),
                 nodes
         ).setLine(node.getLine());
 
@@ -1310,7 +1310,7 @@ public class Interpreter {
             final FunctionDefinition definition = classDefinition.getStaticFunction(node.getName(), node.getParams().size());
 
             if (definition == null) {
-                except("Static function not found: " + node.getName() + "#" + node.getName(), node.getLine());
+                except("Static function not found: " + caller + "#" + node.getName(), node.getLine());
                 return null;
             }
 
@@ -1322,8 +1322,13 @@ public class Interpreter {
             defineFunctionParameters(functionContext, definition, params);
 
             Register.register(new Register.RegisterElement(Register.RegisterElementType.NATIVECALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
+            context.setCurrentClassName(classDefinition.getName());
+            context.setCurrentFunctionName(node.getName());
 
-            return interpretBlock(definition.getBlock(), functionContext);
+            final Object result = interpretBlock(definition.getBlock(), functionContext);
+            context.setCurrentClassName(null);
+            context.setCurrentFunctionName(null);
+            return result;
         }
 
         if (!(caller instanceof ClassObject)) {

@@ -144,6 +144,10 @@ public final class ASTParser {
             return parseClassDeclaration();
         }
 
+        if (match(KEYWORD, "static") && lookahead().is(KEYWORD, "native")) {
+            return parseFunctionDeclaration();
+        }
+
         if (lookahead().is(KEYWORD, "native")) {
             return parseNativeClassDeclaration();
         }
@@ -247,7 +251,6 @@ public final class ASTParser {
             consume(DIVIDER, ")");
 
             final String ip = pkg.substring(0, pkg.length() - 1);
-
             return ("def".equals(ip) ? new DefaultNativeFunctionCallNode(name, params) : new PackagedNativeFunctionCallNode(name, ip, params)).setLine(line);
         }
 

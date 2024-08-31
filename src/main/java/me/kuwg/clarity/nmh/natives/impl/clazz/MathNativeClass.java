@@ -58,6 +58,21 @@ public class MathNativeClass extends NativeClass {
                         params.isEmpty());
                 return Math.random();
             }
+            case "log": {
+                check("Invalid parameters for 'log'. Expected 2 Numbers, got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 2 && params.get(0) instanceof Number && params.get(1) instanceof Number);
+                double value = ((Number) params.get(0)).doubleValue();
+                double base = ((Number) params.get(1)).doubleValue();
+                if (base <= 1 || value <= 0) {
+                    throw new IllegalArgumentException("Base must be greater than 1 and value must be positive.");
+                }
+                return Math.log(value) / Math.log(base);
+            }
+            case "exp": {
+                check("Invalid parameters for 'exp'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 1 && params.get(0) instanceof Number);
+                return Math.exp(((Number) params.get(0)).doubleValue());
+            }
         }
 
         throw new UnsupportedOperationException("Unsupported math native: " + name);
