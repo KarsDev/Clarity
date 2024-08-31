@@ -488,28 +488,35 @@ public class Interpreter {
         }
 
         final ClassDefinition definition = (ClassDefinition) raw;
-        Object val = interpretBlock(definition.getBody(), classContext);
 
-        if (val != VOID_OBJECT)
-            except("Return in class body", node.getLine());
-
-        final ClassDefinition inheritedClass = definition.getInheritedClass();
-
-        if (inheritedClass != null) {
+        // Resolve all inherited classes and merge contexts
+        ClassObject inheritedObject = null;
+        ClassDefinition currentDefinition = definition;
+        while (currentDefinition.getInheritedClass() != null) {
+            ClassDefinition inheritedClass = currentDefinition.getInheritedClass();
             final FunctionDefinition[] inheritedConstructors = inheritedClass.getConstructors();
-            final ClassObject inheritedObject = interpretConstructors(inheritedConstructors, params, classContext, inheritedClass.getName());
 
+            inheritedObject = interpretConstructors(inheritedObject, inheritedConstructors, params, classContext, inheritedClass.getName());
             classContext.mergeContext(inheritedObject.getContext());
+
+            currentDefinition = inheritedClass;
         }
 
-        final Object result = interpretConstructors(definition.getConstructors(), params, classContext, name);
+        Object val = interpretBlock(definition.getBody(), classContext);
+        if (val != VOID_OBJECT) {
+            except("Return in class body", node.getLine());
+        }
+
+        final Object result = interpretConstructors(inheritedObject, definition.getConstructors(), params, classContext, name);
+
         context.setCurrentClassName(null);
         return result;
     }
 
-    private ClassObject interpretConstructors(final FunctionDefinition[] constructors, final List<Object> params, final Context context, final String cn) {
+
+    private ClassObject interpretConstructors(final ClassObject inherited, final FunctionDefinition[] constructors, final List<Object> params, final Context context, final String cn) {
         if (constructors.length == 0) {
-            return new ClassObject(cn, new Context(context));
+            return new ClassObject(cn, inherited, new Context(context));
         }
 
         FunctionDefinition matchingConstructor = null;
@@ -522,7 +529,7 @@ public class Interpreter {
 
         if (matchingConstructor == null) {
             Register.throwException("No matching constructor found for class " + cn + " with " + params.size() + " parameters.");
-            return new ClassObject(null, null); // for notnull errors
+            return new ClassObject(null, null, null); // for notnull errors
         }
 
         final List<String> constructorParams = matchingConstructor.getParams();
@@ -542,7 +549,7 @@ public class Interpreter {
             except("You can't return in a constructor!", matchingConstructor.getBlock().getLine());
         }
 
-        return new ClassObject(cn, constructorContext);
+        return new ClassObject(cn, inherited, constructorContext);
     }
 
     private Object interpretVariableReassignment(final VariableReassignmentNode node, final Context context) {
@@ -1369,7 +1376,7 @@ public class Interpreter {
         return VOID_OBJECT;
     }
 
-    private Object interpretIs(final IsNode node, final Context context) {
+    private boolean interpretIs(final IsNode node, final Context context) {
         final Object result = interpretNode(node.getExpression(), context);
 
         if (result instanceof VoidObject) {
@@ -1383,9 +1390,13 @@ public class Interpreter {
                 return result instanceof Integer;
             case ARR:
                 return result instanceof Object[];
+            case CLASS:
+                if (!(result instanceof ClassObject)) return false;
+                ClassObject object = (ClassObject) result;
+                return object.isInstance(node.getType().getValue());
             default:
-                Register.throwException("Unknown cast: " + node.getType().name().toLowerCase(), node.getLine());
-                return null;
+                Register.throwException("Unknown 'is' type: " + node.getType().name().toLowerCase(), node.getLine());
+                return false;
         }
     }
 

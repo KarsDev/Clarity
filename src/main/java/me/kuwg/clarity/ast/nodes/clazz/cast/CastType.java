@@ -1,22 +1,26 @@
 package me.kuwg.clarity.ast.nodes.clazz.cast;
 
 public enum CastType {
-    FLOAT, INT, ARR;
+    FLOAT(""),
+    INT(""),
+    ARR(""),
+    CLASS("");
 
-    public static CastType fromStreamByte(final byte val) {
-        switch (val) {
-            case 0x0:
-                return FLOAT;
+    private String value;
 
-            case 0x1:
-                return INT;
+    CastType(String value) {
+        this.value = value;
+    }
 
-            case 0x2:
-                return ARR;
+    public final CastType setValue(final String value) {
+        assert this == CLASS;
+        this.value = value;
+        return CLASS;
+    }
 
-            default:
-                throw new RuntimeException("Unreachable");
-        }
+    public final String getValue() {
+        assert this == CLASS;
+        return value;
     }
 
     public static CastType fromValue(final String s) {
@@ -33,22 +37,7 @@ public enum CastType {
             default:
                 return null;
         }
-
     }
 
-    public byte toStreamByte() {
-        switch (this) {
-            case FLOAT:
-                return 0x0;
-
-            case INT:
-                return 0x1;
-
-            case ARR:
-                return 0x2;
-
-            default:
-                throw new RuntimeException("Unreachable");
-        }
-    }
+    public static final CastType[] VALUES = values();
 }

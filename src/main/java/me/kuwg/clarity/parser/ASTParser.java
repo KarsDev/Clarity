@@ -309,7 +309,7 @@ public final class ASTParser {
             Token operatorToken = consume();
 
             if (operatorToken.is(KEYWORD, "is")) {
-                final CastType valueOf = CastType.fromValue(consume(KEYWORD).getValue());
+                final CastType valueOf = match(KEYWORD) ? CastType.fromValue(consume(KEYWORD).getValue()) : CastType.CLASS.setValue(consume(VARIABLE).getValue());
                 if (valueOf == null) {
                     Register.throwException("Unknown native type: " + lookahead(-1).getValue());
                     return null;

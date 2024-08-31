@@ -43,12 +43,14 @@ public class IsNode extends ASTNode {
     @Override
     protected void save0(final ASTOutputStream out) throws IOException {
         out.writeNode(expression);
-        out.writeByte(type.toStreamByte());
+        out.writeVarInt(type.ordinal());
+        if (type == CastType.CLASS) out.writeString(type.getValue());
     }
 
     @Override
     protected void load0(final ASTInputStream in) throws IOException {
         this.expression = in.readNode();
-        this.type = CastType.fromStreamByte(in.readByte());
+        this.type = CastType.VALUES[(in.readVarInt())];
+        if (this.type == CastType.CLASS) this.type.setValue(in.readString());
     }
 }

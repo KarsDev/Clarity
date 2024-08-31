@@ -27,13 +27,15 @@ public class NativeCastNode extends ASTNode {
 
     @Override
     protected void save0(final ASTOutputStream out) throws IOException {
-        out.writeByte(type.toStreamByte());
+        out.writeVarInt(type.ordinal());
+        if (type == CastType.CLASS) out.writeString(type.getValue());
         out.writeNode(casted);
     }
 
     @Override
     protected void load0(final ASTInputStream in) throws IOException {
-        this.type = CastType.fromStreamByte(in.readByte());
+        this.type = CastType.VALUES[(in.readVarInt())];
+        if (this.type == CastType.CLASS) this.type.setValue(in.readString());
         this.casted = in.readNode();
     }
 

@@ -1,14 +1,8 @@
-fn add(array) {
-
-    assert array is arr else "Expected parameter of type array"
-
-    var result = 0
-    for i : array {
-        result = result + i
-    }
-    return result
+class Extend {
+}
+class Test inherits Extend {
 }
 
-var i = add(1, 3)
+var test = new Test()
 
-native.println(i)
+assert test is Test
