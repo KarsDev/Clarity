@@ -5,11 +5,16 @@ import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
 import me.kuwg.clarity.register.Register;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 @SuppressWarnings("CallToPrintStackTrace")
 public class FileNativeClass extends NativeClass {
@@ -173,10 +178,69 @@ public class FileNativeClass extends NativeClass {
                     return false;
                 }
 
+            case "compressZip":
+                checkParams("compressZip", params, 1);
+                return compressFileZip(new File(pathString), String.valueOf(params.get(0)));
+
+            case "decompressZip":
+                checkParams("decompressZip", params, 1);
+                return decompressFileZip(new File(pathString), String.valueOf(params.get(0)));
+
             default:
                 Register.throwException("Invalid native method name: " + name);
                 return null;
         }
+    }
+
+    private File compressFileZip(final File original, final String zipFileName) throws IOException {
+        File zipFile = new File(zipFileName);
+
+        try (FileOutputStream fos = new FileOutputStream(zipFile);
+             ZipOutputStream zos = new ZipOutputStream(fos);
+             FileInputStream fis = new FileInputStream(original)) {
+
+            ZipEntry zipEntry = new ZipEntry(original.getName());
+            zos.putNextEntry(zipEntry);
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = fis.read(buffer)) >= 0) {
+                zos.write(buffer, 0, length);
+            }
+
+            zos.closeEntry();
+        }
+
+        return zipFile;
+    }
+
+    public File decompressFileZip(final File zipFile, final String outputDir) throws IOException {
+        File destDir = new File(outputDir);
+        if (!destDir.exists()) {
+            destDir.mkdirs();
+        }
+
+        try (FileInputStream fis = new FileInputStream(zipFile);
+             ZipInputStream zis = new ZipInputStream(fis)) {
+
+            ZipEntry zipEntry;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                File newFile = new File(destDir, zipEntry.getName());
+
+                new File(newFile.getParent()).mkdirs();
+
+                try (FileOutputStream fos = new FileOutputStream(newFile)) {
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = zis.read(buffer)) >= 0) {
+                        fos.write(buffer, 0, length);
+                    }
+                }
+                zis.closeEntry();
+            }
+        }
+
+        return destDir;
     }
 
     private void checkParams(String methodName, List<Object> params, int expectedSize) {

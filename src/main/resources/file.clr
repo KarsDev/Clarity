@@ -356,4 +356,22 @@ const native class File {
      # var readOnly = file.setReadOnly()  // Sets the file to read-only.
      #/
     native fn setReadOnly()
+
+    /##
+     # Function: compressZip
+     #
+     # Description:
+     # Compresses the file with zip format.
+     #
+     # Parameters:
+     # - output: name of the output zip file.
+     #
+     # Returns:
+     # - file: compressed.
+     #
+     # Example:
+     # file.compressZip()  // Compresses the file with zip format.
+     #/
+    native fn compressZip(output)
+
 }
