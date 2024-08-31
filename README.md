@@ -151,6 +151,21 @@ var x = int(native.input("Write a number from 1 to 3: "))
 assert x >= 1 && x <= 3 else "The number " + x + " is not between i and 3!"
 ```
 
+Is Check:
+
+```clarity
+class Inherited {
+}
+
+class Inheritor inherits Inherited {
+}
+
+var inheritor = new Inheritor()
+
+assert inheritor is Inherited // does not give any exception since inheritor is indirectly Inherited
+
+```
+
 ## Native Libraries
 
 Clarity includes a set of built-in libraries that provide essential functions for various operations. You can include these libraries using the include keyword.
