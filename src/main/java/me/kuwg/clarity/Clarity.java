@@ -21,6 +21,7 @@ public class Clarity {
                 try {
                     exec();
                 } catch (final IOException e) {
+                    System.err.println("IO Error: " + e.getMessage());
                     throw new RuntimeException(e);
                 }
             }
@@ -79,11 +80,11 @@ public class Clarity {
     }
 
     private static void printInputFileRequired() {
-        System.out.println("Error: Input file required.");
+        System.err.println("Error: Input file required.");
     }
 
     private static void printFileNotFound(File file) {
-        System.err.println("File not found: " + file);
+        System.err.println("Error: File not found: " + file.getAbsolutePath());
     }
 
     private static void runOrInterpretFile(File file) throws IOException {
@@ -116,7 +117,7 @@ public class Clarity {
         try {
             return loader.load();
         } catch (IOException e) {
-            System.err.println("Failed to load the AST:");
+            System.err.println("Error: Failed to load the AST from file: " + file.getAbsolutePath());
             throw new RuntimeException(e);
         }
     }
@@ -162,7 +163,7 @@ public class Clarity {
         try {
             saver.save(new File(output));
         } catch (IOException e) {
-            System.err.println("Failed to save the AST: " + e.getMessage());
+            System.err.println("Error: Failed to save the AST to file: " + output);
             throw new RuntimeException(e);
         }
     }
