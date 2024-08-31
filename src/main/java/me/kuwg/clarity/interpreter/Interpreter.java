@@ -920,6 +920,7 @@ public class Interpreter {
                 if (o instanceof Integer) s.append("int");
                 else if (o instanceof Double) s.append("float");
                 else if (o instanceof Object[]) s.append("arr");
+                else if (o instanceof String) s.append("str");
                 else s.append(o.getClass().getSimpleName().toLowerCase());
             }
             if (i < size - 1) s.append(", ");
