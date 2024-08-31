@@ -77,7 +77,8 @@ const native class Math {
      # Method: clamp
      #
      # Description:
-     # Restricts a value to lie between a minimum and a maximum value.
+     # Restricts a value to lie between a minimum and a maximum value. It ensures that the result is
+     # within the specified range.
      #
      # Parameters:
      # - val: The value to clamp.
@@ -98,7 +99,7 @@ const native class Math {
      # Method: max
      #
      # Description:
-     # Returns the greater of two numbers.
+     # Returns the greater of two numbers. This can be useful for finding the maximum value in comparisons.
      #
      # Parameters:
      # - x: The first number to compare.
@@ -119,7 +120,7 @@ const native class Math {
      # Method: min
      #
      # Description:
-     # Returns the lesser of two numbers.
+     # Returns the lesser of two numbers. This can be useful for finding the minimum value in comparisons.
      #
      # Parameters:
      # - x: The first number to compare.
@@ -137,10 +138,90 @@ const native class Math {
     }
 
     /##
+     # Method: exp
+     #
+     # Description:
+     # Computes the exponential of a given number. The exponential of a number x is e^x, where e is the base
+     # of natural logarithms (approximately 2.71828).
+     #
+     # Parameters:
+     # - x: A number whose exponential is to be computed.
+     #
+     # Returns:
+     # - The value of e raised to the power of x.
+     #
+     # Example:
+     # Math.exp(1)    // Returns: 2.718281828459045 (approximately)
+     #/
+    static fn exp(x) {
+        const var tolerance = 1e-10
+        const var maxTerms = 100
+        const var e = Math.E
+
+        var result = 1
+        var term = 1
+        for (var n = 1; n < maxTerms; n++) {
+            term *= x / n
+            result += term
+            if (Math.abs(term) < tolerance) break
+        }
+        return result
+    }
+
+    /##
+     # Method: log
+     #
+     # Description:
+     # Computes the logarithm of a given number with a specified base. The logarithm is the inverse of the exponential function.
+     #
+     # Parameters:
+     # - value: The number whose logarithm is to be computed.
+     # - base: The base of the logarithm.
+     #
+     # Returns:
+     # - The logarithm of the value with the specified base.
+     #
+     # Example:
+     # Math.log(100, 10)    // Returns: 2
+     #/
+    static fn log(value, base) {
+        if (value <= 0 || base <= 0 || base == 1) {
+            System.throw("Value and base must be greater than 0 and base cannot be 1.")
+        }
+        return computeNaturalLog(value) / computeNaturalLog(base)
+    }
+
+    /##
+     # Method: computeNaturalLog
+     #
+     # Description:
+     # Computes the natural logarithm (base e) of a given positive number using an iterative approximation method.
+     #
+     # Parameters:
+     # - x: The number whose natural logarithm is to be computed.
+     #
+     # Returns:
+     # - The natural logarithm of x.
+     #
+     # Example:
+     # Math.computeNaturalLog(2.718281828459045)    // Returns: 1 (approximately)
+     #/
+    static fn computeNaturalLog(x) {
+        if x <= 0 System.throw("The number must be positive.")
+
+        const var tolerance = 1e-10
+        const var estimate = x - 1
+        while Math.abs(Math.exp(estimate) - x) > tolerance {
+            estimate = estimate - (Math.exp(estimate) - x) / Math.exp(estimate)
+        }
+        return estimate
+    }
+
+    /##
      # Native Method: isPrime
      #
      # Description:
-     # Checks if a number is a prime number.
+     # Checks if a number is a prime number. This method is declared as native and relies on an external implementation.
      #
      # Parameters:
      # - num: The number to check for primality.
@@ -157,7 +238,7 @@ const native class Math {
      # Native Method: sqrt
      #
      # Description:
-     # Computes the square root of a number.
+     # Computes the square root of a number. This method is declared as native and relies on an external implementation.
      #
      # Parameters:
      # - num: The number whose square root is to be calculated.
@@ -174,7 +255,7 @@ const native class Math {
      # Native Method: cbrt
      #
      # Description:
-     # Computes the cube root of a number.
+     # Computes the cube root of a number. This method is declared as native and relies on an external implementation.
      #
      # Parameters:
      # - num: The number whose cube root is to be calculated.
@@ -191,7 +272,7 @@ const native class Math {
      # Native Method: floor
      #
      # Description:
-     # Rounds a number down to the nearest integer.
+     # Rounds a number down to the nearest integer. This method is declared as native and relies on an external implementation.
      #
      # Parameters:
      # - num: The number to round down.
@@ -208,7 +289,7 @@ const native class Math {
      # Native Method: ceil
      #
      # Description:
-     # Rounds a number up to the nearest integer.
+     # Rounds a number up to the nearest integer. This method is declared as native and relies on an external implementation.
      #
      # Parameters:
      # - num: The number to round up.
@@ -225,7 +306,7 @@ const native class Math {
      # Native Method: round
      #
      # Description:
-     # Rounds a number to the nearest integer.
+     # Rounds a number to the nearest integer. This method is declared as native and relies on an external implementation.
      #
      # Parameters:
      # - num: The number to round.
@@ -242,7 +323,7 @@ const native class Math {
      # Native Method: random
      #
      # Description:
-     # Generates a random number between 0 (inclusive) and 1 (exclusive).
+     # Generates a random number between 0 (inclusive) and 1 (exclusive). This method is declared as native and relies on an external implementation.
      #
      # Returns:
      # - A random floating-point number in the range [0, 1).
