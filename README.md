@@ -39,6 +39,7 @@ Linux: Open a terminal, navigate to the directory containing `install_linux.sh` 
 
 ##### Complete Installation:
 The installer will place Clarity on your system `%userpath%/Clarity` and then remove the installer files. You can safely delete clarity.jar and the installer script if they are not automatically removed.
+(Java will automatically installed if version 8 or higher is not found)
 
 ## Features
 
