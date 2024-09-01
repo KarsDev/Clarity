@@ -4,22 +4,28 @@
 	"patterns": [
 		{ "include": "#comments" },
 		{ "include": "#keywords" },
-		{ "include": "#classes" },
 		{ "include": "#strings" },
 		{ "include": "#operators" },
-		{ "include": "#functions" }
+		{ "include": "#numbers" },
+		{ "include": "#dividers" },
+		{ "include": "#variables" }
 	],
 	"repository": {
 		"comments": {
 			"patterns": [
 				{
 					"name": "comment.line.double-slash",
-					"match": "//.*$"
+					"match": "//[^\r\n]*"
 				},
 				{
 					"name": "comment.block.hash",
 					"begin": "/#",
-					"end": "#/"
+					"end": "#/",
+					"patterns": [
+						{
+							"include": "#comments"
+						}
+					]
 				}
 			]
 		},
@@ -27,21 +33,25 @@
 			"name": "keyword",
 			"match": "\\b(class|var|constructor|local|fn|native|if|else|return|new|void|include|static|const|compiled|null|for|while|select|when|default|break|continue|float|int|inherits|assert|is|arr|str)\\b"
 		},
-		"classes": {
-			"name": "entity.name.class",
-			"match": "(?<=\\b(new|class)\\b\\s+)\\w+"
-		},
 		"strings": {
 			"name": "string",
-			"match": "\"([^\"]*)\""
+			"match": "\"(\\\\.|[^\"\\\\])*\"|'(\\\\.|[^'\\\\])*'"
 		},
 		"operators": {
 			"name": "keyword.operator",
-			"match": "(\\+|\\-|\\/|\\*|\\=)"
+			"match": "<<|>>|\\+\\+|--|[+\\-*/%=<>!]=?|==|\\.\\.\\.|\\.|\\|\\||&&|\\?|:|\\^|&"
 		},
-		"functions": {
-			"name": "entity.name.function",
-			"match": "\\b(\\w+)\\s*\\("
+		"numbers": {
+			"name": "constant.numeric",
+			"match": "\\b\\d[_\\d]*(\\.\\d[_\\d]*)?([eE][+-]?\\d[_\\d]*)?\\b"
+		},
+		"dividers": {
+			"name": "punctuation.definition.separator",
+			"match": "[\\(\\)\\[\\]\\{\\},]"
+		},
+		"variables": {
+			"name": "variable",
+			"match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
 		}
 	},
 	"scopeName": "source.clarity"

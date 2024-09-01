@@ -349,7 +349,7 @@ public class Interpreter {
             case "!=":
                 return left != right;
             default:
-                except("Unsupported operator: " + operator, line);
+                except("Unsupported operator for float: " + operator, line);
                 return null;
         }
     }
@@ -387,6 +387,12 @@ public class Interpreter {
                 return left == right;
             case "!=":
                 return left != right;
+            case ">>":
+                return left >> right;
+            case "<<":
+                return left << right;
+            case "&":
+                return left & right;
             default:
                 except("Unsupported operator: " + operator, line);
                 return null;
@@ -439,8 +445,7 @@ public class Interpreter {
             except("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
         }
 
-        final Context functionContext = new Context(context);
-
+        final Context functionContext = new Context(context.parentContext());
         List<String> definitionParams = definition.getParams();
         for (int i = 0; i < definitionParams.size(); i++) {
             final String name = definitionParams.get(i);

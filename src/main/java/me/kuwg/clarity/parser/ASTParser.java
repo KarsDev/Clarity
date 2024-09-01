@@ -281,24 +281,29 @@ public final class ASTParser {
                 return 1;
             case "&&":
                 return 2;
+            case "&":
+                return 3;
             case "==":
             case "!=":
-                return 3;
+                return 4;
             case "<":
             case "<=":
             case ">":
             case ">=":
             case "is":
-                return 4;
+                return 5;
+            case "<<":
+            case ">>":
+                return 6;
             case "+":
             case "-":
-                return 5;
+                return 7;
             case "*":
             case "/":
             case "%":
-                return 6;
+                return 8;
             case "^":
-                return 7;
+                return 9;
             default:
                 return -1;
         }
