@@ -16,6 +16,7 @@ public class LinuxClarityInstaller extends ClarityInstaller {
     }
 
     private void createShellScripts() throws IOException, InterruptedException {
+        System.out.println("Creating shell scripts...");
         cloneResource("linux/clarity.sh", "clarity");
         cloneResource("linux/clr.sh", "clarity");
         cloneResource("linux/installer.sh", "installer.sh");
@@ -26,6 +27,9 @@ public class LinuxClarityInstaller extends ClarityInstaller {
 
     // Updates the PATH environment variable for Linux
     private void setUserPath() throws IOException {
+
+        System.out.println("Setting user path...");
+
         final String newPath = new File(path).getAbsolutePath();
 
         // Get current PATH from the user's shell configuration file

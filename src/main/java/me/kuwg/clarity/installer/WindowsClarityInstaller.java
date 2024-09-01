@@ -17,12 +17,16 @@ public class WindowsClarityInstaller extends ClarityInstaller {
 
 
     private void createBatchFiles() throws IOException {
+        System.out.println("Creating batch files...");
         cloneResource("windows/clarity.bat", "clarity.bat");
         cloneResource("windows/clr.bat", "clarity.bat");
         cloneResource("windows/installer.bat", "installer.bat");
     }
 
     private void setUserPath() throws IOException, InterruptedException {
+
+        System.out.println("Setting user path...");
+
         final String newPath = new File(path).getAbsolutePath();
 
         // Get current PATH

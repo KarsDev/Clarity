@@ -54,15 +54,18 @@ public abstract class ClarityInstaller {
     protected final int exe(final String cmd) throws IOException, InterruptedException {
         switch (OS.CURRENT_OS) {
             case WINDOWS: {
-                return Runtime.getRuntime().exec("cmd /c" + cmd).waitFor();
+                return Runtime.getRuntime().exec("cmd /c " + cmd).waitFor();
             }
-            case MAC: {
+            case MAC:
+            case LINUX: {
                 return Runtime.getRuntime().exec(new String[]{"/bin/sh", "-c", cmd}).waitFor();
             }
+            default: {
+                return throwOSException();
+            }
         }
-
-        return throwOSException();
     }
+
 
     protected static <T> T throwOSException() {
         throw new UnsupportedOperationException("Unsupported OS in installing: " + OS.CURRENT_OPERATING_SYSTEM_NAME);
@@ -72,12 +75,15 @@ public abstract class ClarityInstaller {
         try {
             switch (OS.CURRENT_OS) {
                 case WINDOWS: {
+                    System.out.println("Installing Windows version...");
                     new WindowsClarityInstaller(dest);
                 }
                 case MAC: {
+                    System.out.println("Installing MacOS version...");
                     new MacClarityInstaller(dest);
                 }
                 case LINUX: {
+                    System.out.println("Installing Linux version...");
                     new LinuxClarityInstaller(dest);
                 }
                 case OTHER: {

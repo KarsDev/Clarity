@@ -16,6 +16,7 @@ public class MacClarityInstaller extends ClarityInstaller {
     }
 
     private void createShellScripts() throws IOException, InterruptedException {
+        System.out.println("Creating shell scripts...");
         cloneResource("mac/clarity.sh", "clarity");
         cloneResource("mac/clr.sh", "clarity");
         cloneResource("mac/installer.sh", "installer.sh");
@@ -26,6 +27,9 @@ public class MacClarityInstaller extends ClarityInstaller {
 
     // Updates the PATH environment variable for macOS
     private void setUserPath() throws IOException {
+
+        System.out.println("Setting user path...");
+
         final String newPath = new File(path).getAbsolutePath();
 
         // Get current PATH from the user's shell configuration file
