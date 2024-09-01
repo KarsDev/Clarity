@@ -50,7 +50,7 @@ public class WindowsClarityInstaller extends ClarityInstaller {
     public void setLanguageLogo() throws IOException, InterruptedException {
         cloneResource("windows/logo.ico", "logo.ico");
         System.out.println("Setting image logo and opener...");
-        exe(new File(path, "installer.bat").getAbsolutePath());
+        exe("cd " + new File(path).getAbsolutePath() + " && installer.bat");
     }
 
 }

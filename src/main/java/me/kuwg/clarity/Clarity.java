@@ -4,6 +4,7 @@ import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
 import me.kuwg.clarity.installer.ClarityInstaller;
+import me.kuwg.clarity.installer.OS;
 import me.kuwg.clarity.installer.WindowsClarityInstaller;
 import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.parser.ASTParser;
@@ -39,6 +40,9 @@ public class Clarity {
                     if (args[0].equals("install")){
                         System.out.println("Installing...");
                         installClarity();
+                        return;
+                    } else if (args[0].equals("os")) {
+                        System.out.println(OS.CURRENT_OS);
                         return;
                     }
                     printInputFileRequired();

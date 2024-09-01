@@ -77,17 +77,21 @@ public abstract class ClarityInstaller {
                 case WINDOWS: {
                     System.out.println("Installing Windows version...");
                     new WindowsClarityInstaller(dest);
+                    break;
                 }
                 case MAC: {
                     System.out.println("Installing MacOS version...");
                     new MacClarityInstaller(dest);
+                    break;
                 }
                 case LINUX: {
                     System.out.println("Installing Linux version...");
                     new LinuxClarityInstaller(dest);
+                    break;
                 }
                 case OTHER: {
                     throwOSException();
+                    break;
                 }
             }
         } catch (final Exception e) {
