@@ -4,6 +4,7 @@ import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
 import me.kuwg.clarity.installer.ClarityInstaller;
+import me.kuwg.clarity.installer.WindowsClarityInstaller;
 import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.token.Token;
@@ -86,7 +87,7 @@ public class Clarity {
             ClarityInstaller.install(destDir.getAbsolutePath());
         } catch (final Exception e) {
             System.err.println("Installation failed: " + e.getMessage());
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         }
     }
 
