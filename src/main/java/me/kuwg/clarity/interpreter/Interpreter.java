@@ -1401,7 +1401,8 @@ public class Interpreter {
             apply = (boolean) result;
         }
         if (!apply) {
-            Register.throwException(String.valueOf(interpretNode(node.getOrElse(), context)), node.getLine());
+            final Object o = interpretNode(node.getOrElse(), context);
+            if (!(o instanceof VoidObject)) Register.throwException(String.valueOf(o), node.getLine());
         }
         return VOID_OBJECT;
     }

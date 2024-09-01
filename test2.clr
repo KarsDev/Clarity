@@ -1,10 +1,7 @@
-include native reflections
-include native system
+var x = 4
 
-const var x = str(3)
+assert x != 4 else x()
 
-Reflections.editVariable("x", 5)
-
-native.println(x)
-
-System.throw("lookup")
+fn x() {
+    native.println("LOL")
+}
