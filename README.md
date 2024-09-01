@@ -5,19 +5,40 @@
 Clarity is a high-level, object-oriented programming language designed to prioritize simplicity and clarity. It features a concise syntax and supports dynamic typing, making it easy to read and write. Clarity is suitable for both beginners and experienced developers who want to create clean, maintainable code.
 
 ## Table of Contents
-
-1. [Features](#features)
-2. [Basic Syntax](#basic-syntax)
+1. [Installation](#installation)
+2. [Features](#features)
+3. [Basic Syntax](#basic-syntax)
    - [Variables](#variables)
    - [Functions](#functions)
    - [Classes](#classes)
    - [Control Structures](#control-structures)
-3. [Native Libraries](#native-libraries)
-4. [Examples](#examples)
+4. [Native Libraries](#native-libraries)
+5. [Examples](#examples)
    - [Simple Program](#simple-program)
    - [Using a Class](#using-a-class)
    - [Looping Over a List](#looping-over-a-list)
    - [Static Properties and Methods](#static-properties-and-methods)
+
+## Installation
+
+To install Clarity, follow these steps based on your operating system:
+
+##### download Required Files:
+Windows: Download install_windows.bat
+Mac: Download install_mac.sh
+Linux: Download install_linux.sh
+Also, download clarity.jar
+
+##### Prepare for Installation:
+Ensure that `install_windows.bat`, `install_mac.sh`, or `install_linux.sh`, along with `clarity.jar`, are located in the same directory.
+
+##### Run the Installer:
+Windows: Double-click `install_windows.bat` to run the installer.
+Mac: Open a terminal, navigate to the directory containing `install_mac.sh` and clarity.jar, then run the bash file.
+Linux: Open a terminal, navigate to the directory containing `install_linux.sh` and clarity.jar, then the bash file.
+
+##### Complete Installation:
+The installer will place Clarity on your system `%userpath%/Clarity` and then remove the installer files. You can safely delete clarity.jar and the installer script if they are not automatically removed.
 
 ## Features
 
