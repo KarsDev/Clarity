@@ -142,7 +142,7 @@ public class Interpreter {
         if (node instanceof ForeachNode) return interpretForeach((ForeachNode) node, context);
         if (node instanceof ReflectedNativeFunctionDeclaration) return interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) node, context);
         if (node instanceof NativeClassDeclarationNode) return interpretNativeClassDeclaration((NativeClassDeclarationNode) node, context);
-        if (node instanceof LocalVariableReassignmentNode) return VOID_OBJECT; // ignore
+        if (node instanceof LocalVariableReassignmentNode) return interpretLocalVariableReassignment((LocalVariableReassignmentNode) node, context);
         if (node instanceof SelectNode) return interpretSelect((SelectNode) node, context);
         if (node instanceof BreakNode) return BREAK;
         if (node instanceof ContinueNode) return CONTINUE;
@@ -299,7 +299,7 @@ public class Interpreter {
             }
         }
 
-        except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " and " + rightValue.getClass().getSimpleName(), node.getLine());
+        except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " " + node.getOperator() + " " + rightValue.getClass().getSimpleName(), node.getLine());
         return null;
     }
 
@@ -314,7 +314,7 @@ public class Interpreter {
             case "!=":
                 return left != right;
             default:
-                except("Unsupported operator for boolean operands: " + operator, line);
+                except("Unsupported operator for booleans: " + operator, line);
                 return null;
         }
     }
@@ -349,7 +349,7 @@ public class Interpreter {
             case "!=":
                 return left != right;
             default:
-                except("Unsupported operator for float: " + operator, line);
+                except("Unsupported operator for floats: " + operator, line);
                 return null;
         }
     }
@@ -393,8 +393,12 @@ public class Interpreter {
                 return left << right;
             case "&":
                 return left & right;
+            case "|":
+                return left | right;
+            case "^^":
+                return left ^ right;
             default:
-                except("Unsupported operator: " + operator, line);
+                except("Unsupported operato for integers: " + operator, line);
                 return null;
         }
     }
@@ -431,13 +435,23 @@ public class Interpreter {
         }
 
         final ObjectType type = context.getFunction(functionName, node.getParams().size());
+        final FunctionDefinition definition;
 
         if (type == VOID_OBJECT) {
-            except("Calling a function that doesn't exist: " + functionName + getParams(params), node.getLine());
-            return null;
-        }
+            final ObjectType clazz = context.getClass(context.getCurrentClassName());
 
-        final FunctionDefinition definition = (FunctionDefinition) type;
+            if (clazz == null) {
+                except("Calling a function that doesn't exist: " + functionName + getParams(params), node.getLine());
+                return null;
+            }
+            final FunctionDefinition rawStaticFun = ((ClassDefinition) clazz).getStaticFunction(functionName, node.getParams().size());
+            if (rawStaticFun != null) {
+                definition = rawStaticFun;
+            } else {
+                except("Calling a function that doesn't exist: " + functionName + getParams(params), node.getLine());
+                return null;
+            }
+        } else definition = (FunctionDefinition) type;
 
         if (params.size() > definition.getParams().size()) {
             except("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
@@ -564,7 +578,6 @@ public class Interpreter {
         context.setVariable(node.getName(), result);
         return VOID_OBJECT;
     }
-
     private Object interpretObjectFunctionCall(final ObjectFunctionCallNode node, final Context context) {
         final Object caller = context.getVariable(node.getCaller());
         if (caller instanceof VoidObject) {
@@ -883,7 +896,6 @@ public class Interpreter {
         final ObjectType rawCurrent =  context.getClass(context.getCurrentClassName());
 
         if (!(rawCurrent instanceof ClassDefinition)) {
-            System.out.println(rawCurrent);
             return new ReturnValue(nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params));
         }
 
@@ -986,48 +998,50 @@ public class Interpreter {
         return condition;
     }
 
-    private Object interpretFor(final ForNode node, final Context context) {
+    private Object interpretFor(final ForNode node, final Context raw) {
 
-        final Context forContext = new Context(context);
+        final Context FOR_CONTEXT = new Context(raw);
+        Context BLOCK_CONTEXT = new Context(FOR_CONTEXT);
 
-        if (node.getDeclaration() != null && interpretNode(node.getDeclaration(), forContext) != VOID_OBJECT)
+        if (node.getDeclaration() != null && interpretNode(node.getDeclaration(), FOR_CONTEXT) != VOID_OBJECT)
             except("for declaration must be void return", node.getLine());
 
         final ASTNode condition = node.getCondition();
 
-        while (node.getDeclaration() == null || checkCondition(condition, forContext)) {
-            final Object val = interpretBlock(node.getBlock(), forContext);
-            if (val == CONTINUE) {
-                continue;
-            } else if (val == BREAK) {
+        while (node.getDeclaration() == null || checkCondition(condition, FOR_CONTEXT)) {
+            final Object val = interpretBlock(node.getBlock(), BLOCK_CONTEXT);
+            if (val == BREAK) {
                 break;
             }
             if (val != VOID_OBJECT) {
                 return new ReturnValue(val);
             }
-            if (node.getIncrementation() != null && interpretNode(node.getIncrementation(), forContext) != VOID_OBJECT)
+
+            BLOCK_CONTEXT = new Context(FOR_CONTEXT);
+
+            if (node.getIncrementation() != null && interpretNode(node.getIncrementation(), FOR_CONTEXT) != VOID_OBJECT)
                 except("for incrementation must be void return", node.getLine());
+
         }
 
         return VOID_OBJECT;
     }
 
     private Object interpretWhile(final WhileNode node, final Context context) {
-        final Context whileContext = new Context(context);
+        Context whileContext = new Context(context);
 
         final ASTNode condition = node.getCondition();
 
 
         while (checkCondition(condition, whileContext)) {
             final Object val = interpretBlock(node.getBlock(), whileContext);
-            if (val == CONTINUE) {
-                continue;
-            } else if (val == BREAK) {
+            if (val == BREAK) {
                 break;
             }
             if (val != VOID_OBJECT) {
                 return new ReturnValue(val);
             }
+            whileContext = new Context(context);
         }
 
         return VOID_OBJECT;
@@ -1035,7 +1049,7 @@ public class Interpreter {
 
     private Object interpretForeach(final ForeachNode node, final Context context) {
 
-        final Context forEachContext = new Context(context);
+        Context forEachContext = new Context(context);
 
         final Object list = interpretNode(node.getList(), context);
 
@@ -1059,14 +1073,13 @@ public class Interpreter {
         for (final Object o : arr) {
             forEachContext.setVariable(node.getVariable(), o);
             final Object val = interpretBlock(node.getBlock(), forEachContext);
-            if (val == CONTINUE) {
-                continue;
-            } else if (val == BREAK) {
+            if (val == BREAK) {
                 break;
             }
             if (val != VOID_OBJECT) {
                 return new ReturnValue(val);
             }
+            forEachContext = new Context(context);
         }
 
         return VOID_OBJECT;
@@ -1142,6 +1155,14 @@ public class Interpreter {
         });
 
         context.setCurrentClassName(null);
+        return VOID_OBJECT;
+    }
+
+    private Object interpretLocalVariableReassignment(final LocalVariableReassignmentNode node, final Context context) {
+        final Context localContext = context.parentContext();
+        final Object result = interpretNode(node.getValue(), context);
+        if (result instanceof VoidObject) Register.throwException("Reassigning variable with void value: " + node.getName(), node.getLine());
+        localContext.setVariable(node.getName(), result);
         return VOID_OBJECT;
     }
 
@@ -1318,7 +1339,6 @@ public class Interpreter {
             final ClassDefinition classDefinition = (ClassDefinition) rawClassDefinition;
 
             final FunctionDefinition definition = classDefinition.getStaticFunction(node.getName(), node.getParams().size());
-            System.out.println(classDefinition);
             if (definition == null) {
                 except("Static function not found: " + classDefinition.getName() + "#" + node.getName(), node.getLine());
                 return null;

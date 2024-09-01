@@ -1,5 +1,7 @@
 package me.kuwg.clarity.token;
 
+import me.kuwg.clarity.register.Register;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -44,15 +46,23 @@ public class Tokenizer {
     }
 
     private static Number processNumber(final String number) {
-        String sanitizedNumber = number.replace("_", "");
-
-        if (sanitizedNumber.contains("e") || sanitizedNumber.contains("E")) {
-            final String[] parts = sanitizedNumber.split("[eE]");
-            final double result = Double.parseDouble(sanitizedNumber);
-            if (!parts[0].contains(".") && result == (int) result) return (int) result;
-            return result;
+        if (number.matches("0[xX][0-9a-fA-F_]+")) { // Hexadecimal
+            return Integer.decode(number.replace("_", ""));
+        } else if (number.matches("0[bB][01_]+")) { // Binary
+            return Integer.parseInt(number.replace("_", "").substring(2), 2);
+        } else if (number.matches("0[0-7_]+")) { // Octal
+            return Integer.parseInt(number.replace("_", ""), 8);
+        } else if (number.matches("\\d+([eE][+-]?\\d+)?")) { // Integer or scientific notation
+            if (number.contains("e") || number.contains("E")) {
+                return Double.parseDouble(number.replace("_", ""));
+            } else {
+                return Integer.parseInt(number.replace("_", ""));
+            }
+        } if (number.matches("\\d+[fFdD]")) { // Floating point
+            return Float.parseFloat(number.replace("_", "").replaceAll("[fFdD]", ""));
+        }  else {
+            Register.throwException("Invalid number format: " + number);
+            return null;
         }
-        if (sanitizedNumber.contains(".")) return Double.parseDouble(sanitizedNumber);
-        return Integer.parseInt(sanitizedNumber);
     }
 }

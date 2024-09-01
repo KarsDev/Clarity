@@ -281,29 +281,33 @@ public final class ASTParser {
                 return 1;
             case "&&":
                 return 2;
-            case "&":
+            case "|":
                 return 3;
+            case "^^":
+                return 4;
+            case "&":
+                return 5;
             case "==":
             case "!=":
-                return 4;
+                return 6;
             case "<":
             case "<=":
             case ">":
             case ">=":
             case "is":
-                return 5;
+                return 7;
             case "<<":
             case ">>":
-                return 6;
+                return 8;
             case "+":
             case "-":
-                return 7;
+                return 9;
             case "*":
             case "/":
             case "%":
-                return 8;
-            case "^":
-                return 9;
+                return 10;
+            case "^": // ^ is pow
+                return 11;
             default:
                 return -1;
         }
@@ -511,11 +515,10 @@ public final class ASTParser {
                 consume(DIVIDER, ")");
                 return new LocalFunctionCallNode(name, params).setLine(line);
             } else if (matchAndConsume(OPERATOR, "=")) {
-                return new LocalVariableReassignmentNode(name, parseExpression());
+                return new LocalVariableReassignmentNode(name, parseExpression()).setLine(line);
             }
-            return new LocalVariableReferenceNode(name);
+            return new LocalVariableReferenceNode(name).setLine(line);
         }
-
         undo();
         return parseVariableDeclaration();
     }

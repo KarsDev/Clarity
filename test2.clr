@@ -1,7 +1,9 @@
-var x = 4
+include native random
 
-assert x != 4 else x()
+const var rand = new Random(123)
 
-fn x() {
-    native.println("LOL")
+for var i = 0, i < 10, i = i + 1 {
+    var start = native.nano()
+    rand.randInt(0, 100)
+    native.println("Took " + (native.nano() - start) + "ns")
 }

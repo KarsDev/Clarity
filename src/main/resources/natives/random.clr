@@ -1,0 +1,40 @@
+class Random {
+
+    const static var MULT = 412629635
+    const static var MASK = 343597383
+
+    var seed
+
+    constructor(seed) {
+        local.seed = seed
+    }
+
+    constructor() {
+        local.seed = native.nano() | native.now()
+    }
+
+    fn randInt(min, max) {
+        assert min < max else "Max must be greater than min."
+        updateSeed()
+        var range = max - min
+        var value = (local.seed % range) + min
+        return value
+    }
+
+    fn randDouble(min, max) {
+        assert min < max else "Max must be greater than min."
+        updateSeed()
+        var fraction = (local.seed % 1000000) / 1000000f
+        return min + fraction * (max - min)
+    }
+
+    fn updateSeed() {
+        local.seed = (local.seed * MULT + native.now() ^^ native.nano()) & MASK
+        for ,, {
+            if local.seed % 3 == 0 {
+                break
+            }
+            updateSeed()
+        }
+    }
+}
