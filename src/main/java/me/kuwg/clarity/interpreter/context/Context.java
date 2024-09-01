@@ -17,11 +17,12 @@ public class Context {
     private final Map<String, ObjectType> classes = new HashMap<>();
     private final List<String> natives = new ArrayList<>();
 
-    private String currentClassName, currentFunctionName;
+    private String currentClassName;
+    private String currentFunctionName;
 
     private final Context parentContext;
 
-    public Context(Context parentContext) {
+    public Context(final Context parentContext) {
         this.parentContext = parentContext;
     }
 
@@ -29,83 +30,82 @@ public class Context {
         this(null);
     }
 
-    public void defineVariable(String name, VariableDefinition value) {
+    public void defineVariable(final String name, final VariableDefinition value) {
         if (variables.putIfAbsent(name, value) != null) {
             Register.throwException("Declaring an already declared variable: " + name);
         }
     }
 
-    public Object getVariable(String name) {
-        ObjectType result = variables.getOrDefault(name, VOID_OBJECT);
-        if (result == VOID_OBJECT && parentContext != null) {
+    public Object getVariable(final String name) {
+        final ObjectType result = variables.get(name);
+        if (result == null && parentContext != null) {
             return parentContext.getVariable(name);
         }
-        return result == VOID_OBJECT ? VOID_OBJECT : ((VariableDefinition) result).getValue();
+        return result != null ? ((VariableDefinition) result).getValue() : VOID_OBJECT;
     }
 
-    public ObjectType getVariableDefinition(String name) {
-        ObjectType result = variables.getOrDefault(name, VOID_OBJECT);
-        if (result == VOID_OBJECT && parentContext != null) {
-            return parentContext.getVariableDefinition(name);
-        }
-        return result;
+    public ObjectType getVariableDefinition(final String name) {
+        final ObjectType result = variables.get(name);
+        return result != null ? result : (parentContext != null ? parentContext.getVariableDefinition(name) : VOID_OBJECT);
     }
 
-    public void setVariable(String name, Object value) {
-        ObjectType definition = getVariableDefinition(name);
+    public void setVariable(final String name, final Object value) {
+        final ObjectType definition = getVariableDefinition(name);
         if (!(definition instanceof VariableDefinition)) {
             Register.throwException("You cannot edit a variable that hasn't been created: " + name);
             return;
         }
-        final VariableDefinition variableDefinition = ((VariableDefinition) definition);
+        final VariableDefinition variableDefinition = (VariableDefinition) definition;
         if (variableDefinition.isConstant() && variableDefinition.getValue() != VOID_OBJECT) {
-            Register.throwException("Variable that has const cannot be edited");
+            Register.throwException("Variable that has const cannot be edited: " + name);
         }
         variableDefinition.setValue(value);
     }
 
-    public void defineFunction(String name, FunctionDefinition definition) {
-        List<FunctionDefinition> existingDefinitions = functions.computeIfAbsent(name, k -> new ArrayList<>());
-        for (FunctionDefinition existingDefinition : existingDefinitions)
-            if (existingDefinition.getParams().size() == definition.getParams().size())
+    public void defineFunction(final String name, final FunctionDefinition definition) {
+        final List<FunctionDefinition> existingDefinitions = functions.computeIfAbsent(name, k -> new ArrayList<>());
+        for (final FunctionDefinition d : existingDefinitions) {
+            if (d.getParams().size() == definition.getParams().size()) {
                 Register.throwException("Declaring an already declared function: " + name + " with the same number of parameters.");
+                break;
+            }
+        }
         existingDefinitions.add(definition);
     }
 
-    public ObjectType getFunction(String name, int paramsSize) {
-        List<FunctionDefinition> definitions = functions.get(name);
+    public ObjectType getFunction(final String name, final int paramsSize) {
+        final List<FunctionDefinition> definitions = functions.get(name);
         if (definitions != null) {
-            for (FunctionDefinition d : definitions) {
+            for (final FunctionDefinition d : definitions) {
                 if (paramsSize == d.getParams().size()) {
                     return d;
                 }
             }
-            return parentContext != null ? parentContext.getFunction(name, paramsSize) : VOID_OBJECT;
         }
         return parentContext != null ? parentContext.getFunction(name, paramsSize) : VOID_OBJECT;
     }
 
-    public void defineClass(String name, ClassDefinition definition) {
+    public void defineClass(final String name, final ClassDefinition definition) {
         if (classes.putIfAbsent(name, definition) != null) {
             Register.throwException("Declaring an already declared class: " + name);
         }
     }
 
-    public ObjectType getClass(String name) {
+    public ObjectType getClass(final String name) {
         if (name == null) return null;
-        ObjectType result = classes.getOrDefault(name, VOID_OBJECT);
-        return result == VOID_OBJECT && parentContext != null ? parentContext.getClass(name) : result;
+        final ObjectType result = classes.get(name);
+        return result != null ? result : (parentContext != null ? parentContext.getClass(name) : VOID_OBJECT);
     }
 
-    public final List<String> getNatives() {
-        return natives;
+    public List<String> getNatives() {
+        return new ArrayList<>(natives);
     }
 
     public String getCurrentClassName() {
         return currentClassName != null ? currentClassName : (parentContext != null ? parentContext.getCurrentClassName() : null);
     }
 
-    public void setCurrentClassName(String currentClassName) {
+    public void setCurrentClassName(final String currentClassName) {
         this.currentClassName = currentClassName;
     }
 
@@ -113,67 +113,49 @@ public class Context {
         return currentFunctionName != null ? currentFunctionName : (parentContext != null ? parentContext.getCurrentFunctionName() : null);
     }
 
-    public void setCurrentFunctionName(String currentFunctionName) {
+    public void setCurrentFunctionName(final String currentFunctionName) {
         this.currentFunctionName = currentFunctionName;
+    }
+
+    public void mergeContext(final Context source) {
+        if (source == null) return;
+
+        source.variables.forEach(this.variables::putIfAbsent);
+
+        source.functions.forEach((key, list) -> {
+            final List<FunctionDefinition> targetFunctions = this.functions.computeIfAbsent(key, k -> new ArrayList<>());
+            list.forEach(function -> {
+                if (!targetFunctions.contains(function)) {
+                    targetFunctions.add(function);
+                }
+            });
+        });
+
+        source.classes.forEach(this.classes::putIfAbsent);
+
+        source.natives.forEach(nativeName -> {
+            if (!this.natives.contains(nativeName)) {
+                this.natives.add(nativeName);
+            }
+        });
     }
 
     public Context parentContext() {
         return parentContext;
     }
 
-    public void mergeContext(final Context source) {
-        if (source == null) return;
-
-        for (final Map.Entry<String, ObjectType> entry : source.variables.entrySet()) {
-            this.variables.putIfAbsent(entry.getKey(), entry.getValue());
-        }
-
-        for (final Map.Entry<String, List<FunctionDefinition>> entry : source.functions.entrySet()) {
-            final List<FunctionDefinition> targetFunctions = this.functions.computeIfAbsent(entry.getKey(), k -> new ArrayList<>());
-            for (final FunctionDefinition function : entry.getValue()) {
-                if (!targetFunctions.contains(function)) {
-                    targetFunctions.add(function);
-                }
-            }
-        }
-
-        for (final Map.Entry<String, ObjectType> entry : source.classes.entrySet()) {
-            this.classes.putIfAbsent(entry.getKey(), entry.getValue());
-        }
-
-        for (final String nativeName : source.natives) {
-            if (!this.natives.contains(nativeName)) {
-                this.natives.add(nativeName);
-            }
-        }
-    }
-
     @Override
     public String toString() {
-        return "Context{" +
-                "variables=" + variables +
-                ", functions=" + functions +
-                ", classes=" + classes +
-                ", natives=" + natives +
-                ", currentClassName='" + currentClassName + '\'' +
-                ", currentFunctionName='" + currentFunctionName + '\'' +
-                ", parentContext=" + parentContext +
-                '}';
+        return String.format("Context{%n" +
+                        "variables=%s,%n" +
+                        "functions=%s,%n" +
+                        "classes=%s,%n" +
+                        "natives=%s,%n" +
+                        "currentClassName='%s',%n" +
+                        "currentFunctionName='%s',%n" +
+                        "parentContext=%s%n" +
+                        "}",
+                variables, functions, classes, natives,
+                currentClassName, currentFunctionName, parentContext);
     }
-
-    /*
-    NEWWLINE TOS
-    @Override
-    public String toString() {
-        return "Context{\n" +
-                "variables=" + variables +
-                ",\n functions=" + functions +
-                ",\n classes=" + classes +
-                ",\n natives=" + natives +
-                ",\n currentClassName='" + currentClassName + '\'' +
-                ",\n currentFunctionName='" + currentFunctionName + '\'' +
-                ",\n parentContext=" + parentContext +
-                "\n}";
-    }
-     */
 }

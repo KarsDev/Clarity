@@ -5,7 +5,6 @@ import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
 import me.kuwg.clarity.installer.ClarityInstaller;
 import me.kuwg.clarity.installer.OS;
-import me.kuwg.clarity.installer.WindowsClarityInstaller;
 import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.token.Token;
@@ -114,7 +113,8 @@ public class Clarity {
     private static void runOrInterpretFile(File file) throws IOException {
         AST ast = loadOrParseAST(file);
         Interpreter interpreter = new Interpreter(ast);
-        System.exit(interpreter.interpret());
+        int exitCode = interpreter.interpret();
+        System.exit(exitCode);
     }
 
     private static void runCompiledFile(File file) {
