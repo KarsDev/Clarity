@@ -69,7 +69,6 @@ public final class ASTParser {
     }
 
     private BlockNode parseBlock() {
-        int i = 12;
         final BlockNode node = new BlockNode();
         final int line = current().getLine();
         if (!matchAndConsume(DIVIDER, "{")) {

@@ -1,2 +1,2 @@
 #!/bin/bash
-java -jar "$(dirname "$0")/clarity.jar" "$@"
+java/java.exe -jar "$(dirname "$0")/clarity.jar" "$@"
