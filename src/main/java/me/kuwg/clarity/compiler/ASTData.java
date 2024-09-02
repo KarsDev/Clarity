@@ -16,10 +16,7 @@ import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclara
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
-import me.kuwg.clarity.ast.nodes.statements.AssertNode;
-import me.kuwg.clarity.ast.nodes.statements.ForNode;
-import me.kuwg.clarity.ast.nodes.statements.IfNode;
-import me.kuwg.clarity.ast.nodes.statements.WhileNode;
+import me.kuwg.clarity.ast.nodes.statements.*;
 import me.kuwg.clarity.ast.nodes.variable.assign.LocalVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
@@ -97,6 +94,7 @@ public class ASTData {
         registerNode(WhileNode.class, 0x901);
         registerNode(ForNode.class, 0x902);
         registerNode(AssertNode.class, 0x902);
+        registerNode(ForeachNode.class, 0x903);
     }
 
     private static void registerNode(Class<? extends ASTNodeCompiler> clazz, int id) {

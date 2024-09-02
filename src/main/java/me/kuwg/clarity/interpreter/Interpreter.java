@@ -194,9 +194,10 @@ public class Interpreter {
     }
 
     private Object interpretBlock(final BlockNode block, final Context context) {
-        if (block == null) {
+        if (block == null || block.isEmpty()) {
             return VOID_OBJECT;
         }
+
         for (final ASTNode node : block) {
             final Object result = interpretNode(node, context);
             if (result instanceof ReturnValue) {
@@ -1065,11 +1066,11 @@ public class Interpreter {
                 return new ReturnValue(val);
             }
 
-            BLOCK_CONTEXT = new Context(FOR_CONTEXT);
 
-            if (node.getIncrementation() != null && interpretNode(node.getIncrementation(), FOR_CONTEXT) != VOID_OBJECT)
+
+            if (node.getIncrementation() != null && interpretNode(node.getIncrementation(), BLOCK_CONTEXT) != VOID_OBJECT)
                 except("for incrementation must be void return", node.getLine());
-
+            BLOCK_CONTEXT = new Context(FOR_CONTEXT);
         }
 
         return VOID_OBJECT;
@@ -1099,22 +1100,73 @@ public class Interpreter {
 
         Context forEachContext = new Context(context);
 
-        final Object list = interpretNode(node.getList(), context);
+        final Object object = interpretNode(node.getList(), context);
 
-        if (list == VOID_OBJECT) {
+        if (object == VOID_OBJECT) {
             except("Void type not allowed in foreach", node.getLine());
             return null;
         }
-        if (list == null) {
+        if (object == null) {
             except("Null list in foreach", node.getLine());
             return null;
         }
-        if (!(list instanceof Object[])) {
-            except("Expected list or array in foreach, but got " + list.getClass().getSimpleName(), node.getLine());
+
+        Object[] arr;
+
+        if (object instanceof Object[]) {
+            arr = (Object[]) object;
+        } else if (object instanceof Integer) {
+            final int range = (int) object;
+            int i = 0;
+            while (i < range){
+                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), i, false, false));
+                final Object val = interpretBlock(node.getBlock(), forEachContext);
+                if (val == BREAK) {
+                    break;
+                }
+                if (val != VOID_OBJECT) {
+                    return new ReturnValue(val);
+                }
+                final Object var = forEachContext.getVariable(node.getVariable());
+                if (!(var instanceof Integer)) {
+                    Register.throwException("Set variable " + node.getVariable() + " as unsupported type in for each, expected int");
+                    return VOID_OBJECT;
+                }
+
+                i = (int) var + 1;
+
+                forEachContext = new Context(context);
+            }
+
+            return VOID_OBJECT;
+        } else if (object instanceof Double) {
+            final double range = (double) object;
+            double i = 0;
+            while (i < range) {
+                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), i, false, false));
+                final Object val = interpretBlock(node.getBlock(), forEachContext);
+                if (val == BREAK) {
+                    break;
+                }
+                if (val != VOID_OBJECT) {
+                    return new ReturnValue(val);
+                }
+                final Object var = forEachContext.getVariable(node.getVariable());
+                if (var instanceof Double || var instanceof Integer) {
+                    i = (double) var + 1;
+                } else {
+                    Register.throwException("Set variable " + node.getVariable() + " as unsupported type in for each, expected int or double");
+                    return VOID_OBJECT;
+                }
+                forEachContext = new Context(context);
+
+            }
+
+            return VOID_OBJECT;
+        } else {
+            except("Expected list, array, or integer in foreach, but got " + object.getClass().getSimpleName(), node.getLine());
             return null;
         }
-
-        Object[] arr = (Object[]) list;
 
         forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, false, false));
 

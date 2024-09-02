@@ -66,8 +66,8 @@ public class Tokenizer {
             return Double.parseDouble(cleanedNumber);
         }
         // Check for float literals (ending with 'f' or 'F')
-        if (cleanedNumber.matches("[+-]?\\d*\\.\\d+[fF]")) {
-            return Float.parseFloat(cleanedNumber.replaceAll("[fF]", ""));
+        if (cleanedNumber.toLowerCase().endsWith("f")) {
+            return Double.parseDouble(cleanedNumber.substring(0, cleanedNumber.length() - 1));
         }
         // Otherwise, treat as integer
         return Integer.parseInt(cleanedNumber);

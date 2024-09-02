@@ -64,4 +64,8 @@ public class BlockNode extends ASTNode implements Iterable<ASTNode> {
     public Spliterator<ASTNode> spliterator() {
         return children.spliterator();
     }
+
+    public boolean isEmpty() {
+        return children.isEmpty();
+    }
 }

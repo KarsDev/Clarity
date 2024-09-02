@@ -1,5 +1,7 @@
-include native math
+const var start = native.now()
 
-const var fact = Math.fact(0xf)
+var n = 0
+while n < 1000000000
+  n = n + 1
 
-native.println(fact)
+native.println((native.now() - start) / 1000)

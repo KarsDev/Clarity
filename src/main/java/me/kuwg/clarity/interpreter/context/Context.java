@@ -126,11 +126,11 @@ public class Context {
             final String key = entry.getKey();
             final List<FunctionDefinition> list = entry.getValue();
             final List<FunctionDefinition> targetFunctions = this.functions.computeIfAbsent(key, k -> new ArrayList<>());
-            list.forEach(function -> {
+            for (final FunctionDefinition function : list) {
                 if (!targetFunctions.contains(function)) {
                     targetFunctions.add(function);
                 }
-            });
+            }
         }
 
         source.classes.forEach(this.classes::putIfAbsent);
