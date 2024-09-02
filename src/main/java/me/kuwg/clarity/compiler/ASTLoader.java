@@ -22,14 +22,11 @@ public class ASTLoader {
     }
 
     public AST load() throws IOException {
-        GZIPInputStream gzipIn = new GZIPInputStream(Files.newInputStream(path));
-        ASTInputStream stream = new ASTInputStream(gzipIn);
-
-        BlockNode rootNode = (BlockNode) stream.readNode();
-
-        stream.close();
-        gzipIn.close();
-
-        return new AST(rootNode);
+        try (final GZIPInputStream gzipIn = new GZIPInputStream(Files.newInputStream(path))) {
+            final ASTInputStream stream = new ASTInputStream(gzipIn);
+            final BlockNode rootNode = (BlockNode) stream.readNode();
+            stream.close();
+            return new AST(rootNode);
+        }
     }
 }

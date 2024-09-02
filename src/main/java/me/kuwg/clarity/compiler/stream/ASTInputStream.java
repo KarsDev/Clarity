@@ -119,16 +119,4 @@ public class ASTInputStream extends DataInputStream {
 
         return value;
     }
-
-    /**
-     * Reads an array of {@link FunctionDeclarationNode} from the input stream.
-     */
-    public FunctionDeclarationNode[] readConstructorNodeArray() throws IOException {
-        List<? extends ASTNode> nodes = readNodeList();
-        FunctionDeclarationNode[] declarationNodes = new FunctionDeclarationNode[nodes.size()];
-        for (int i = 0; i < nodes.size(); i++) {
-            declarationNodes[i] = (FunctionDeclarationNode) nodes.get(i);
-        }
-        return declarationNodes;
-    }
 }

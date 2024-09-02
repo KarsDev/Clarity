@@ -3,10 +3,10 @@ package me.kuwg.clarity.compiler;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.zip.GZIPOutputStream;
-
 
 public class ASTSaver {
     private final AST ast;
@@ -15,13 +15,10 @@ public class ASTSaver {
         this.ast = ast;
     }
 
-    public void save(File file) throws IOException {
-        GZIPOutputStream gzipOut = new GZIPOutputStream(Files.newOutputStream(file.toPath()));
-        ASTOutputStream out = new ASTOutputStream(gzipOut);
-
-        out.writeNode(ast.getRoot());
-
-        out.close();
-        gzipOut.close();
+    public void save(final File file) throws IOException {
+        try (final GZIPOutputStream gzipOut = new GZIPOutputStream(Files.newOutputStream(file.toPath()));
+             ASTOutputStream out = new ASTOutputStream(gzipOut)) {
+            out.writeNode(ast.getRoot());
+        }
     }
 }
