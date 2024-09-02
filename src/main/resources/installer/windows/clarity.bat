@@ -1,2 +1,2 @@
 @echo off
-java/java.exe -jar "%~dp0clarity.jar" %*
+java -jar "%~dp0clarity.jar" %*

@@ -5,6 +5,7 @@ import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
 import me.kuwg.clarity.installer.ClarityInstaller;
 import me.kuwg.clarity.installer.OS;
+import me.kuwg.clarity.installer.WindowsClarityInstaller;
 import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.token.Token;
@@ -12,6 +13,8 @@ import me.kuwg.clarity.token.Tokenizer;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.nio.file.Files;
 import java.util.List;
 
@@ -36,17 +39,34 @@ public class Clarity {
                 }
 
                 if (args.length == 1) {
-                    if (args[0].equals("install")){
-                        System.out.println("Installing...");
-                        installClarity();
-                        return;
-                    } else if (args[0].equals("os")) {
-                        System.out.println(OS.CURRENT_OS);
-                        return;
+                    switch (args[0]) {
+                        case "install":
+                            System.out.println("Installing...");
+                            installClarity();
+                            return;
+                        case "os":
+                            System.out.println("Current OS: " + OS.CURRENT_OPERATING_SYSTEM_NAME);
+                            System.out.println("Detected OS type: " + OS.CURRENT_OS);
+                            System.out.println();
+                            return;
+                        case "size":
+                            final File jarFile = new File(ManagementFactory.getRuntimeMXBean().getClassPath().split(File.pathSeparator)[0]);
+                            if (jarFile.exists()) {
+                                long jarFileSize = jarFile.length();
+                                System.out.println("Running JAR file size: " + jarFileSize + " bytes");
+                            } else {
+                                System.out.println("Running JAR file not found.");
+                            }
+                            return;
+                        case "help":
+                        case "-help":
+                            printUsage();
                     }
                     printInputFileRequired();
                     return;
                 }
+
+
 
                 final File file = new File(args[1]);
 

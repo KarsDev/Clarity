@@ -19,7 +19,7 @@ public class WindowsClarityInstaller extends ClarityInstaller {
     private void createBatchFiles() throws IOException {
         System.out.println("Creating batch files...");
         cloneResource("windows/clarity.bat", "clarity.bat");
-        cloneResource("windows/clr.bat", "clarity.bat");
+        cloneResource("windows/clr.bat", "clr.bat");
         cloneResource("windows/installer.bat", "installer.bat");
     }
 
