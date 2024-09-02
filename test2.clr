@@ -1,5 +1,5 @@
 include native math
 
-const var fact = Math.fact(014)
+const var fact = Math.fact(0xf)
 
 native.println(fact)

@@ -404,7 +404,6 @@ public final class ASTParser {
 
             case OPERATOR:
                 return parseUnaryOperator(token, line);
-
             default:
                 throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " (type=" + token.getType() + ") at line " + token.getLine());
         }

@@ -51,7 +51,6 @@ public class Tokenizer {
 
         // Check for hexadecimal numbers
         if (cleanedNumber.startsWith("0x") || cleanedNumber.startsWith("0X")) {
-            System.out.println(cleanedNumber + "=" + Integer.decode(cleanedNumber));
             return Integer.decode(cleanedNumber);
         }
         // Check for binary numbers
