@@ -1,11 +1,11 @@
 package me.kuwg.clarity;
 
 import me.kuwg.clarity.ast.AST;
+import me.kuwg.clarity.compiler.ASTData;
 import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
 import me.kuwg.clarity.installer.ClarityInstaller;
 import me.kuwg.clarity.installer.OS;
-import me.kuwg.clarity.installer.WindowsClarityInstaller;
 import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.token.Token;
@@ -14,7 +14,6 @@ import me.kuwg.clarity.token.Tokenizer;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.nio.file.Files;
 import java.util.List;
 
@@ -39,7 +38,7 @@ public class Clarity {
                 }
 
                 if (args.length == 1) {
-                    switch (args[0]) {
+                    switch (args[0].toLowerCase()) {
                         case "install":
                             System.out.println("Installing...");
                             installClarity();
@@ -61,6 +60,10 @@ public class Clarity {
                         case "help":
                         case "-help":
                             printUsage();
+                            return;
+                        case "ast":
+                            printASTInfo();
+                            return;
                     }
                     printInputFileRequired();
                     return;
@@ -210,5 +213,14 @@ public class Clarity {
             System.err.println("Error: Failed to save the AST to file: " + output);
             throw new RuntimeException(e);
         }
+    }
+
+    private static void printASTInfo() {
+        System.out.println("AST Info:");
+        System.out.println("  Nodes: " + ASTData.NODE_TO_ID.size());
+        System.out.println("  Compression: GZIP");
+        System.out.println("  Format:");
+        System.out.println("   Default: CLR");
+        System.out.println("   Compressed: CCLR");
     }
 }

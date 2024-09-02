@@ -36,8 +36,8 @@ public class ASTData {
     public static final int SEGMENT_BITS = 0x7F;
     public static final int CONTINUE_BIT = 0x80;
 
-    private static final Map<Class<? extends ASTNodeCompiler>, Integer> NODE_TO_ID = new HashMap<>();
-    private static final Map<Integer, Class<? extends ASTNodeCompiler>> ID_TO_NODE = new HashMap<>();
+    public static final Map<Class<? extends ASTNodeCompiler>, Integer> NODE_TO_ID = new HashMap<>();
+    public static final Map<Integer, Class<? extends ASTNodeCompiler>> ID_TO_NODE = new HashMap<>();
 
     static {
         // Null
@@ -111,4 +111,5 @@ public class ASTData {
     public static Class<? extends ASTNodeCompiler> getClassFromId(int id) {
         return ID_TO_NODE.getOrDefault(id, null);
     }
+
 }
