@@ -1,7 +1,5 @@
 package me.kuwg.clarity.token;
 
-import me.kuwg.clarity.register.Register;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -19,7 +17,9 @@ public class Tokenizer {
                 final Matcher matcher = type.getPattern().matcher(remainingSrc);
                 if (matcher.lookingAt()) {
 
-                    final String tokenValue = type.equals(TokenType.NUMBER) ? processNumber(matcher.group()).toString() : matcher.group();
+                    final String rawValue = matcher.group();
+
+                    final String tokenValue = type.equals(TokenType.NUMBER) ? String.valueOf(processNumber(rawValue.replace("_", ""))) : rawValue;
 
                     if (type == TokenType.NEWLINE) {
                         line++;
@@ -34,35 +34,43 @@ public class Tokenizer {
                         tokens.add(new Token(type, tokenValue, line));
                     }
 
-                    remainingSrc = remainingSrc.substring(tokenValue.length());
+                    remainingSrc = remainingSrc.substring(rawValue.length());
                     matched = true;
                     break;
                 }
             }
 
-            if (!matched) throw new IllegalArgumentException("Unexpected character in input at line " + line + ": " + remainingSrc);
+            if (!matched)
+                throw new IllegalArgumentException("Unexpected character in input at line " + line + ": " + remainingSrc);
         }
         return tokens;
     }
 
     private static Number processNumber(final String number) {
-        if (number.matches("0[xX][0-9a-fA-F_]+")) { // Hexadecimal
-            return Integer.decode(number.replace("_", ""));
-        } else if (number.matches("0[bB][01_]+")) { // Binary
-            return Integer.parseInt(number.replace("_", "").substring(2), 2);
-        } else if (number.matches("0[0-7_]+")) { // Octal
-            return Integer.parseInt(number.replace("_", ""), 8);
-        } else if (number.matches("\\d+([eE][+-]?\\d+)?")) { // Integer or scientific notation
-            if (number.contains("e") || number.contains("E")) {
-                return Double.parseDouble(number.replace("_", ""));
-            } else {
-                return Integer.parseInt(number.replace("_", ""));
-            }
-        } if (number.matches("\\d+[fFdD]")) { // Floating point
-            return Float.parseFloat(number.replace("_", "").replaceAll("[fFdD]", ""));
-        }  else {
-            Register.throwException("Invalid number format: " + number);
-            return null;
+        final String cleanedNumber = number.replaceAll("_", "");
+
+        // Check for hexadecimal numbers
+        if (cleanedNumber.startsWith("0x") || cleanedNumber.startsWith("0X")) {
+            System.out.println(cleanedNumber + "=" + Integer.decode(cleanedNumber));
+            return Integer.decode(cleanedNumber);
         }
+        // Check for binary numbers
+        if (cleanedNumber.startsWith("0b") || cleanedNumber.startsWith("0B")) {
+            return Integer.parseInt(cleanedNumber.substring(2), 2);
+        }
+        // Check for octal numbers
+        if (cleanedNumber.startsWith("0") && cleanedNumber.length() > 1 && cleanedNumber.matches("0[0-7]+")) {
+            return Integer.parseInt(cleanedNumber, 8);
+        }
+        // Check for floating-point numbers (includes scientific notation)
+        if (cleanedNumber.matches("[+-]?\\d*\\.\\d+([eE][+-]?\\d+)?")) {
+            return Double.parseDouble(cleanedNumber);
+        }
+        // Check for float literals (ending with 'f' or 'F')
+        if (cleanedNumber.matches("[+-]?\\d*\\.\\d+[fF]")) {
+            return Float.parseFloat(cleanedNumber.replaceAll("[fF]", ""));
+        }
+        // Otherwise, treat as integer
+        return Integer.parseInt(cleanedNumber);
     }
 }

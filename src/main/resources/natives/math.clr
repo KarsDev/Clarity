@@ -45,7 +45,7 @@ const native class Math {
      # accurate to 16 decimal places.
      #
      # Value:
-     # - E = 2.7182818284590452
+     # - E = 2.7182818284590452f
      #
      # Example:
      # Math.E    // Accesses the constant value of e.
@@ -288,6 +288,24 @@ const native class Math {
      # This method is declared as native and relies on an external implementation.
      #/
     static native fn log(value, base)
+
+    /##
+     # Native Method: fact
+     #
+     # Description:
+     # Computes the factorial of a given non-negative integer. The factorial of a number x is the product
+     # of all positive integers less than or equal to x (x!).
+     #
+     # Parameters:
+     # - x: A non-negative integer whose factorial is to be computed.
+     #
+     # Returns:
+     # - The factorial of the number x.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
+    static native fn fact(x)
 
     /##
      # Constructor: Math

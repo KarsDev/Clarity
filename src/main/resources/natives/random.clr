@@ -21,7 +21,7 @@ class Random {
         return value
     }
 
-    fn randDouble(min, max) {
+    fn randFloat(min, max) {
         assert min < max else "Max must be greater than min."
         updateSeed()
         var fraction = (local.seed % 1000000) / 1000000f

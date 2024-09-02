@@ -1,10 +1,5 @@
-class Test {
-    fn lol() {
-        return 1 * 1 ^ 3 << 4
-    }
+include native math
 
-}
+const var fact = Math.fact(014)
 
-var test = new Test()
-var x = test.lol()
-native.println("X=" + x)
+native.println(fact)

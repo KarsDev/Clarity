@@ -98,7 +98,7 @@ public class Context {
     }
 
     public List<String> getNatives() {
-        return new ArrayList<>(natives);
+        return natives;
     }
 
     public String getCurrentClassName() {
@@ -122,22 +122,24 @@ public class Context {
 
         source.variables.forEach(this.variables::putIfAbsent);
 
-        source.functions.forEach((key, list) -> {
+        for (final Map.Entry<String, List<FunctionDefinition>> entry : source.functions.entrySet()) {
+            final String key = entry.getKey();
+            final List<FunctionDefinition> list = entry.getValue();
             final List<FunctionDefinition> targetFunctions = this.functions.computeIfAbsent(key, k -> new ArrayList<>());
             list.forEach(function -> {
                 if (!targetFunctions.contains(function)) {
                     targetFunctions.add(function);
                 }
             });
-        });
+        }
 
         source.classes.forEach(this.classes::putIfAbsent);
 
-        source.natives.forEach(nativeName -> {
+        for (final String nativeName : source.natives) {
             if (!this.natives.contains(nativeName)) {
                 this.natives.add(nativeName);
             }
-        });
+        }
     }
 
     public Context parentContext() {

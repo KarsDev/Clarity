@@ -2,6 +2,7 @@ package me.kuwg.clarity.nmh.natives.impl.clazz;
 
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
+import me.kuwg.clarity.register.Register;
 
 import java.util.List;
 
@@ -72,6 +73,17 @@ public class MathNativeClass extends NativeClass {
                 check("Invalid parameters for 'exp'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
                         params.size() == 1 && params.get(0) instanceof Number);
                 return Math.exp(((Number) params.get(0)).doubleValue());
+            }
+            case "fact": {
+                check("Invalid parameters for 'exp'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 1 && params.get(0) instanceof Integer);
+                final int n = (int) params.get(0);
+
+                if (n < 0) Register.throwException("Negative numbers are not allowed.");
+
+                long result = 1;
+                for (int i = 2; i <= n; i++) result *= i;
+                return result;
             }
         }
 
