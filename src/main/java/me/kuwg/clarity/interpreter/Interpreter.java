@@ -1425,7 +1425,7 @@ public class Interpreter {
             return result;
         }
 
-        if (!(caller instanceof ClassObject)) {
+        if (!(caller instanceof ClassObject)) { // TODO FIX MAP
             except("Expected class object caller", node.getLine());
             return null;
         }
