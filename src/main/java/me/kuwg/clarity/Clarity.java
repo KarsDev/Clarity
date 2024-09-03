@@ -138,17 +138,15 @@ public class Clarity {
         AST ast = loadOrParseAST(file);
         Interpreter interpreter = new Interpreter(ast);
         int exitCode = interpreter.interpret();
-        PerformanceHistogram.showHistogram();
-        //System.exit(exitCode);
+        System.exit(exitCode);
     }
 
     private static void runCompiledFile(File file) {
         AST ast = loadASTFromFile(file);
 
         Interpreter interpreter = new Interpreter(ast);
-        PerformanceHistogram.showHistogram();
         int exitCode = interpreter.interpret();
-        //System.exit(exitCode);
+        System.exit(exitCode);
     }
 
     private static AST loadOrParseAST(File file) throws IOException {

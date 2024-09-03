@@ -1432,12 +1432,15 @@ public class Interpreter {
 
         final ClassObject object = (ClassObject) caller;
         final String objectName = object.getName();
-        final FunctionDefinition definition = (FunctionDefinition) object.getContext().getFunction(node.getName(), node.getParams().size());
+        final ObjectType rawDefinition =  object.getContext().getFunction(node.getName(), node.getParams().size());
 
-        if (definition == null) {
+        if (!(rawDefinition instanceof FunctionDefinition)) {
             except("Instance function not found: " + objectName + "#" + node.getName(), node.getLine());
             return null;
         }
+
+        final FunctionDefinition definition = (FunctionDefinition) rawDefinition;
+
 
         final Context functionContext = new Context(object.getContext());
         final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());

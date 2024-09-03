@@ -56,12 +56,14 @@ public class MemberFunctionCallNode extends ASTNode {
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
         out.writeNode(caller);
+        out.writeString(name);
         out.writeNodeList(params);
     }
 
     @Override
     public void load0(final ASTInputStream in) throws IOException {
         this.caller = in.readNode();
+        this.name = in.readString();
         this.params = in.readNodeListNoCast();
     }
 
