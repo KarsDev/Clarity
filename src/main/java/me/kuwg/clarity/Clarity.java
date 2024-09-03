@@ -4,6 +4,7 @@ import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.compiler.ASTData;
 import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
+import me.kuwg.clarity.debug.PerformanceHistogram;
 import me.kuwg.clarity.installer.ClarityInstaller;
 import me.kuwg.clarity.installer.OS;
 import me.kuwg.clarity.interpreter.Interpreter;
@@ -137,15 +138,17 @@ public class Clarity {
         AST ast = loadOrParseAST(file);
         Interpreter interpreter = new Interpreter(ast);
         int exitCode = interpreter.interpret();
-        System.exit(exitCode);
+        PerformanceHistogram.showHistogram();
+        //System.exit(exitCode);
     }
 
     private static void runCompiledFile(File file) {
         AST ast = loadASTFromFile(file);
 
         Interpreter interpreter = new Interpreter(ast);
+        PerformanceHistogram.showHistogram();
         int exitCode = interpreter.interpret();
-        System.exit(exitCode);
+        //System.exit(exitCode);
     }
 
     private static AST loadOrParseAST(File file) throws IOException {

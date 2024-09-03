@@ -305,146 +305,106 @@ public class Interpreter {
     private Object interpretBinaryExpressionNode(final BinaryExpressionNode node, final Context context) {
         final Object leftValue = interpretNode(node.getLeft(), context);
         final Object rightValue = interpretNode(node.getRight(), context);
-
         final String operator = node.getOperator();
+
+        if (leftValue == null || rightValue == null) {
+            return handleNullComparison(leftValue, rightValue, operator, node.getLine());
+        }
 
         if (leftValue instanceof Boolean && rightValue instanceof Boolean) {
             return evaluateBooleanOperation((Boolean) leftValue, (Boolean) rightValue, operator, node.getLine());
-        } else if (leftValue == null || rightValue == null) {
-            if (!operator.equals("==")) {
-                except("Only operator available for null is '=='", node.getLine());
-                return null;
-            }
-            return leftValue == rightValue;
-        } else if (leftValue instanceof String || rightValue instanceof String) {
-            if (operator.equals("+")) {
-                return leftValue + rightValue.toString();
-            } else if (operator.equals("==")) {
-                return leftValue.equals(rightValue);
-            } else {
-                except("Operator " + operator + " is not supported for string operands.", node.getLine());
-            }
-        } else if (leftValue instanceof Number && rightValue instanceof Number) {
-            Number leftNumber = (Number) leftValue;
-            Number rightNumber = (Number) rightValue;
-
-            boolean leftIsDouble = leftNumber instanceof Double;
-            boolean rightIsDouble = rightNumber instanceof Double;
-
-            if (leftIsDouble || rightIsDouble) {
-                double left = leftNumber.doubleValue();
-                double right = rightNumber.doubleValue();
-
-                return evaluateDoubleOperation(left, right, operator, node.getLine());
-            } else {
-                int left = leftNumber.intValue();
-                int right = rightNumber.intValue();
-
-                return evaluateIntegerOperation(left, right, operator, node.getLine());
-            }
         }
 
-        except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " " + node.getOperator() + " " + rightValue.getClass().getSimpleName(), node.getLine());
+        if (leftValue instanceof String || rightValue instanceof String) {
+            return handleStringOperation(leftValue, rightValue, operator, node.getLine());
+        }
+
+        if (leftValue instanceof Number && rightValue instanceof Number) {
+            return handleNumericOperation((Number) leftValue, (Number) rightValue, operator, node.getLine());
+        }
+
+        except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " " + operator + " " + rightValue.getClass().getSimpleName(), node.getLine());
         return null;
     }
 
-    private Object evaluateBooleanOperation(boolean left, boolean right, String operator, final int line) {
+    private Object handleNullComparison(final Object leftValue, final Object rightValue, final String operator, final int line) {
         switch (operator) {
-            case "&&":
-                return left && right;
-            case "||":
-                return left || right;
             case "==":
-                return left == right;
+                return leftValue == rightValue;
             case "!=":
-                return left != right;
-            default:
-                except("Unsupported operator for booleans: " + operator, line);
-                return null;
+                return leftValue != rightValue;
+        }
+        except("Only operator available for null is '=='", line);
+        return VOID_OBJECT;
+    }
+
+    private Object handleStringOperation(final Object leftValue, final Object rightValue, final String operator, final int line) {
+        switch (operator) {
+            case "+":
+                return leftValue.toString() + rightValue.toString();
+            case "==":
+                return leftValue.equals(rightValue);
+        }
+        except("Operator " + operator + " is not supported for string operands.", line);
+        return null;
+    }
+
+    private Object handleNumericOperation(final Number leftNumber, final Number rightNumber, final String operator, final int line) {
+        if (leftNumber instanceof Double || leftNumber instanceof Float || rightNumber instanceof Double || rightNumber instanceof Float) {
+            return evaluateDoubleOperation(leftNumber.doubleValue(), rightNumber.doubleValue(), operator, line);
+        } else {
+            return evaluateIntegerOperation(leftNumber.intValue(), rightNumber.intValue(), operator, line);
         }
     }
 
-    private Object evaluateDoubleOperation(double left, double right, String operator, final int line) {
+    private Object evaluateBooleanOperation(final boolean left, final boolean right, final String operator, final int line) {
         switch (operator) {
-            case "+":
-                return left + right;
-            case "-":
-                return left - right;
-            case "*":
-                return left * right;
-            case "/":
-                if (right == 0) {
-                    except("Division by zero", line);
-                }
-                return left / right;
-            case "%":
-                return left % right;
-            case "^":
-                return Math.pow(left, right);
-            case "<":
-                return left < right;
-            case ">":
-                return left > right;
-            case "<=":
-                return left <= right;
-            case ">=":
-                return left >= right;
-            case "==":
-                return left == right;
-            case "!=":
-                return left != right;
-            default:
-                except("Unsupported operator for floats: " + operator, line);
-                return null;
+            case "&&": return left && right;
+            case "||": return left || right;
+            case "==": return left == right;
+            case "!=": return left != right;
+            default: except("Unsupported operator for booleans: " + operator, line); return null;
         }
     }
 
-    private Object evaluateIntegerOperation(int left, int right, String operator, final int line) {
+    private Object evaluateDoubleOperation(final double left, final double right, final String operator, final int line) {
         switch (operator) {
-            case "+":
-                return left + right;
-            case "-":
-                return left - right;
-            case "*":
-                return left * right;
-            case "/":
-                if (right == 0) {
-                    throw new ArithmeticException("Division by zero");
-                }
-                return left / right;
-            case "%":
-                return left % right;
-            case "^":
-                final double pow = Math.pow(left, right);
+            case "+": return left + right;
+            case "-": return left - right;
+            case "*": return left * right;
+            case "/": return (right == 0) ? except("Division by zero", line) : left / right;
+            case "%": return left % right;
+            case "^": return Math.pow(left, right);
+            case "<": return left < right;
+            case ">": return left > right;
+            case "<=": return left <= right;
+            case ">=": return left >= right;
+            case "==": return left == right;
+            case "!=": return left != right;
+            default: except("Unsupported operator for floats: " + operator, line); return null;
+        }
+    }
 
-                if (pow % 1 == 0) return (int) pow;
-
-                return pow % 1 == 0 ? (int) pow : pow;
-            case "<":
-                return left < right;
-            case ">":
-                return left > right;
-            case "<=":
-                return left <= right;
-            case ">=":
-                return left >= right;
-            case "==":
-                return left == right;
-            case "!=":
-                return left != right;
-            case ">>":
-                return left >> right;
-            case "<<":
-                return left << right;
-            case "&":
-                return left & right;
-            case "|":
-                return left | right;
-            case "^^":
-                return left ^ right;
-            default:
-                except("Unsupported operato for integers: " + operator, line);
-                return null;
+    private Object evaluateIntegerOperation(final int left, final int right, final String operator, final int line) {
+        switch (operator) {
+            case "+": return left + right;
+            case "-": return left - right;
+            case "*": return left * right;
+            case "/": return (right == 0) ? except("Division by zero", line) : left / right;
+            case "%": return left % right;
+            case "^": return Math.pow(left, right) % 1 == 0 ? (int)Math.pow(left, right) : Math.pow(left, right);
+            case "<": return left < right;
+            case ">": return left > right;
+            case "<=": return left <= right;
+            case ">=": return left >= right;
+            case "==": return left == right;
+            case "!=": return left != right;
+            case ">>": return left >> right;
+            case "<<": return left << right;
+            case "&": return left & right;
+            case "|": return left | right;
+            case "^^": return left ^ right;
+            default: except("Unsupported operator for integers: " + operator, line); return null;
         }
     }
 
@@ -972,8 +932,9 @@ public class Interpreter {
         return objects;
     }
 
-    private void except(final String message, final int line) {
+    private Object except(final String message, final int line) {
         Register.throwException(message, line);
+        return VOID_OBJECT;
     }
 
     private String getParams(final List<?> objects) {
