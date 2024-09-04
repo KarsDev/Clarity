@@ -1,10 +1,5 @@
-const var start = native.now()
+include native map
 
-var n = 0
-while n < 1_000_000
-  n = n + 1
-
-native.println(native.now() - start)
-fn lol() {
-
-}
+var map = new Map()
+map.put(1, 2)
+native.println(map.print())

@@ -638,11 +638,87 @@ public class Interpreter {
         return result;
     }
 
+    private Object handleStaticFunctionCall(final MemberFunctionCallNode node, final Context context) {
+        final ObjectType rawDefinition = context.getClass(((VariableReferenceNode) node.getCaller()).getName());
+        if (rawDefinition instanceof VoidObject) {
+            except("Accessing a static function of a non-existent class: " + node.getCaller(), node.getLine());
+            return null;
+        }
+
+        final ClassDefinition classDefinition = (ClassDefinition) rawDefinition;
+
+        context.setCurrentClassName(classDefinition.getName());
+        context.setCurrentFunctionName(node.getName());
+
+        final FunctionDefinition definition = classDefinition.getStaticFunction(node.getName(), node.getParams().size());
+
+        if (definition == null) {
+            except("Accessing a static function that does not exist: " + node.getCaller() + "#" + node.getName() + "(...)", node.getLine());
+            return null;
+        }
+
+        final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
+        if (params == null) return null;
+
+        final Context functionContext = new Context(context);
+        defineFunctionParameters(functionContext, definition, params);
+
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.STATICCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        final Object result = interpretBlock(definition.getBlock(), functionContext);
+        context.setCurrentClassName(null);
+        context.setCurrentFunctionName(null);
+        return result;
+    }
+
     private Object handleArrayFunctionCall(final ObjectFunctionCallNode node, final Context context, final Object[] array) {
         final List<Object> params = getFunctionParameters(node, context, -1);
         if (params == null) return null;
 
         final String fn = node.getCalled();
+
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.ARRAYCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+
+        switch (fn) {
+            case "at":
+                if (params.size() == 1 && params.get(0) instanceof Integer) {
+                    try {
+                        return array[(int) params.get(0)];
+                    } catch (final ArrayIndexOutOfBoundsException ex) {
+                        except("Array out of bounds: " + params.get(0), node.getLine());
+                    }
+                }
+            case "size":
+                if (params.isEmpty()) {
+                    return array.length;
+                }
+            case "set":
+                if (params.size() == 2 && params.get(0) instanceof Integer) {
+                    try {
+                        array[(int) params.get(0)] = params.get(1);
+                    } catch (final IndexOutOfBoundsException e) {
+                        except("Array index out of bounds: " + params.get(0), node.getLine());
+                    }
+                    return VOID_OBJECT;
+                }
+            case "setSize":
+                if (params.size() == 1 && params.get(0) instanceof Integer) {
+                    int newSize = (int) params.get(0);
+                    if (newSize < 0) except("Negative array size: " + newSize, node.getLine());
+                    Object[] newArray = new Object[newSize];
+                    System.arraycopy(array, 0, newArray, 0, Math.min(array.length, newSize));
+                    return newArray;
+                }
+            default:
+                except("Illegal function in array context: " + fn + " with params " + params, node.getLine());
+                return null;
+        }
+    }
+
+    private Object handleArrayFunctionCall(final MemberFunctionCallNode node, final Context context, final Object[] array) {
+        final List<Object> params = getFunctionParameters(node, context, -1);
+        if (params == null) return null;
+
+        final String fn = node.getName();
 
         Register.register(new Register.RegisterElement(Register.RegisterElementType.ARRAYCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
 
@@ -1424,8 +1500,20 @@ public class Interpreter {
 
             return result;
         }
-
-        if (!(caller instanceof ClassObject)) { // TODO FIX MAP
+        if (caller instanceof VoidObject) {
+            return handleStaticFunctionCall(node, context);
+        } else if (caller instanceof Object[]) {
+            Object resultArray = handleArrayFunctionCall(node, context, (Object[]) caller);
+            if (resultArray instanceof Object[]) {
+                if (!(node.getCaller() instanceof VariableReferenceNode)) {
+                    except("Expected variable reference", node.getLine());
+                    return null;
+                }
+                context.setVariable(((VariableReferenceNode) node.getCaller()).getName(), resultArray);
+                return VOID_OBJECT;
+            }
+            return resultArray;
+        } else if (!(caller instanceof ClassObject)) {
             except("Expected class object caller", node.getLine());
             return null;
         }
