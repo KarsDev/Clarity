@@ -3,6 +3,7 @@ package me.kuwg.clarity.compiler.cir;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.DefaultNativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
@@ -97,6 +98,8 @@ public class CIRCompiler {
             compileDefaultNativeFunctionCall((DefaultNativeFunctionCallNode) node);
         } else if (node instanceof VariableReferenceNode) {
             compileVariableReference((VariableReferenceNode) node);
+        } else if (node instanceof BinaryExpressionNode) {
+            compileBinaryExpression((BinaryExpressionNode) node);
         } else {
             throw new UnsupportedOperationException("Unknown node type: " + node.getClass().getName());
         }
@@ -164,6 +167,58 @@ public class CIRCompiler {
     private void compileVariableReference(final VariableReferenceNode node) throws IOException {
         write(node.getName());
     }
+
+    private void compileBinaryExpression(final BinaryExpressionNode node) throws IOException {
+        if (node.getOperator().equals("^")) {
+            addInclude("\"math.h\"");
+            write("pow(");
+            compileNode(node.getLeft());
+            write(", ");
+            compileNode(node.getRight());
+            write(")");
+            return;
+        }
+        compileNode(node.getLeft());
+        write(" ");
+        write(node.getOperator());
+        write(" ");
+        compileNode(node.getRight());
+    }
+
+    public String convertToCPPOperator(final String operator) {
+        switch (operator) {
+            case "||":
+                return "||";
+            case "&&":
+                return "&&";
+            case "|":
+                return "|";
+            case "^^":
+                return "^";
+            case "&":
+                return "&";
+            case "^":
+                return  "unreachable";
+            case "<":
+            case "<=":
+            case ">":
+            case ">=":
+            case "<<":
+            case ">>":
+            case "+":
+            case "-":
+            case "*":
+            case "/":
+            case "%":
+            case "==":
+            case "!=":
+            default:
+                return operator;
+        }
+    }
+
+
+
 
 
 

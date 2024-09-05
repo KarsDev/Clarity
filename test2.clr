@@ -1,9 +1,5 @@
 fn main() {
     var x = 2
     var y = 3
-    native.println(x)
-}
-
-fn lol(a, b) {
-    var y = 3
+    native.println(x ^ y)
 }
