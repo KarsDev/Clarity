@@ -2,8 +2,8 @@ package me.kuwg.clarity.ast.nodes.statements;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
-import me.kuwg.clarity.compiler.stream.ASTInputStream;
-import me.kuwg.clarity.compiler.stream.ASTOutputStream;
+import me.kuwg.clarity.compiler.ast.stream.ASTInputStream;
+import me.kuwg.clarity.compiler.ast.stream.ASTOutputStream;
 
 import java.io.IOException;
 

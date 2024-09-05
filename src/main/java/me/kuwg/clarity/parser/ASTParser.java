@@ -24,7 +24,7 @@ import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
-import me.kuwg.clarity.compiler.ASTLoader;
+import me.kuwg.clarity.compiler.ast.ASTLoader;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.TokenType;
@@ -179,8 +179,7 @@ public final class ASTParser {
 
         final String name = consume(VARIABLE).getValue();
 
-        ASTNode value;
-        value = matchAndConsume(OPERATOR, "=") ? parseExpression() : new VoidNode().setLine(line);
+        final ASTNode value = matchAndConsume(OPERATOR, "=") ? parseExpression() : new VoidNode().setLine(line);
 
         return new VariableDeclarationNode(name, value, isConst, isStatic).setLine(lookahead(-1).getLine());
     }
@@ -485,12 +484,12 @@ public final class ASTParser {
         final BlockNode body = parseBlock();
 
         List<FunctionDeclarationNode> constructors = new ArrayList<>();
-        for (ASTNode node : body.getChildrens()) {
+        for (ASTNode node : body.getChildren()) {
             if (node instanceof FunctionDeclarationNode) {
                 FunctionDeclarationNode cast = (FunctionDeclarationNode) node;
                 if (cast.getFunctionName().equals("constructor")) {
                     constructors.add(cast);
-                    body.getChildrens().remove(node);
+                    body.getChildren().remove(node);
                 }
             }
         }
@@ -755,12 +754,12 @@ public final class ASTParser {
         final BlockNode body = parseBlock();
 
         final List<FunctionDeclarationNode> constructors = new ArrayList<>();
-        for (ASTNode node : body.getChildrens()) {
+        for (ASTNode node : body.getChildren()) {
             if (node instanceof FunctionDeclarationNode) {
                 FunctionDeclarationNode cast = (FunctionDeclarationNode) node;
                 if (cast.getFunctionName().equals("constructor")) {
                     constructors.add(cast);
-                    body.getChildrens().remove(node);
+                    body.getChildren().remove(node);
                 }
             }
         }

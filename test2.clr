@@ -1,5 +1,9 @@
-include native map
+fn main() {
+    var x = 2
+    var y = 3
+    native.println(x)
+}
 
-var map = new Map()
-map.put(1, 2)
-native.println(map.print())
+fn lol(a, b) {
+    var y = 3
+}

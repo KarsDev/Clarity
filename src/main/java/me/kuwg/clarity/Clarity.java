@@ -1,10 +1,10 @@
 package me.kuwg.clarity;
 
 import me.kuwg.clarity.ast.AST;
-import me.kuwg.clarity.compiler.ASTData;
-import me.kuwg.clarity.compiler.ASTLoader;
-import me.kuwg.clarity.compiler.ASTSaver;
-import me.kuwg.clarity.debug.PerformanceHistogram;
+import me.kuwg.clarity.compiler.ast.ASTData;
+import me.kuwg.clarity.compiler.ast.ASTLoader;
+import me.kuwg.clarity.compiler.ast.ASTSaver;
+import me.kuwg.clarity.compiler.cir.CIRCompiler;
 import me.kuwg.clarity.installer.ClarityInstaller;
 import me.kuwg.clarity.installer.OS;
 import me.kuwg.clarity.interpreter.Interpreter;
@@ -98,6 +98,10 @@ public class Clarity {
                         System.out.println("Running the compiled file: " + file.getName());
                         runCompiledFile(file);
                         break;
+                    case "cpp":
+                        System.out.println("Compiling the file to cpp: " + file.getName());
+                        compileToCPP(file);
+                        break;
                     default:
                         printUsage();
                         break;
@@ -123,6 +127,7 @@ public class Clarity {
         System.out.println("  interpret <source.clr>      - Interpret and run the source file");
         System.out.println("  run <compiled.cclr>         - Interpret the compiled source file");
         System.out.println("  compile <source.clr> [output.cclr] - Compile the source file to AST format");
+        System.out.println("  test <source.clr> - Compile the source file to clarity IR");
         System.out.println("  test <source.clr> [output.cclr] - Interpret, run, and then compile the source file");
     }
 
@@ -132,6 +137,12 @@ public class Clarity {
 
     private static void printFileNotFound(File file) {
         System.err.println("Error: File not found: " + file.getAbsolutePath());
+    }
+
+    private static void compileToCPP(File file) throws IOException {
+        AST ast = loadOrParseAST(file);
+        CIRCompiler compiler = new CIRCompiler(ast, new File(file.getName().substring(file.getName().lastIndexOf(".") + 1) + ".cpp"));
+        compiler.compile();
     }
 
     private static void runOrInterpretFile(File file) throws IOException {

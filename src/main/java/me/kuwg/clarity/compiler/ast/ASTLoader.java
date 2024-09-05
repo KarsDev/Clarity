@@ -1,8 +1,8 @@
-package me.kuwg.clarity.compiler;
+package me.kuwg.clarity.compiler.ast;
 
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
-import me.kuwg.clarity.compiler.stream.ASTInputStream;
+import me.kuwg.clarity.compiler.ast.stream.ASTInputStream;
 
 import java.io.File;
 import java.io.IOException;

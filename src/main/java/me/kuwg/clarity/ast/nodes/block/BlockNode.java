@@ -1,11 +1,10 @@
 package me.kuwg.clarity.ast.nodes.block;
 
 import me.kuwg.clarity.ast.ASTNode;
-import me.kuwg.clarity.compiler.stream.ASTInputStream;
-import me.kuwg.clarity.compiler.stream.ASTOutputStream;
+import me.kuwg.clarity.compiler.ast.stream.ASTInputStream;
+import me.kuwg.clarity.compiler.ast.stream.ASTOutputStream;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
@@ -20,7 +19,7 @@ public class BlockNode extends ASTNode implements Iterable<ASTNode> {
         children.add(child);
     }
 
-    public final List<ASTNode> getChildrens() {
+    public final List<ASTNode> getChildren() {
         return children;
     }
 

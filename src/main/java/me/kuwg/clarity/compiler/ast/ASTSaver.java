@@ -1,7 +1,7 @@
-package me.kuwg.clarity.compiler;
+package me.kuwg.clarity.compiler.ast;
 
 import me.kuwg.clarity.ast.AST;
-import me.kuwg.clarity.compiler.stream.ASTOutputStream;
+import me.kuwg.clarity.compiler.ast.stream.ASTOutputStream;
 
 import java.io.File;
 import java.io.IOException;

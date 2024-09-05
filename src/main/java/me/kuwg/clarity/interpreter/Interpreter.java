@@ -62,7 +62,7 @@ public class Interpreter {
             if (node instanceof MainFunctionDeclarationNode) {
                 if (main != null) throw new MultipleMainMethodsException();
                 main = (MainFunctionDeclarationNode) node;
-                ast.getRoot().getChildrens().remove(node);
+                ast.getRoot().getChildren().remove(node);
             } else {
                 preInterpret(node, ast.getRoot(), general);
             }
@@ -93,14 +93,14 @@ public class Interpreter {
     private void preInterpret(final ASTNode node, final BlockNode block, final Context context) {
         if (node instanceof FunctionDeclarationNode) {
             interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
-            block.getChildrens().remove(node);
+            block.getChildren().remove(node);
         } else if (node instanceof ClassDeclarationNode) {
             final ClassDeclarationNode cdn = (ClassDeclarationNode) node;
             if (context.getClass(cdn.getName()) == VOID_OBJECT) interpretClassDeclaration(cdn, context);
-            block.getChildrens().remove(node);
+            block.getChildren().remove(node);
         } else if (node instanceof IncludeNode) {
             interpretInclude((IncludeNode) node, context);
-            block.getChildrens().remove(node);
+            block.getChildren().remove(node);
         } else if (node instanceof ReflectedNativeFunctionDeclaration) {
             final ReflectedNativeFunctionDeclaration reflected = (ReflectedNativeFunctionDeclaration) node;
             if (reflected.isStatic()) interpretReflectedNativeFunctionDeclaration(reflected, context);
