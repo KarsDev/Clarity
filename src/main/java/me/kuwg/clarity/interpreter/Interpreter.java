@@ -661,7 +661,6 @@ public class Interpreter {
         }
 
         final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
-        if (params == null) return null;
 
         final Context functionContext = new Context(context);
         defineFunctionParameters(functionContext, definition, params);
@@ -735,7 +734,6 @@ public class Interpreter {
 
     private Object handleArrayFunctionCall(final MemberFunctionCallNode node, final Context context, final Object[] array) {
         final List<Object> params = getFunctionParameters(node, context, -1);
-        if (params == null) return null;
 
         final String fn = node.getName();
 
@@ -1006,15 +1004,15 @@ public class Interpreter {
         final ObjectType rawCurrent =  context.getClass(context.getCurrentClassName());
 
         if (!(rawCurrent instanceof ClassDefinition)) {
-            return new ReturnValue(nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params));
+            return nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params);
         }
 
         final ClassDefinition current = (ClassDefinition) rawCurrent;
 
         if (current.isNative()) {
-            return new ReturnValue(nmh.callClassNative(current.getName(), node.getName(), params, context));
+            return nmh.callClassNative(current.getName(), node.getName(), params, context);
         }
-        return new ReturnValue(nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params));
+        return nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params);
     }
 
     private Object interpretArray(final ArrayNode node, final Context context) {
@@ -1500,6 +1498,41 @@ public class Interpreter {
             }
 
             final ClassDefinition classDefinition = (ClassDefinition) rawClassDefinition;
+
+            if (classDefinition instanceof EnumClassDefinition) {
+                final int params = node.getParams().size();
+                final EnumClassDefinition ecd = (EnumClassDefinition) classDefinition;
+                switch (node.getName()) {
+                    case "values": {
+                        if (params != 0) break;
+                        return ecd.getValues().toArray(new EnumClassDefinition.EnumValue[0]);
+                    }
+                    case "index": {
+                        if (params != 1) break;
+                        final Object rawIndex = interpretNode(node.getParams().get(0), context);
+                        if (!(rawIndex instanceof Integer)) break;
+                        return ecd.getValues().toArray(new EnumClassDefinition.EnumValue[0])[(int) rawIndex];
+                    }
+                    case "valueOf": {
+                        if (params != 1) break;
+                        final Object rawLiteral = interpretNode(node.getParams().get(0), context);
+                        if (!(rawLiteral instanceof String)) break;
+                        final String valueOfLiteral = (String) rawLiteral;
+                        for (final EnumClassDefinition.EnumValue value : ecd.getValues()) {
+                            if (value.getName().equals(valueOfLiteral)) return value;
+                        }
+                        Register.throwException("Enum value not found by name " + valueOfLiteral);
+                    }
+                    default: {
+                        break;
+                    }
+                }
+
+                final List<Object> paramsList = getFunctionParameters(node, context, params);
+
+                except("Static function not found: " + classDefinition.getName() + "#" + node.getName() + getParams(paramsList), node.getLine());
+            }
+
             final FunctionDefinition definition = classDefinition.getStaticFunction(node.getName(), node.getParams().size());
 
             if (definition == null) {
@@ -1509,7 +1542,6 @@ public class Interpreter {
 
             final Context functionContext = new Context(context);
             final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
-            if (params == null) return null;
 
             defineFunctionParameters(functionContext, definition, params);
 
@@ -1547,7 +1579,7 @@ public class Interpreter {
 
         final ClassObject object = (ClassObject) caller;
         final String objectName = object.getName();
-        final ObjectType rawDefinition =  object.getContext().getFunction(node.getName(), node.getParams().size());
+        final ObjectType rawDefinition = object.getContext().getFunction(node.getName(), node.getParams().size());
 
         if (!(rawDefinition instanceof FunctionDefinition)) {
             except("Instance function not found: " + objectName + "#" + node.getName(), node.getLine());
@@ -1556,10 +1588,8 @@ public class Interpreter {
 
         final FunctionDefinition definition = (FunctionDefinition) rawDefinition;
 
-
         final Context functionContext = new Context(object.getContext());
         final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
-        if (params == null) return null;
 
         defineFunctionParameters(functionContext, definition, params);
 
@@ -1582,14 +1612,14 @@ public class Interpreter {
             final Object returned = interpretNode(param, context);
             if (returned == VOID_OBJECT) {
                 Register.throwException("Passing void as a parameter function");
-                return null;
+                return new ArrayList<>();
             }
             params.add(returned);
         }
 
         if (expectedSize != -1 && (params.size() > expectedSize || params.size() < expectedSize)) {
             except("Parameter size mismatch. Expected: " + expectedSize + ", Found: " + params.size(), node.getLine());
-            return null;
+            return new ArrayList<>();
         }
         return params;
     }

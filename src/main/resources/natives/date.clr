@@ -1,0 +1,367 @@
+/####################################################
+ #  Enum: Day
+ #
+ #  Overview:
+ #  This enum represents the days of the week. Each value corresponds to a specific day,
+ #  from Monday to Sunday. It is used within the Date class to specify and manage days.
+ #
+ #  Example Usage:
+ #  Day.MONDAY    // Refers to Monday.
+ ####################################################/
+enum Day {
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
+    SUNDAY
+}
+
+
+
+/####################################################
+ #  Enum: Month
+ #
+ #  Overview:
+ #  This enum represents the months of the year, ranging from January to December.
+ #  It is used within the Date class to specify and manage months.
+ #
+ #  Example Usage:
+ #  Month.JANUARY    // Refers to January.
+ ####################################################/
+enum Month {
+    JANUARY,
+    FEBRUARY,
+    MARCH,
+    APRIL,
+    MAY,
+    JUNE,
+    JULY,
+    AUGUST,
+    SEPTEMBER,
+    OCTOBER,
+    NOVEMBER,
+    DECEMBER
+}
+
+
+
+/####################################################
+ #  Class: Year
+ #
+ #  Overview:
+ #  The Year class encapsulates the concept of a year and provides methods to
+ #  get, set, and check if a given year is a leap year. It is primarily used
+ #  within the Date class to manage the year component of a date.
+ #
+ #  Example Usage:
+ #  var y = new Year(2024)    // Creates a Year object representing 2024.
+ #  y.isLeapYear()            // Returns true if the year is a leap year.
+ ####################################################/
+class Year {
+    var year
+
+    /##
+     # Constructor: Year
+     #
+     # Description:
+     # Initializes a new Year object with the specified year value.
+     #
+     # Parameters:
+     # - year: An integer representing the year.
+     #
+     # Example:
+     # var y = new Year(2024)    // Initializes a Year object for 2024.
+     #/
+    constructor(year) {
+        local.year = year
+    }
+
+    /##
+     # Method: getYear
+     #
+     # Description:
+     # Returns the value of the year stored in the Year object.
+     #
+     # Returns:
+     # - An integer representing the year.
+     #
+     # Example:
+     # y.getYear()    // Returns the year value (e.g., 2024).
+     #/
+    fn getYear() {
+        return year
+    }
+
+    /##
+     # Method: setYear
+     #
+     # Description:
+     # Sets the year value for the Year object.
+     #
+     # Parameters:
+     # - year: An integer representing the year to be set.
+     #
+     # Example:
+     # y.setYear(2025)    // Sets the year to 2025.
+     #/
+    fn setYear(year) {
+        local.year = year
+    }
+
+    /##
+     # Method: isLeapYear
+     #
+     # Description:
+     # Determines whether the current year is a leap year.
+     #
+     # Returns:
+     # - A boolean: `true` if the year is a leap year, `false` otherwise.
+     #
+     # Example:
+     # y.isLeapYear()    // Returns true if the year is a leap year.
+     #/
+    fn isLeapYear() {
+        return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
+    }
+}
+
+
+
+/####################################################
+ #  Class: Date
+ #
+ #  Overview:
+ #  The Date class combines a day of the week, numerical day, month, and year to represent a specific date.
+ #  It provides methods to access and modify these components, as well as to check
+ #  if the year within the date is a leap year.
+ #
+ #  Example Usage:
+ #  var d = new Date(Day.MONDAY, 1, Month.JANUARY, new Year(2024))
+ #  d.print()    // Returns "MONDAY 1 JANUARY 2024"
+ ####################################################/
+class Date {
+    var weekDay
+    var day
+    var month
+    var year
+
+    /##
+     # Constructor: Date
+     #
+     # Description:
+     # Initializes a new Date object with the specified day of the week, numerical day, month, and year.
+     #
+     # Parameters:
+     # - weekDay: A value from the Day enum representing the day of the week.
+     # - day: An integer representing the numerical day of the month.
+     # - month: A value from the Month enum representing the month.
+     # - year: A Year object representing the year.
+     #
+     # Example:
+     # var d = new Date(Day.MONDAY, 1, Month.JANUARY, new Year(2024))
+     #/
+    constructor(weekDay, day, month, year) {
+        local.weekDay = weekDay
+        local.day = day
+        local.month = month
+        local.year = year
+    }
+
+    /##
+     # Method: getWeekDay
+     #
+     # Description:
+     # Returns the day of the week stored in the Date object.
+     #
+     # Returns:
+     # - A value from the Day enum representing the day of the week.
+     #
+     # Example:
+     # d.getWeekDay()    // Returns the day of the week (e.g., Day.MONDAY).
+     #/
+    fn getWeekDay() {
+        return weekDay
+    }
+
+    /##
+     # Method: getDay
+     #
+     # Description:
+     # Returns the numerical day of the month stored in the Date object.
+     #
+     # Returns:
+     # - An integer representing the numerical day of the month.
+     #
+     # Example:
+     # d.getDay()    // Returns the day of the month (e.g., 1).
+     #/
+    fn getDay() {
+        return day
+    }
+
+    /##
+     # Method: getMonth
+     #
+     # Description:
+     # Returns the month stored in the Date object.
+     #
+     # Returns:
+     # - A value from the Month enum representing the month.
+     #
+     # Example:
+     # d.getMonth()    // Returns the month (e.g., Month.JANUARY).
+     #/
+    fn getMonth() {
+        return month
+    }
+
+    /##
+     # Method: getYear
+     #
+     # Description:
+     # Returns the year stored in the Date object.
+     #
+     # Returns:
+     # - An integer representing the year.
+     #
+     # Example:
+     # d.getYear()    // Returns the year (e.g., 2024).
+     #/
+    fn getYear() {
+        return year.getYear()
+    }
+
+    /##
+     # Method: setWeekDay
+     #
+     # Description:
+     # Sets the day of the week in the Date object.
+     #
+     # Parameters:
+     # - weekDay: A value from the Day enum representing the day of the week to be set.
+     #
+     # Example:
+     # d.setWeekDay(Day.TUESDAY)    // Sets the day of the week to Tuesday.
+     #/
+    fn setWeekDay(weekDay) {
+        local.weekDay = weekDay
+    }
+
+    /##
+     # Method: setDay
+     #
+     # Description:
+     # Sets the numerical day of the month in the Date object.
+     #
+     # Parameters:
+     # - day: An integer representing the numerical day of the month to be set.
+     #
+     # Example:
+     # d.setDay(15)    // Sets the day of the month to 15.
+     #/
+    fn setDay(day) {
+        local.day = day
+    }
+
+    /##
+     # Method: setMonth
+     #
+     # Description:
+     # Sets the month in the Date object.
+     #
+     # Parameters:
+     # - month: A value from the Month enum representing the month to be set.
+     #
+     # Example:
+     # d.setMonth(Month.FEBRUARY)    // Sets the month to February.
+     #/
+    fn setMonth(month) {
+        local.month = month
+    }
+
+    /##
+     # Method: setYear
+     #
+     # Description:
+     # Sets the year in the Date object.
+     #
+     # Parameters:
+     # - year: A Year object representing the year to be set.
+     #
+     # Example:
+     # d.setYear(new Year(2025))    // Sets the year to 2025.
+     #/
+    fn setYear(year) {
+        local.year = year
+    }
+
+    /##
+     # Method: isLeapYear
+     #
+     # Description:
+     # Determines whether the year within the Date object is a leap year.
+     #
+     # Returns:
+     # - A boolean: `true` if the year is a leap year, `false` otherwise.
+     #
+     # Example:
+     # d.isLeapYear()    // Returns true if the year is a leap year.
+     #/
+    fn isLeapYear() {
+        return year.isLeapYear()
+    }
+
+    /##
+     # Method: print
+     #
+     # Description:
+     # Returns a string representation of the Date object in the format "DAY WEEKDAY MONTH YEAR".
+     #
+     # Returns:
+     # - A string representing the date.
+     #
+     # Example:
+     # d.print()    // Returns "MONDAY 1 JANUARY 2024".
+     #/
+    fn print() {
+        return weekDay.name() + " " + day + " " + month.name() + " " + year.getYear()
+    }
+
+    /##
+     # Static Method: now
+     #
+     # Description:
+     # Creates a new Date object representing the current date.
+     #
+     # Returns:
+     # - A Date object initialized to the current date.
+     #
+     # Example:
+     # var d = Date.now()    // Returns a Date object representing the current date.
+     #/
+    static fn now() {
+        return new Date(null, null, null, null).current()
+    }
+
+    /##
+     # Method: current
+     #
+     # Description:
+     # Retrieves the current date and returns a new Date object representing it.
+     #
+     # Returns:
+     # - A Date object initialized to the current date.
+     #
+     # Example:
+     # var d = d.current()    // Returns a Date object representing the current date.
+     #/
+    fn current() {
+        const var weekDay = Day.index(native.date.getWeekDay())
+        const var day = native.date.getDay()
+        const var month = Month.index(native.date.getMonth())
+        const var year = native.date.getYear()
+        return new Date(weekDay, day, month, new Year(year))
+    }
+}

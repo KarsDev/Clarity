@@ -1,6 +1,10 @@
 package me.kuwg.clarity.nmh;
 
 import me.kuwg.clarity.interpreter.context.Context;
+import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetDayNative;
+import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetMonthNative;
+import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetWeekDayNative;
+import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetYearNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.CheckNativeTypeNative;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeFunction;
@@ -38,10 +42,19 @@ public class NativeMethodHandler {
     }
 
     private void initializePackagedFunctions() {
+        // can be accessed by anyone
         registerPackagedFunction(new CreateListNative());
         registerPackagedFunction(new ExceptNative());
+
+        // required accessor: System
         registerPackagedFunction(new ExitNative());
         registerPackagedFunction(new CheckNativeTypeNative());
+
+        // required accessor: Date
+        registerPackagedFunction(new GetWeekDayNative());
+        registerPackagedFunction(new GetDayNative());
+        registerPackagedFunction(new GetMonthNative());
+        registerPackagedFunction(new GetYearNative());
     }
 
     private void initializeNativeClasses() {

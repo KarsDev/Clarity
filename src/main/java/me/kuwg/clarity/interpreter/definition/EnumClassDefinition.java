@@ -24,6 +24,10 @@ public class EnumClassDefinition extends ClassDefinition {
         throw new RuntimeException(); // unreachable
     }
 
+    public List<EnumValue> getValues() {
+        return enumValues;
+    }
+
     public static class EnumValue {
         private final String name;
         private final Object value;
