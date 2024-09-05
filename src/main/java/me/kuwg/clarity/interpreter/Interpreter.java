@@ -8,6 +8,7 @@ import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
+import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
@@ -188,6 +189,8 @@ public class Interpreter {
             return interpretAssert((AssertNode) node, context);
         } else if (node instanceof IsNode) {
             return interpretIs((IsNode) node, context);
+        } else if (node instanceof EnumDeclarationNode) {
+            return interpretEnumDeclaration((EnumDeclarationNode) node, context);
         } else {
             throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
         }
@@ -589,9 +592,7 @@ public class Interpreter {
     }
     private Object interpretObjectFunctionCall(final ObjectFunctionCallNode node, final Context context) {
         final Object caller = context.getVariable(node.getCaller());
-        if (caller instanceof VoidObject) {
-            return handleStaticFunctionCall(node, context);
-        } else if (caller instanceof Object[]) {
+        if (caller instanceof Object[]) {
             Object resultArray = handleArrayFunctionCall(node, context, (Object[]) caller);
             if (resultArray instanceof Object[]) {
                 context.setVariable(node.getCaller(), resultArray);
@@ -600,6 +601,8 @@ public class Interpreter {
             return resultArray;
         } else if (caller instanceof ClassObject) {
             return handleInstanceMethodCall(node, context, (ClassObject) caller);
+        } else if (caller instanceof VoidObject) {
+            return handleStaticFunctionCall(node, context);
         } else {
             except("You can't call a function out of a " + caller.getClass().getSimpleName(), node.getLine());
             return null;
@@ -668,6 +671,22 @@ public class Interpreter {
         context.setCurrentClassName(null);
         context.setCurrentFunctionName(null);
         return result;
+    }
+
+    private Object handleEnumValueFunctionCall(final MemberFunctionCallNode node, final EnumClassDefinition.EnumValue val) {
+        if (!node.getParams().isEmpty()) {
+            except("All enum value functions have no params.", node.getLine());
+            return null;
+        }
+        switch (node.getName()) {
+            case "value":
+                return val.getValue();
+            case "name":
+                return val.getName();
+            default:
+                except("Illegal function in array context: " + node.getName(), node.getLine());
+                return null;
+        }
     }
 
     private Object handleArrayFunctionCall(final ObjectFunctionCallNode node, final Context context, final Object[] array) {
@@ -916,6 +935,12 @@ public class Interpreter {
             }
 
             final ClassDefinition classDefinition = (ClassDefinition) classDefinitionRaw;
+
+            if (classDefinition instanceof EnumClassDefinition) {
+                final EnumClassDefinition enumDefinition = (EnumClassDefinition) classDefinition;
+                return enumDefinition.getValue(calledObjectName);
+            }
+
             final VariableDefinition staticVariable = classDefinition.staticVariables.get(calledObjectName);
 
             if (staticVariable == null) {
@@ -1502,6 +1527,8 @@ public class Interpreter {
         }
         if (caller instanceof VoidObject) {
             return handleStaticFunctionCall(node, context);
+        } else if (caller instanceof EnumClassDefinition.EnumValue) {
+            return handleEnumValueFunctionCall(node, (EnumClassDefinition.EnumValue) caller);
         } else if (caller instanceof Object[]) {
             Object resultArray = handleArrayFunctionCall(node, context, (Object[]) caller);
             if (resultArray instanceof Object[]) {
@@ -1617,6 +1644,23 @@ public class Interpreter {
                 Register.throwException("Unknown 'is' type: " + node.getType().name().toLowerCase(), node.getLine());
                 return false;
         }
+    }
+
+    private Object interpretEnumDeclaration(final EnumDeclarationNode node, final Context context) {
+        final String name = node.getName();
+
+        final List<EnumClassDefinition.EnumValue> enumValues = new ArrayList<>();
+        for (final EnumDeclarationNode.EnumValueNode val : node.getEnumValues()) {
+            final String valName = val.getName();
+            final ASTNode valObj = val.getValue();
+            enumValues.add(new EnumClassDefinition.EnumValue(valName, interpretNode(valObj, context)));
+        }
+
+        final EnumClassDefinition definition = new EnumClassDefinition(name, node.isConstant(), enumValues);
+
+        context.defineClass(name, definition);
+
+        return VOID_OBJECT;
     }
 
 }

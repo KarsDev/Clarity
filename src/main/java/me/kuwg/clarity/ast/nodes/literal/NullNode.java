@@ -9,7 +9,7 @@ import java.io.IOException;
 public class NullNode extends ASTNode {
     @Override
     public void print(final StringBuilder sb, final String indent) {
-
+        sb.append(indent).append("Null");
     }
 
     @Override

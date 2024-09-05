@@ -1,5 +1,0 @@
-fn main() {
-    var x = 2
-    var y = 3
-    native.println(x ^ y)
-}

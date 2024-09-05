@@ -8,6 +8,7 @@ import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
+import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
 import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.statements.*;
@@ -136,6 +137,8 @@ public final class ASTParser {
                 return parseStrDeclaration();
             case ARR:
                 return parseArrDeclaration();
+            case ENUM:
+                return parseEnumDeclaration();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -146,6 +149,10 @@ public final class ASTParser {
 
         if (lookahead().is(KEYWORD, "class")) {
             return parseClassDeclaration();
+        }
+
+        if (lookahead().is(KEYWORD, "enum")) {
+            return parseEnumDeclaration();
         }
 
         if (match(KEYWORD, "static") && lookahead().is(KEYWORD, "native")) {
@@ -861,6 +868,32 @@ public final class ASTParser {
     private ASTNode parseArrDeclaration() {
         final int line = consume().getLine(); // consume "str"
         return new NativeCastNode(CastType.ARR, parseExpression()).setLine(line);
+    }
+
+    private ASTNode parseEnumDeclaration()  {
+        final boolean isConstant = matchAndConsume(KEYWORD, "const");
+        final int line = consume().getLine(); // consume "enum"
+        final String enumName = consume(VARIABLE).getValue();
+        consume(DIVIDER, "{");
+
+        final List<EnumDeclarationNode.EnumValueNode> enumValues = new ArrayList<>();
+
+        if (match(VARIABLE)) {
+            do {
+                final String name = consume().getValue();
+                final ASTNode value;
+                if (matchAndConsume(DIVIDER, "(")) {
+                    value = parseExpression();
+                    consume(DIVIDER, ")");
+                } else {
+                    value = new NullNode();
+                }
+                enumValues.add(new EnumDeclarationNode.EnumValueNode(name, value));
+            } while (matchAndConsume(DIVIDER, ","));
+        }
+
+        consume(DIVIDER, "}");
+        return new EnumDeclarationNode(enumName, isConstant, fileName, enumValues);
     }
 
 
