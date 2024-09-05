@@ -17,10 +17,12 @@ native class List {
      # Example:
      # var list = new List([1, 2, 3])  // Initializes the list with elements 1, 2, 3.
      #/
-    constructor(arr) {
-        if !System.checkNativeType("arr", arr) System.throw("Expected array value in List constructor")
-        
-        elements = arr
+    constructor(elements) {
+        if !System.checkNativeType("arr", elements) {
+            System.throw("Expected array value in List constructor")
+        }
+
+        local.elements = elements
     }
 
     /##
@@ -167,11 +169,11 @@ native class List {
      #/
     fn toArray() {
         const var size = elements.size()
-        const var arr = [size]
+        const var arr0 = [size]
         for var i = 0, i < size, i = i + 1 {
-            arr.set(i, elements.at(i))
+            arr0.set(i, elements.at(i))
         }
-        return arr
+        return arr0
     }
 
     /##

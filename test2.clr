@@ -1,3 +1,10 @@
-include native date
+include native random
+include native list
 
-native.println(Date.now().print())
+const var rand = new Random()
+
+const var list = new List()
+
+for i : 100 {
+    list.add(rand.randInt(0, 100))
+}

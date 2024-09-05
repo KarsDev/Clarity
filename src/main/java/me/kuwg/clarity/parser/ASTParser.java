@@ -926,7 +926,7 @@ public final class ASTParser {
 
     private Token consume() {
         if (currentTokenIndex >= tokens.size()) {
-            throw new IllegalStateException("Unexpected end of input.");
+            throw new IllegalStateException("Unexpected end of input" + ", in file: " + fileName);
         }
         return tokens.get(currentTokenIndex++);
     }
@@ -940,7 +940,7 @@ public final class ASTParser {
     private Token consume(final TokenType expectedType) {
         final Token token = consume();
         if (token.getType() != expectedType) {
-            throw new IllegalStateException("Expected token type " + expectedType + " but found " + token.getType() + " at line " + token.getLine());
+            throw new IllegalStateException("Expected token type " + expectedType + " but found " + token.getType() + " at line " + token.getLine() + ", in file: " + fileName);
         }
         return token;
     }
@@ -948,7 +948,7 @@ public final class ASTParser {
     private void consume(final TokenType expectedType, final String expectedValue) {
         final Token token = consume();
         if (token.getType() != expectedType || !token.getValue().equals(expectedValue)) {
-            throw new IllegalStateException("Expected value " + expectedValue + " but found " + token.getValue() + " at line " + token.getLine());
+            throw new IllegalStateException("Expected value " + expectedValue + " but found " + token.getValue() + " at line " + token.getLine() + ", in file: " + fileName);
         }
     }
 
