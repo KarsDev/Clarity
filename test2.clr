@@ -1,7 +1,5 @@
 include native math
 
-var x = 0
-x++
-x--
---x
-native.println(x)
+fn main() {
+    return 0f
+}

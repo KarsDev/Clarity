@@ -79,7 +79,7 @@ public class Interpreter {
             if (result == VOID_OBJECT || result == VOID_RETURN || result == null) {
                 return 0;
             } else if (!(result instanceof Integer)) {
-                System.err.println("[WARNING] Main function does not return an integer, but returns instead: " + result.getClass().getSimpleName());
+                System.err.println("[WARNING] Main function does not return an integer");
                 return 1;
             } else {
                 return (int) result;
