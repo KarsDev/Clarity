@@ -400,6 +400,15 @@ public final class ASTParser {
                         }
                         break;
                     }
+                    case "++":
+                    case "--": {
+                        if (node instanceof VariableReferenceNode) {
+                            final char v = consume().getValue().charAt(0); // consume op
+                            final VariableReferenceNode left = (VariableReferenceNode) node;
+                            node = new VariableReassignmentNode(left.getName(), new BinaryExpressionNode(left, String.valueOf(v), new IntegerNode(1)));
+                        }
+                        break;
+                    }
                 }
                 return node;
 
@@ -474,7 +483,15 @@ public final class ASTParser {
                     final double divisor = Math.pow(10, numberOfDigits);
                     return new DecimalNode(integerValue / divisor);
                 }
-
+            case "++":
+            case "--": {
+                if (right instanceof VariableReferenceNode) {
+                    final char v = token.getValue().charAt(0); // consume op
+                    final VariableReferenceNode left = (VariableReferenceNode) right;
+                    System.out.println(new VariableReassignmentNode(left.getName(), new BinaryExpressionNode(left, String.valueOf(v), new IntegerNode(1))));
+                    return new VariableReassignmentNode(left.getName(), new BinaryExpressionNode(left, String.valueOf(v), new IntegerNode(1)));
+                }
+            }
             default:
                 throw new UnsupportedOperationException("Unsupported unary operator: " + token.getValue() + " at line " + line);
         }

@@ -1,6 +1,7 @@
 include native math
 
-fn main() {
-    var x = Math.standardDeviation([2f, 3f, 4f])
-    native.println(x)
-}
+var x = 0
+x++
+x--
+--x
+native.println(x)
