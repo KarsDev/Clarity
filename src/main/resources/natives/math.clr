@@ -138,6 +138,38 @@ const native class Math {
     }
 
     /##
+     # Method: standardDeviation
+     #
+     # Description:
+     # Computes the standard deviation of an array of numbers. The standard deviation is a measure
+     # of the amount of variation or dispersion of a set of values.
+     #
+     # Parameters:
+     # - elements: An array of numbers for which to calculate the standard deviation.
+     #
+     # Returns:
+     # - The standard deviation of the given array of numbers.
+     #
+     # Example:
+     # Math.standardDeviation([1, 2, 3, 4, 5])    // Returns: 1.4142135623730951
+     #/
+    static fn standardDeviation(elements) {
+        var mean = 0
+        for e : elements {
+            mean += e
+        }
+        mean /= elements.size()
+
+        var variance = 0
+        for e : elements {
+            variance += (e - mean) * (e - mean)
+        }
+        variance /= elements.size()
+
+        return Math.sqrt(variance)
+    }
+
+    /##
      # Native Method: isPrime
      #
      # Description:
@@ -254,21 +286,17 @@ const native class Math {
     static native fn random()
 
     /##
-    # Native Method: exp
-    #
-    # Description:
-    # Computes the exponential of a given number. The exponential of a number x is e^x, where e is the base
-    # of natural logarithms.
-    #
-    # Parameters:
-    # - x: A number whose exponential is to be computed.
-    #
-    # Returns:
-    # - The value of e raised to the power of x.
-    #
-    # Note:
-    # This method is declared as native and relies on an external implementation.
-    #/
+     # Native Method: exp
+     # Description:
+     # Computes the exponential of a given number. The exponential of a number x is e^x, where e is the base
+     # of natural logarithms.
+     # Parameters:
+     # - x: A number whose exponential is to be computed.
+     # Returns:
+     # - The value of e raised to the power of x.
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
     static native fn exp(x)
 
     /##

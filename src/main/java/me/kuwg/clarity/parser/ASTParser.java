@@ -340,6 +340,7 @@ public final class ASTParser {
             }
 
             ASTNode right = parsePrecedence(currentPrecedence + 1);
+
             left = new BinaryExpressionNode(left, operatorToken.getValue(), right).setLine(line);
         }
         return left;
@@ -385,6 +386,21 @@ public final class ASTParser {
                     if (node instanceof ObjectVariableReferenceNode) return new VariableReassignmentNode(((ObjectVariableReferenceNode) node).getCalled(), expression).setLine(line);
                     else return new VariableReassignmentNode(((VariableReferenceNode) node).getName(), expression).setLine(line);
                 }
+
+                switch (current().getValue()) {
+                    case "+=":
+                    case "-=":
+                    case "*=":
+                    case "/=":
+                    case "%=": {
+                        if (node instanceof VariableReferenceNode) {
+                            final char v = consume().getValue().charAt(0); // consume op
+                            final VariableReferenceNode left = (VariableReferenceNode) node;
+                            node = new VariableReassignmentNode(left.getName(), new BinaryExpressionNode(left, String.valueOf(v), parsePrimary()));
+                        }
+                        break;
+                    }
+                }
                 return node;
 
             case NUMBER:
@@ -395,9 +411,14 @@ public final class ASTParser {
 
             case DIVIDER:
                 if (token.getValue().equals("(")) {
-                    ASTNode expression = parseExpression();
+                    ASTNode astNode = parseExpression();
                     consume(DIVIDER, ")");
-                    return expression;
+                    while (match(OPERATOR)){
+                        final String op = consume().getValue();
+                        ASTNode expression = parseExpression();
+                        astNode = new BinaryExpressionNode(astNode, op, expression);
+                    }
+                    return astNode;
                 } else if (token.getValue().equals("[")) {
                     return parseArray(line);
                 }
@@ -453,6 +474,7 @@ public final class ASTParser {
                     final double divisor = Math.pow(10, numberOfDigits);
                     return new DecimalNode(integerValue / divisor);
                 }
+
             default:
                 throw new UnsupportedOperationException("Unsupported unary operator: " + token.getValue() + " at line " + line);
         }

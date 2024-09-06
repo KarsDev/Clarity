@@ -950,7 +950,7 @@ public class Interpreter {
         }
 
         if (!(callerObject instanceof ClassObject)) {
-            except("Expected Class Object, but found " + (callerObject != null ? callerObject.getClass().getSimpleName() : "null"), node.getLine());
+            except("Expected Class Object, but found " + (callerObject != null ? callerObject.getClass().getSimpleName() : "null") + ", while getting " + calledObjectName, node.getLine());
             return null;
         }
 
@@ -1240,6 +1240,7 @@ public class Interpreter {
                 return new ReturnValue(val);
             }
             forEachContext = new Context(context);
+            forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, false, false));
         }
 
         return VOID_OBJECT;
@@ -1487,7 +1488,6 @@ public class Interpreter {
 
     private Object interpretMemberFunctionCall(final MemberFunctionCallNode node, final Context context) {
         final Object caller = interpretNode(node.getCaller(), context);
-
         if (caller == VOID_OBJECT) {
             final String className = ((VariableReferenceNode) node.getCaller()).getName();
             final ObjectType rawClassDefinition = context.getClass(className);
