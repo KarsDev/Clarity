@@ -1,0 +1,22 @@
+include native random
+
+var num = new Random().randInt(1, 10)
+
+var guessed = false
+var guesses = 0
+
+while !guessed {
+
+    var guess = int(native.input("Scrivi un numero: "))
+
+    guesses++
+    if guess == num {
+        break
+    } else if guess > num {
+        native.println("Lower")
+    } else if guess < num {
+        native.println("Higher")
+    }
+}
+
+native.println("You guessed it in " + guesses + " attempts")
