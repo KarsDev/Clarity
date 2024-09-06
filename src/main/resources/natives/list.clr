@@ -1,4 +1,4 @@
-native class List {
+class List {
     // Variable to store the list elements
     var elements
 
@@ -177,32 +177,32 @@ native class List {
     }
 
     /##
-         # Function: print
-         #
-         # Description:
-         # Returns a string representation of the list.
-         #
-         # Parameters:
-         # - None.
-         #
-         # Returns:
-         # - A string that represents the list in the format "[element1, element2, ...]".
-         #
-         # Example:
-         # var output = list.print()  // Returns the string representation of the list.
-         #/
-        fn print() {
-            const var size = elements.size()
-            var result = "["
+     # Function: print
+     #
+     # Description:
+     # Returns a string representation of the list.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - A string that represents the list in the format "[element1, element2, ...]".
+     #
+     # Example:
+     # var output = list.print()  // Returns the string representation of the list.
+     #/
+    fn print() {
+        const var size = elements.size()
+        var result = "["
 
-            for var i = 0, i < size, i = i + 1 {
-                result = result + elements.at(i)
-                if i < size - 1 {
-                    result = result + ", "
-                }
+        for var i = 0, i < size, i = i + 1 {
+            result = result + elements.at(i)
+            if i < size - 1 {
+                result = result + ", "
             }
-
-            result = result + "]"
-            return result
         }
+
+        result = result + "]"
+        return result
+    }
 }

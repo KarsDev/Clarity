@@ -1,4 +1,4 @@
-native class Map {
+class Map {
     // Variable to store keys and values
     var keys
     var values
