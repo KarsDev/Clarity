@@ -1,10 +1,62 @@
 include native random
 include native list
 
-const var rand = new Random()
+fn main() {
 
-const var list = new List()
+    const var list = new List()
 
-for i : 100 {
-    list.add(rand.randInt(0, 100))
+    for i : 100 {
+        list.add(do_rand_most_freq())
+    }
+
+    native.println(list.print())
+}
+
+fn do_rand_most_freq() {
+    const var rand = new Random()
+    const var list = new List()
+
+    for i : 100 {
+        list.add(rand.randInt(0, 100))
+    }
+
+    return most_freq(list)
+}
+
+fn most_freq(list) {
+    assert list is List
+
+    var currentOut = list.get(0)
+    var count = 0
+    var maxElement = currentOut
+    var maxCount = 0
+
+    for i : list.size() {
+        const var current = list.get(i)
+
+        if current == currentOut {
+            count = count + 1
+        } else {
+            count = count - 1
+        }
+
+        if count == 0 {
+            currentOut = current
+            count = 1
+        }
+
+        var tempCount = 0
+        for j : list.size() {
+            if list.get(j) == currentOut {
+                tempCount = tempCount + 1
+            }
+        }
+
+        if tempCount > maxCount {
+            maxElement = currentOut
+            maxCount = tempCount
+        }
+    }
+
+    return maxElement
 }

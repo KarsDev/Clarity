@@ -1004,15 +1004,15 @@ public class Interpreter {
         final ObjectType rawCurrent =  context.getClass(context.getCurrentClassName());
 
         if (!(rawCurrent instanceof ClassDefinition)) {
-            return nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params);
+            return new ReturnValue(nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params));
         }
 
         final ClassDefinition current = (ClassDefinition) rawCurrent;
 
         if (current.isNative()) {
-            return nmh.callClassNative(current.getName(), node.getName(), params, context);
+            return new ReturnValue(nmh.callClassNative(current.getName(), node.getName(), params, context));
         }
-        return nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params);
+        return new ReturnValue(nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params));
     }
 
     private Object interpretArray(final ArrayNode node, final Context context) {
@@ -1554,7 +1554,6 @@ public class Interpreter {
 
             context.setCurrentClassName(null);
             context.setCurrentFunctionName(null);
-
             return result;
         }
         if (caller instanceof VoidObject) {
