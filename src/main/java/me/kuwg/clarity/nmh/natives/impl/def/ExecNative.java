@@ -1,5 +1,6 @@
 package me.kuwg.clarity.nmh.natives.impl.def;
 
+import me.kuwg.clarity.installer.OS;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeFunction;
 
 import java.io.BufferedReader;
@@ -7,9 +8,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
-public class ExeNative extends DefaultNativeFunction<Object> {
-    public ExeNative() {
-        super("exe");
+public class ExecNative extends DefaultNativeFunction<Object> {
+
+    public ExecNative() {
+        super("exec");
     }
 
     @Override
@@ -23,15 +25,26 @@ public class ExeNative extends DefaultNativeFunction<Object> {
     }
 
     /**
-     * Executes a given command and returns its output.
+     * Executes a given command and returns its output based on the OS.
      *
      * @param command The command to be executed.
      * @return The output of the command.
      */
     public static String exe(final String command) {
         final StringBuilder output = new StringBuilder();
+        final ProcessBuilder processBuilder;
 
-        final ProcessBuilder processBuilder = new ProcessBuilder("cmd.exe", "/c", command);
+        switch (OS.CURRENT_OS) {
+            case WINDOWS:
+                processBuilder = new ProcessBuilder("cmd.exe", "/c", command);
+                break;
+            case LINUX:
+            case MAC:
+                processBuilder = new ProcessBuilder("sh", "-c", command);
+                break;
+            default:
+                return "Unsupported OS";
+        }
 
         try {
             final Process process = processBuilder.start();
@@ -60,5 +73,4 @@ public class ExeNative extends DefaultNativeFunction<Object> {
 
         return output.toString();
     }
-
 }
