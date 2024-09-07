@@ -1,4 +1,4 @@
-package me.kuwg.clarity.installer;
+package me.kuwg.clarity.installer.sys;
 
 public enum OS {
     WINDOWS,

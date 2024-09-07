@@ -1,5 +1,6 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.system;
 
+import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.ClarityNativeFunction;
 import me.kuwg.clarity.VoidObject;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class LoadNativeLibraryNative extends SystemNativeFunction<Integer> {
 
-    private static final File LIBRARIES = new File(System.getProperty("user.home") + "/Clarity/libraries/");
+    private static final File LIBRARIES = new File(Clarity.USER_HOME + "/Clarity/libraries/");
 
     public LoadNativeLibraryNative() {
         super("loadNativeLibrary");

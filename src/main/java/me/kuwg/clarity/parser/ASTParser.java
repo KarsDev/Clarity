@@ -1,5 +1,6 @@
 package me.kuwg.clarity.parser;
 
+import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.*;
@@ -637,8 +638,14 @@ public final class ASTParser {
         final String path = parseIncludePath(isCompiled);
 
         if (isCompiled) {
+            final File file;
 
-            File file = new File(path);
+            if (matchAndConsume(VARIABLE, "from")) {
+                file = new File(Clarity.USER_HOME + "/Clarity/libraries/" + consume(VARIABLE).getValue(), path);
+            } else {
+                file = new File(path);
+            }
+
             ASTLoader loader = new ASTLoader(file);
             try {
                 return new IncludeNode(path, loader.load().getRoot(), false).setLine(line);
@@ -684,6 +691,7 @@ public final class ASTParser {
         final List<Token> tokens = Tokenizer.tokenize(content);
         final ASTParser parser = new ASTParser(ORIGINAL, path, tokens);
         final AST ast = parser.parse();
+
         return new IncludeNode(path, ast.getRoot(), false).setLine(line);
     }
 

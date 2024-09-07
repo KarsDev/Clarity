@@ -1,6 +1,6 @@
 package me.kuwg.clarity.nmh.natives.impl.def;
 
-import me.kuwg.clarity.installer.OS;
+import me.kuwg.clarity.installer.sys.OS;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeFunction;
 
 import java.io.BufferedReader;

@@ -1,4 +1,6 @@
-package me.kuwg.clarity.installer;
+package me.kuwg.clarity.installer.sys;
+
+import me.kuwg.clarity.Clarity;
 
 import java.io.*;
 
@@ -33,9 +35,9 @@ public class LinuxClarityInstaller extends ClarityInstaller {
         final String newPath = new File(path).getAbsolutePath();
 
         // Get current PATH from the user's shell configuration file
-        final File bashProfile = new File(System.getProperty("user.home"), ".bash_profile");
-        final File bashrc = new File(System.getProperty("user.home"), ".bashrc");
-        final File zshrc = new File(System.getProperty("user.home"), ".zshrc");
+        final File bashProfile = new File(Clarity.USER_HOME, ".bash_profile");
+        final File bashrc = new File(Clarity.USER_HOME, ".bashrc");
+        final File zshrc = new File(Clarity.USER_HOME, ".zshrc");
         File shellConfig = bashProfile.exists() ? bashProfile : (bashrc.exists() ? bashrc : zshrc);
 
         if (!shellConfig.exists()) {

@@ -1,4 +1,4 @@
-package me.kuwg.clarity.installer;
+package me.kuwg.clarity.installer.sys;
 
 import java.io.*;
 import java.nio.file.Files;

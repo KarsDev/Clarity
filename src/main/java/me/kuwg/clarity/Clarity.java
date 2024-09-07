@@ -5,8 +5,9 @@ import me.kuwg.clarity.compiler.ast.ASTData;
 import me.kuwg.clarity.compiler.ast.ASTLoader;
 import me.kuwg.clarity.compiler.ast.ASTSaver;
 import me.kuwg.clarity.compiler.cir.CIRCompiler;
-import me.kuwg.clarity.installer.ClarityInstaller;
-import me.kuwg.clarity.installer.OS;
+import me.kuwg.clarity.installer.modules.ClarityModuleInstaller;
+import me.kuwg.clarity.installer.sys.ClarityInstaller;
+import me.kuwg.clarity.installer.sys.OS;
 import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.token.Token;
@@ -19,6 +20,9 @@ import java.nio.file.Files;
 import java.util.List;
 
 public class Clarity {
+
+    public static final String USER_HOME = System.getProperty("user.home");
+
     public static void main(final String[] args) {
         new Thread("Clarity Main Thread") {
             @Override
@@ -74,45 +78,57 @@ public class Clarity {
 
                 final File file = new File(args[1]);
 
-                if (!file.exists()) {
-                    printFileNotFound(file);
-                    return;
-                }
-
                 switch (args[0]) {
                     case "interpret":
+                        if (requireFile(file)) return;
                         System.out.println("Interpreting and running the file: " + file.getName());
                         runOrInterpretFile(file);
                         break;
                     case "compile":
+                        if (requireFile(file)) return;
                         System.out.println("Compiling the file: " + file.getName());
                         compileFile(args, file);
                         break;
                     case "test":
+                        if (requireFile(file)) return;
                         System.out.println("Interpreting and running the file: " + file.getName());
                         runOrInterpretFile(file);
                         System.out.println("Compiling the file: " + file.getName());
                         compileFile(args, file);
                         break;
                     case "run":
+                        if (requireFile(file)) return;
                         System.out.println("Running the compiled file: " + file.getName());
                         runCompiledFile(file);
                         break;
                     case "cpp":
+                        if (requireFile(file)) return;
                         System.out.println("Compiling the file to cpp: " + file.getName());
                         compileToCPP(file);
+                        break;
+                    case "install":
+                        if (args.length == 2) System.out.println("Installing module: " + args[1]);
+                        else System.out.println("Installing modules...");
+                        installModule(args);
                         break;
                     default:
                         printUsage();
                         break;
                 }
             }
+            boolean requireFile(final File file) {
+                if (!file.exists()) {
+                    printFileNotFound(file);
+                    return true;
+                }
+                return false;
+            }
         }.start();
     }
 
     private static void installClarity() {
         try {
-            final File destDir = new File(System.getProperty("user.home") + "\\Clarity");
+            final File destDir = new File(Clarity.USER_HOME + "\\Clarity");
             if (!destDir.exists()) destDir.mkdirs();
             System.out.println("Clarity will be installed successfully at: " + destDir.getAbsolutePath());
             ClarityInstaller.install(destDir.getAbsolutePath());
@@ -137,6 +153,12 @@ public class Clarity {
 
     private static void printFileNotFound(File file) {
         System.err.println("Error: File not found: " + file.getAbsolutePath());
+    }
+
+    private static void installModule(final String[] args) {
+        final String[] modules = new String[args.length-1];
+        System.arraycopy(args, 1, modules, 0, args.length - 1);
+        ClarityModuleInstaller.installModules(modules);
     }
 
     private static void compileToCPP(File file) throws IOException {

@@ -1,7 +1,8 @@
-include native system
+class Test {
 
-System.loadNativeLibrary("Test")
+    fn print() {
+        return "Test!"
+    }
+}
 
-var lol = native.test()
-
-native.println(lol)
+native.println(new Test())

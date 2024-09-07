@@ -53,6 +53,7 @@ public class Interpreter {
         this.ast = ast;
         this.nmh = new NativeMethodHandler();
         this.general = new Context();
+        ClassObject.setInterpreter(this);
     }
 
     public int interpret() {
@@ -108,7 +109,7 @@ public class Interpreter {
         }
     }
 
-    private Object interpretNode(final ASTNode node, final Context context) {
+    public Object interpretNode(final ASTNode node, final Context context) {
         if (node instanceof BlockNode) {
             return interpretBlock((BlockNode) node, context);
         } else if (node instanceof VariableDeclarationNode) {
