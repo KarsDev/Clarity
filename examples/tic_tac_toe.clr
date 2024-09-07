@@ -1,0 +1,68 @@
+var board = [
+    [" ", " ", " "],
+    [" ", " ", " "],
+    [" ", " ", " "]
+]
+
+var currentPlayer = "X"
+
+fn printBoard() {
+    for var i = 0, i < 3, i++ {
+        native.println(board.at(i).at(0) + "|" + board.at(i).at(1) + "|" + board.at(i).at(2))
+        if (i < 2) native.println("-----")
+    }
+}
+
+fn checkWin() {
+    // Check rows and columns
+    for var i = 0, i < 3, i++ {
+        if (board.at(i).at(0) == currentPlayer && board.at(i).at(1) == currentPlayer && board.at(i).at(2) == currentPlayer) return true
+        if (board.at(0).at(i) == currentPlayer && board.at(1).at(i) == currentPlayer && board.at(2).at(i) == currentPlayer) return true
+    }
+
+    // Check diagonals
+    if (board.at(0).at(0) == currentPlayer && board.at(1).at(1) == currentPlayer && board.at(2).at(2) == currentPlayer) return true
+    if (board.at(0).at(2) == currentPlayer && board.at(1).at(1) == currentPlayer && board.at(2).at(0) == currentPlayer) return true
+
+    return false
+}
+
+fn isBoardFull() {
+    for var i = 0, i < 3, i++ {
+        for var j = 0, j < 3, j++ {
+            if (board.at(i).at(j) == " ") return false
+        }
+    }
+    return true
+}
+
+while true {
+    printBoard()
+    var row = int(native.input("Player " + currentPlayer + ", enter row (0, 1, 2): "))
+    var col = int(native.input("Player " + currentPlayer + ", enter column (0, 1, 2): "))
+
+    if (row < 0 || row > 2 || col < 0 || col > 2 || board.at(row).at(col) != " ") {
+        native.println("Invalid move. Try again.")
+        continue
+    }
+
+    board.at(row).set(col, currentPlayer)
+
+    if (checkWin()) {
+        printBoard()
+        native.println("Player " + currentPlayer + " wins!")
+        break
+    }
+
+    if (isBoardFull()) {
+        printBoard()
+        native.println("It's a draw!")
+        break
+    }
+
+    if currentPlayer == "X" {
+        currentPlayer = "O"
+    } else {
+        currentPlayer = "X"
+    }
+}

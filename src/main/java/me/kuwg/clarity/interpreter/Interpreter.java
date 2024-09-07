@@ -347,6 +347,8 @@ public class Interpreter {
                 return leftValue.toString() + rightValue.toString();
             case "==":
                 return leftValue.equals(rightValue);
+            case "!=":
+                return !leftValue.equals(rightValue);
         }
         except("Operator " + operator + " is not supported for string operands.", line);
         return null;
@@ -1490,6 +1492,7 @@ public class Interpreter {
         final Object caller = interpretNode(node.getCaller(), context);
         if (caller == VOID_OBJECT) {
             final String className = ((VariableReferenceNode) node.getCaller()).getName();
+
             final ObjectType rawClassDefinition = context.getClass(className);
 
             if (!(rawClassDefinition instanceof ClassDefinition)) {
@@ -1562,7 +1565,7 @@ public class Interpreter {
             return handleEnumValueFunctionCall(node, (EnumClassDefinition.EnumValue) caller);
         } else if (caller instanceof Object[]) {
             Object resultArray = handleArrayFunctionCall(node, context, (Object[]) caller);
-            if (resultArray instanceof Object[]) {
+            if (resultArray instanceof Object[] && ((Object[]) resultArray).length != ((Object[]) caller).length) {
                 if (!(node.getCaller() instanceof VariableReferenceNode)) {
                     except("Expected variable reference", node.getLine());
                     return null;
