@@ -172,6 +172,27 @@ const class System {
         System.throw("You cannot instantiate this class!")
     }
 
+    /##
+     # Method: loadNativeLibrary
+     #
+     # Description:
+     # Loads a native library into the runtime environment. This method enables the integration
+     # of native code with the program by dynamically loading shared libraries or modules.
+     #
+     # Parameters:
+     # - lib: A string representing the path or name of the native library to be loaded.
+     #
+     # Returns:
+     # - A int value, 0 if everything worked as normal, any other number otherwise
+     #
+     # Example:
+     # System.loadNativeLibrary("myNativeLib")  // Attempts to load the library named "myNativeLib" in the jar file "%userpath%/Clarity/libraries/myNativeLib.jar".
+     #
+     # Notes:
+     # - The library must be available in the specified path or system's library path.
+     # - Successful loading of the library does not guarantee that all native functions will
+     #   be accessible or work as expected. Further checks or error handling might be required.
+     #/
     static fn loadNativeLibrary(lib) {
         native.system.loadNativeLibrary(lib)
     }
