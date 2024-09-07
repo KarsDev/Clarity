@@ -1,14 +1,14 @@
 package me.kuwg.clarity.interpreter.context;
 
+import me.kuwg.clarity.ObjectType;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
 import me.kuwg.clarity.interpreter.definition.VariableDefinition;
 import me.kuwg.clarity.register.Register;
-import me.kuwg.clarity.interpreter.types.ObjectType;
 
 import java.util.*;
 
-import static me.kuwg.clarity.interpreter.types.VoidObject.VOID_OBJECT;
+import static me.kuwg.clarity.VoidObject.VOID_OBJECT;
 
 public class Context {
 

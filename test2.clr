@@ -1,5 +1,7 @@
-include native math
+include native system
 
-fn main() {
-    return 0f
-}
+System.loadNativeLibrary("Test")
+
+var lol = native.test()
+
+native.println(lol)

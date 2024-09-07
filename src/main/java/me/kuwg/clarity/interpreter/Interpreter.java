@@ -1,5 +1,7 @@
 package me.kuwg.clarity.interpreter;
 
+import me.kuwg.clarity.ObjectType;
+import me.kuwg.clarity.VoidObject;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.*;
@@ -31,17 +33,15 @@ import me.kuwg.clarity.interpreter.definition.*;
 import me.kuwg.clarity.interpreter.exceptions.MultipleMainMethodsException;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.interpreter.types.ClassObject;
-import me.kuwg.clarity.interpreter.types.ObjectType;
-import me.kuwg.clarity.interpreter.types.VoidObject;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.privilege.Privileges;
 
 import java.util.*;
 
+import static me.kuwg.clarity.VoidObject.VOID_OBJECT;
+import static me.kuwg.clarity.VoidObject.VOID_RETURN;
 import static me.kuwg.clarity.interpreter.definition.BreakValue.BREAK;
 import static me.kuwg.clarity.interpreter.definition.ContinueValue.CONTINUE;
-import static me.kuwg.clarity.interpreter.types.VoidObject.VOID_OBJECT;
-import static me.kuwg.clarity.interpreter.types.VoidObject.VOID_RETURN;
 
 public class Interpreter {
 

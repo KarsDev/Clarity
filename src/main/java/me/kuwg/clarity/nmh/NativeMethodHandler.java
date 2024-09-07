@@ -1,11 +1,14 @@
 package me.kuwg.clarity.nmh;
 
+import me.kuwg.clarity.ClarityNativeFunction;
+import me.kuwg.clarity.ClarityNativeLibrary;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetDayNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetMonthNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetWeekDayNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetYearNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.CheckNativeTypeNative;
+import me.kuwg.clarity.nmh.natives.impl.pkg.system.LoadNativeLibraryNative;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeFunction;
 import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
@@ -22,9 +25,9 @@ import java.util.Map;
 
 public class NativeMethodHandler {
 
-    private final Map<String, DefaultNativeFunction<?>> defaultFunctions = new HashMap<>();
-    private final Map<String, PackagedNativeFunction<?>> packagedFunctions = new HashMap<>();
-    private final Map<String, NativeClass> nativeClasses = new HashMap<>();
+    private static final Map<String, ClarityNativeFunction<?>> defaultFunctions = new HashMap<>();
+    private static final Map<String, PackagedNativeFunction<?>> packagedFunctions = new HashMap<>();
+    private static final Map<String, NativeClass> nativeClasses = new HashMap<>();
 
     public NativeMethodHandler() {
         initializeDefaultFunctions();
@@ -49,6 +52,7 @@ public class NativeMethodHandler {
         // required accessor: System
         registerPackagedFunction(new ExitNative());
         registerPackagedFunction(new CheckNativeTypeNative());
+        registerPackagedFunction(new LoadNativeLibraryNative());
 
         // required accessor: Date
         registerPackagedFunction(new GetWeekDayNative());
@@ -76,7 +80,7 @@ public class NativeMethodHandler {
     }
 
     public Object callDefault(final String name, final List<Object> params) {
-        DefaultNativeFunction<?> method = defaultFunctions.get(name);
+        final ClarityNativeFunction<?> method = defaultFunctions.get(name);
         if (method != null && method.applies(name, params)) {
             return method.call(params);
         }
@@ -119,5 +123,11 @@ public class NativeMethodHandler {
             s.append(objects.get(i).getClass().getSimpleName().toLowerCase());
         }
         return s.toString();
+    }
+
+    public static void loadLibrary(final ClarityNativeLibrary lib) {
+        for (final ClarityNativeFunction<?> function : lib.getLibraryNativeFunctions()) {
+            defaultFunctions.put(function.getName(), function);
+        }
     }
 }

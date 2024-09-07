@@ -1,9 +1,9 @@
 package me.kuwg.clarity.interpreter.definition;
 
+import me.kuwg.clarity.ObjectType;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
-import me.kuwg.clarity.interpreter.types.ObjectType;
 
 import java.util.List;
 import java.util.stream.Collectors;

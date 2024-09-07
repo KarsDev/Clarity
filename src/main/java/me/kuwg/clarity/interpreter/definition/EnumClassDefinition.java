@@ -1,6 +1,5 @@
 package me.kuwg.clarity.interpreter.definition;
 
-import me.kuwg.clarity.interpreter.types.VoidObject;
 import me.kuwg.clarity.register.Register;
 
 import java.util.List;

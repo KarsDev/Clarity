@@ -1,8 +1,8 @@
 package me.kuwg.clarity.nmh.natives.aclass;
 
+import me.kuwg.clarity.VoidObject;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.register.Register;
-import me.kuwg.clarity.interpreter.types.VoidObject;
 
 import java.util.List;
 

@@ -171,4 +171,8 @@ const class System {
     static fn initExcept() {
         System.throw("You cannot instantiate this class!")
     }
+
+    static fn loadNativeLibrary(lib) {
+        native.system.loadNativeLibrary(lib)
+    }
 }

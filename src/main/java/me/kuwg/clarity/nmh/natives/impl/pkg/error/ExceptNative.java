@@ -1,7 +1,7 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.error;
 
+import me.kuwg.clarity.VoidObject;
 import me.kuwg.clarity.register.Register;
-import me.kuwg.clarity.interpreter.types.VoidObject;
 import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeFunction;
 
 import java.util.List;
