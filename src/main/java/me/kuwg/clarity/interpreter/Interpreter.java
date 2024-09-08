@@ -229,6 +229,7 @@ public class Interpreter {
             variableDefinition = new VariableDefinition(node.getName(), interpretedValue, node.isConstant(), node.isStatic());
         }
 
+
         context.defineVariable(node.getName(), variableDefinition);
 
         return VOID_OBJECT;
@@ -262,7 +263,7 @@ public class Interpreter {
             inheritedClass = null;
         }
 
-        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, getConstructors(node.getConstructors()),node.getBody(), false);
+        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, getConstructors(node.getConstructors()), node.getBody(),false);
         context.defineClass(name, definition);
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
@@ -529,6 +530,11 @@ public class Interpreter {
         // Iterate through the inheritance chain
         while (currentDefinition.getInheritedClass() != null) {
             ClassDefinition inheritedClass = currentDefinition.getInheritedClass();
+
+            context.setCurrentClassName(inheritedClass.getName());
+            interpretBlock(inheritedClass.getBody(), context);
+            context.setCurrentClassName(name);
+
             final FunctionDefinition[] inheritedConstructors = inheritedClass.getConstructors();
 
             inheritedObject = interpretConstructors(inheritedObject, inheritedConstructors, params, classContext, inheritedClass.getName());

@@ -1,8 +1,23 @@
-class Test {
+class Device {
+    const var name
+
+    constructor(name) {
+        local.name = name
+    }
+
+    fn getName() {
+        return name
+    }
 
     fn print() {
-        return "Test!"
+        return "Device{name=" + local.name + "}"
     }
 }
 
-native.println(new Test())
+class Phone inherits Device {
+
+}
+
+var phone = new Phone("Samsung")
+
+native.println(phone)
