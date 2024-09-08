@@ -1,0 +1,68 @@
+include native system
+
+System.loadNativeLibrary("UI")
+
+var win = native.createWindow("Cube", 400, 400)
+
+class Cube {
+    var x
+    var y
+    var size
+    var shift
+    var cubeOnePoints
+    var cubeTwoPoints
+
+    constructor(x, y, size, shift) {
+        local.x = x
+        local.y = y
+        local.size = size
+        local.shift = shift
+        local.cubeOnePoints = getCubeOnePoints()
+        local.cubeTwoPoints = getCubeTwoPoints()
+    }
+
+    fn getCubeOnePoints() {
+        var points = [null, null, null, null]
+        points.set(0, new Point(x, y))
+        points.set(1, new Point(x + size, y))
+        points.set(2, new Point(x + size, y + size))
+        points.set(3, new Point(x, y + size))
+        return points
+    }
+
+    fn getCubeTwoPoints() {
+        var newX = x + shift
+        var newY = y + shift
+        var points = [null, null, null, null]
+        points.set(0, new Point(newX, newY))
+        points.set(1, new Point(newX + size, newY))
+        points.set(2, new Point(newX + size, newY + size))
+        points.set(3, new Point(newX, newY + size))
+        return points
+    }
+
+    fn drawCube() {
+        native.setColor(win, 123, 123, 123)
+        native.drawRect(win, x, y, size, size)
+
+        native.setColor(win, 153, 153, 153)
+        native.drawRect(win, x + shift, y + shift, size, size)
+
+        native.setColor(win, 0, 0, 0)
+        for i : 4 {
+            native.drawLine(win, cubeOnePoints.at(i).x, cubeOnePoints.at(i).y, cubeTwoPoints.at(i).x, cubeTwoPoints.at(i).y)
+        }
+    }
+}
+
+class Point {
+    var x
+    var y
+    constructor(x, y) {
+        local.x = x
+        local.y = y
+    }
+}
+
+var cube = new Cube(75, 75, 200, 50)
+cube.drawCube()

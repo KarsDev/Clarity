@@ -599,6 +599,7 @@ public class Interpreter {
         context.setVariable(node.getName(), result);
         return VOID_OBJECT;
     }
+
     private Object interpretObjectFunctionCall(final ObjectFunctionCallNode node, final Context context) {
         final Object caller = context.getVariable(node.getCaller());
         if (caller instanceof Object[]) {

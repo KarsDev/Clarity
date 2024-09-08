@@ -336,6 +336,40 @@ const native class Math {
     static native fn fact(x)
 
     /##
+     # Native Method: sin
+     #
+     # Description:
+     # Computes the sine of a given angle (in radians). This method is declared as native and relies on an external implementation.
+     #
+     # Parameters:
+     # - angle: The angle in radians for which to compute the sine.
+     #
+     # Returns:
+     # - The sine of the specified angle.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
+    static native fn sin(angle)
+
+    /##
+     # Native Method: cos
+     #
+     # Description:
+     # Computes the cosine of a given angle (in radians). This method is declared as native and relies on an external implementation.
+     #
+     # Parameters:
+     # - angle: The angle in radians for which to compute the cosine.
+     #
+     # Returns:
+     # - The cosine of the specified angle.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
+    static native fn cos(angle)
+
+    /##
      # Constructor: Math
      #
      # Description:

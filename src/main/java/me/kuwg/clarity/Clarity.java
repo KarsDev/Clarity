@@ -13,6 +13,8 @@ import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.Tokenizer;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -26,9 +28,6 @@ public class Clarity {
     public static final String USER_HOME = System.getProperty("user.home");
 
     public static void main(final String[] args) {
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> System.exit(EXIT_CODE)));
-
         new Thread("Clarity Main Thread") {
             @Override
             public void run() {
@@ -85,19 +84,13 @@ public class Clarity {
 
                 switch (args[0]) {
                     case "interpret":
+                    case "test":
                         if (requireFile(file)) return;
                         System.out.println("Interpreting and running the file: " + file.getName());
                         runOrInterpretFile(file);
                         break;
                     case "compile":
                         if (requireFile(file)) return;
-                        System.out.println("Compiling the file: " + file.getName());
-                        compileFile(args, file);
-                        break;
-                    case "test":
-                        if (requireFile(file)) return;
-                        System.out.println("Interpreting and running the file: " + file.getName());
-                        runOrInterpretFile(file);
                         System.out.println("Compiling the file: " + file.getName());
                         compileFile(args, file);
                         break;

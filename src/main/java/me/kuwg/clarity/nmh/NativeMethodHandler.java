@@ -44,6 +44,7 @@ public class NativeMethodHandler {
         registerDefaultFunction(new NanoNative());
         registerDefaultFunction(new ErrNative());
         registerDefaultFunction(new ExecNative());
+        registerDefaultFunction(new SleepNative());
     }
 
     private void initializePackagedFunctions() {

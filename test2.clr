@@ -1,5 +1,4 @@
-include native system
+var x = 1
+x += 2 / 5f
 
-System.loadNativeLibrary("UI")
-
-var win = native.createWindow("LOL", 800, 600)
+native.println(x)

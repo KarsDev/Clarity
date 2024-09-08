@@ -4,6 +4,7 @@ import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
 import me.kuwg.clarity.register.Register;
 
+import java.io.DataOutputStream;
 import java.util.List;
 
 public class MathNativeClass extends NativeClass {
@@ -75,7 +76,7 @@ public class MathNativeClass extends NativeClass {
                 return Math.exp(((Number) params.get(0)).doubleValue());
             }
             case "fact": {
-                check("Invalid parameters for 'exp'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
+                check("Invalid parameters for 'fact'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
                         params.size() == 1 && params.get(0) instanceof Integer);
                 final int n = (int) params.get(0);
 
@@ -84,6 +85,18 @@ public class MathNativeClass extends NativeClass {
                 long result = 1;
                 for (int i = 2; i <= n; i++) result *= i;
                 return result;
+            }
+            case "sin": {
+                check("Invalid parameters for 'sin'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 1 && params.get(0) instanceof Number);
+                final double n = ((Number) params.get(0)).doubleValue();
+                return Math.sin(n);
+            }
+            case "cos": {
+                check("Invalid parameters for 'cos'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 1 && params.get(0) instanceof Number);
+                final double n = ((Number) params.get(0)).doubleValue();
+                return Math.cos(n);
             }
         }
 

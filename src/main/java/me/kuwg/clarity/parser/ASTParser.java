@@ -271,9 +271,10 @@ public final class ASTParser {
 
         consume(DIVIDER, "(");
 
-        while (true) {
-            params.add(parseExpression());
-            if (!matchAndConsume(DIVIDER, ",")) break;
+        if (!match(DIVIDER, ")")) {
+            do {
+                params.add(parseExpression());
+            } while (matchAndConsume(DIVIDER, ","));
         }
         consume(DIVIDER, ")");
 
@@ -399,7 +400,7 @@ public final class ASTParser {
                         if (node instanceof VariableReferenceNode) {
                             final char v = consume().getValue().charAt(0); // consume op
                             final VariableReferenceNode left = (VariableReferenceNode) node;
-                            node = new VariableReassignmentNode(left.getName(), new BinaryExpressionNode(left, String.valueOf(v), parsePrimary()));
+                            node = new VariableReassignmentNode(left.getName(), new BinaryExpressionNode(left, String.valueOf(v), parseExpression()));
                         }
                         break;
                     }

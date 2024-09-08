@@ -1,11 +1,9 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.system;
 
 import me.kuwg.clarity.Clarity;
-import me.kuwg.clarity.ClarityNativeFunction;
-import me.kuwg.clarity.VoidObject;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.register.Register;
-import me.kuwg.clarity.ClarityNativeLibrary;  // Make sure this import matches your actual classpath
+import me.kuwg.clarity.ClarityNativeLibrary;
 
 import java.io.*;
 import java.net.URL;

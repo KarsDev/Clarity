@@ -2,7 +2,6 @@ package me.kuwg.clarity.ast.nodes.expression;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
-import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import me.kuwg.clarity.compiler.ast.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.ast.stream.ASTOutputStream;
 
@@ -15,7 +14,6 @@ public class BinaryExpressionNode extends ASTNode {
     private ASTNode right;
 
     public BinaryExpressionNode(final ASTNode left, final String operator, final ASTNode right) {
-        if (left instanceof VariableReassignmentNode) throw new RuntimeException();
         this.left = left;
         this.operator = operator;
         this.right = right;
