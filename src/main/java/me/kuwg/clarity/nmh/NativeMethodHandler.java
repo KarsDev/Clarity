@@ -19,6 +19,7 @@ import me.kuwg.clarity.nmh.natives.impl.pkg.error.ExceptNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.ExitNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.util.CreateListNative;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +103,7 @@ public class NativeMethodHandler {
     }
 
     public Object callClassNative(final String name, final String method, final List<Object> params, final Context context) {
+
         NativeClass clazz = nativeClasses.get(name);
         if (clazz != null) {
             try {
@@ -113,7 +115,7 @@ public class NativeMethodHandler {
             }
         }
 
-        Register.throwException("Default native function " + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
+        Register.throwException("Class native function " + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
         return null;
     }
 

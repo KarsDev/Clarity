@@ -271,9 +271,11 @@ public final class ASTParser {
 
         consume(DIVIDER, "(");
 
-        while (!matchAndConsume(DIVIDER, ")")) {
+        while (true) {
             params.add(parseExpression());
+            if (!matchAndConsume(DIVIDER, ",")) break;
         }
+        consume(DIVIDER, ")");
 
         return new DefaultNativeFunctionCallNode(name, params).setLine(line);
     }

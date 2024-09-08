@@ -21,9 +21,14 @@ import java.util.List;
 
 public class Clarity {
 
+    private static int EXIT_CODE = 0;
+
     public static final String USER_HOME = System.getProperty("user.home");
 
     public static void main(final String[] args) {
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> System.exit(EXIT_CODE)));
+
         new Thread("Clarity Main Thread") {
             @Override
             public void run() {
@@ -170,16 +175,14 @@ public class Clarity {
     private static void runOrInterpretFile(File file) throws IOException {
         AST ast = loadOrParseAST(file);
         Interpreter interpreter = new Interpreter(ast);
-        int exitCode = interpreter.interpret();
-        System.exit(exitCode);
+        EXIT_CODE = interpreter.interpret();
     }
 
     private static void runCompiledFile(File file) {
         AST ast = loadASTFromFile(file);
 
         Interpreter interpreter = new Interpreter(ast);
-        int exitCode = interpreter.interpret();
-        System.exit(exitCode);
+        EXIT_CODE = interpreter.interpret();
     }
 
     private static AST loadOrParseAST(File file) throws IOException {

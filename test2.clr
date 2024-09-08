@@ -1,23 +1,5 @@
-class Device {
-    const var name
+include native system
 
-    constructor(name) {
-        local.name = name
-    }
+System.loadNativeLibrary("UI")
 
-    fn getName() {
-        return name
-    }
-
-    fn print() {
-        return "Device{name=" + local.name + "}"
-    }
-}
-
-class Phone inherits Device {
-
-}
-
-var phone = new Phone("Samsung")
-
-native.println(phone)
+var win = native.createWindow("LOL", 800, 600)
