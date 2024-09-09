@@ -495,9 +495,10 @@ public class Interpreter {
 
     private Object interpretClassInstantiation(final ClassInstantiationNode node, final Context context) {
         final String name = node.getName();
-        context.setCurrentClassName(name);
 
-        Register.register(new Register.RegisterElement(Register.RegisterElementType.CLASSINST, name, node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.CLASSINST, name, node.getLine(), context.getCurrentClassName() == null ? "none" : context.getCurrentClassName()));
+
+        context.setCurrentClassName(name);
 
         // Create a new context for the class instantiation
         final Context classContext = new Context(context);

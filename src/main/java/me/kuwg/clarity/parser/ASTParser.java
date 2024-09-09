@@ -662,7 +662,7 @@ public final class ASTParser {
         }
 
         if (isNative) {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("natives\\" + path);
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("natives/" + path);
             if (inputStream == null) {
                 try {
                     throw new IOException("Native library not found: '" + path + "'");
@@ -686,7 +686,7 @@ public final class ASTParser {
 
         final String content;
         try {
-            content = new String(Files.readAllBytes(new File(path).toPath()), StandardCharsets.UTF_8);
+            content = new String(Files.readAllBytes(new File(new File(ORIGINAL).getParentFile(), path).toPath()), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
