@@ -1,4 +1,0 @@
-var x = 1
-x += 2 / 5f
-
-native.println(x)

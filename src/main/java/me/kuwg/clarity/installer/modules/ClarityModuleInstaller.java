@@ -30,9 +30,10 @@ public class ClarityModuleInstaller {
             final URL url = new URL(urlString);
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("User-Agent", "Clarity"); // Set your User-Agent here
+            connection.setRequestProperty("User-Agent", "Clarity");
 
             int responseCode = connection.getResponseCode();
+
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 final InputStream inputStream = connection.getInputStream();
                 final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
