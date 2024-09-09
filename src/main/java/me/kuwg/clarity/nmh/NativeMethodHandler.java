@@ -1,5 +1,6 @@
 package me.kuwg.clarity.nmh;
 
+import me.kuwg.clarity.ClarityNativeClass;
 import me.kuwg.clarity.ClarityNativeFunction;
 import me.kuwg.clarity.ClarityNativeLibrary;
 import me.kuwg.clarity.interpreter.context.Context;
@@ -19,7 +20,6 @@ import me.kuwg.clarity.nmh.natives.impl.pkg.error.ExceptNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.ExitNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.util.CreateListNative;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,7 @@ public class NativeMethodHandler {
 
     private static final Map<String, ClarityNativeFunction<?>> defaultFunctions = new HashMap<>();
     private static final Map<String, PackagedNativeFunction<?>> packagedFunctions = new HashMap<>();
-    private static final Map<String, NativeClass> nativeClasses = new HashMap<>();
+    private static final Map<String, ClarityNativeClass> nativeClasses = new HashMap<>();
 
     public NativeMethodHandler() {
         initializeDefaultFunctions();
@@ -105,7 +105,7 @@ public class NativeMethodHandler {
 
     public Object callClassNative(final String name, final String method, final List<Object> params, final Context context) {
 
-        NativeClass clazz = nativeClasses.get(name);
+        final ClarityNativeClass clazz = nativeClasses.get(name);
         if (clazz != null) {
             try {
                 return clazz.handleCall(method, params, context);
@@ -132,6 +132,10 @@ public class NativeMethodHandler {
     public static void loadLibrary(final ClarityNativeLibrary lib) {
         for (final ClarityNativeFunction<?> function : lib.getLibraryNativeFunctions()) {
             defaultFunctions.put(function.getName(), function);
+        }
+
+        for (final ClarityNativeClass clazz : lib.getLibraryNativeClasses()) {
+            nativeClasses.put(clazz.getName(), clazz);
         }
     }
 }

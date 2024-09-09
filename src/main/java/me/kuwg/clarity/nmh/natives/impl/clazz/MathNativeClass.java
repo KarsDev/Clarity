@@ -11,8 +11,9 @@ public class MathNativeClass extends NativeClass {
         super("Math");
     }
 
+
     @Override
-    public Object handleCall(final String name, final List<Object> params, final Context ignore) {
+    public Object handleCall(final String name, final List<Object> params, final Context context) throws Exception {
         switch (name) {
             case "sqrt": {
                 check("Invalid parameters for 'sqrt'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
