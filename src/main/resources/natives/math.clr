@@ -170,6 +170,48 @@ const native class Math {
     }
 
     /##
+     # Method: toDegrees
+     #
+     # Description:
+     # Converts an angle measured in radians to an equivalent angle in degrees.
+     # This is useful when working with trigonometric functions that require degrees
+     # as input or when displaying angles to users in a more familiar format.
+     #
+     # Parameters:
+     # - angle: A number representing the angle in radians.
+     #
+     # Returns:
+     # - The angle in degrees, corresponding to the provided angle in radians.
+     #
+     # Example:
+     # Math.toDegrees(Math.PI)    // Returns: 180.0
+     #/
+    static fn toDegrees(angle) {
+        return angle * 180 / Math.PI
+    }
+
+    /##
+     # Method: toRadians
+     #
+     # Description:
+     # Converts an angle measured in degrees to an equivalent angle in radians.
+     # This is useful for calculations involving trigonometric functions, which
+     # typically require angles in radians.
+     #
+     # Parameters:
+     # - angle: A number representing the angle in degrees.
+     #
+     # Returns:
+     # - The angle in radians, corresponding to the provided angle in degrees.
+     #
+     # Example:
+     # Math.toRadians(180)    // Returns: Math.PI
+     #/
+    static fn toRadians(angle) {
+        return angle * Math.PI / 180
+    }
+
+    /##
      # Native Method: isPrime
      #
      # Description:
