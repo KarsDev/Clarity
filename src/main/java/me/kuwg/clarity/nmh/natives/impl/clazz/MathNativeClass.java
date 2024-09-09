@@ -4,7 +4,6 @@ import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
 import me.kuwg.clarity.register.Register;
 
-import java.io.DataOutputStream;
 import java.util.List;
 
 public class MathNativeClass extends NativeClass {
@@ -97,6 +96,36 @@ public class MathNativeClass extends NativeClass {
                         params.size() == 1 && params.get(0) instanceof Number);
                 final double n = ((Number) params.get(0)).doubleValue();
                 return Math.cos(n);
+            }
+            case "tan": {
+                check("Invalid parameters for 'tan'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 1 && params.get(0) instanceof Number);
+                final double n = ((Number) params.get(0)).doubleValue();
+                return Math.tan(n);
+            }
+            case "asin": {
+                check("Invalid parameters for 'asin'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 1 && params.get(0) instanceof Number);
+                final double n = ((Number) params.get(0)).doubleValue();
+                return Math.asin(n);
+            }
+            case "acos": {
+                check("Invalid parameters for 'acos'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 1 && params.get(0) instanceof Number);
+                final double n = ((Number) params.get(0)).doubleValue();
+                return Math.acos(n);
+            }
+            case "atan": {
+                check("Invalid parameters for 'atan'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 1 && params.get(0) instanceof Number);
+                final double n = ((Number) params.get(0)).doubleValue();
+                return Math.atan(n);
+            }
+            case "log10": {
+                check("Invalid parameters for 'log10'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 1 && params.get(0) instanceof Number);
+                final double value = ((Number) params.get(0)).doubleValue();
+                return Math.log10(value);
             }
         }
 

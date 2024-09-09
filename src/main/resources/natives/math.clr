@@ -370,6 +370,94 @@ const native class Math {
     static native fn cos(angle)
 
     /##
+     # Native Method: tan
+     #
+     # Description:
+     # Computes the tangent of a given angle (in radians). This method is declared as native and relies on an external implementation.
+     #
+     # Parameters:
+     # - angle: The angle in radians for which to compute the tangent.
+     #
+     # Returns:
+     # - The tangent of the specified angle.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
+    static native fn tan(angle)
+
+    /##
+     # Native Method: asin
+     #
+     # Description:
+     # Computes the arcsine (inverse sine) of a value. The result is an angle in radians whose sine is the specified value.
+     # This method is declared as native and relies on an external implementation.
+     #
+     # Parameters:
+     # - value: The value for which to compute the arcsine.
+     #
+     # Returns:
+     # - The arcsine of the specified value, in radians.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
+    static native fn asin(value)
+
+    /##
+     # Native Method: acos
+     #
+     # Description:
+     # Computes the arccosine (inverse cosine) of a value. The result is an angle in radians whose cosine is the specified value.
+     # This method is declared as native and relies on an external implementation.
+     #
+     # Parameters:
+     # - value: The value for which to compute the arccosine.
+     #
+     # Returns:
+     # - The arccosine of the specified value, in radians.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
+    static native fn acos(value)
+
+    /##
+     # Native Method: atan
+     #
+     # Description:
+     # Computes the arctangent (inverse tangent) of a value. The result is an angle in radians whose tangent is the specified value.
+     # This method is declared as native and relies on an external implementation.
+     #
+     # Parameters:
+     # - value: The value for which to compute the arctangent.
+     #
+     # Returns:
+     # - The arctangent of the specified value, in radians.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
+    static native fn atan(value)
+
+    /##
+     # Native Method: log10
+     #
+     # Description:
+     # Computes the base-10 logarithm of a given value. This method is declared as native and relies on an external implementation.
+     #
+     # Parameters:
+     # - value: The number whose base-10 logarithm is to be computed.
+     #
+     # Returns:
+     # - The base-10 logarithm of the specified value.
+     #
+     # Note:
+     # This method is declared as native and relies on an external implementation.
+     #/
+    static native fn log10(value)
+
+    /##
      # Constructor: Math
      #
      # Description:
