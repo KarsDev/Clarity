@@ -1,0 +1,9 @@
+include native system
+
+fn main() {
+    loadLibraries()
+}
+
+fn loadLibraries() {
+    System.loadNativeLibrary("lol")
+}
