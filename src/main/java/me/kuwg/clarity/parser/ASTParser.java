@@ -7,6 +7,8 @@ import me.kuwg.clarity.ast.nodes.block.*;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationUseNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
@@ -443,7 +445,19 @@ public final class ASTParser {
                 return new BooleanNode(Boolean.parseBoolean(token.getValue())).setLine(line);
 
             case OPERATOR:
-                return parseUnaryOperator(token, line);
+                if (token.getValue().equals("@")) {
+                    final ASTNode result;
+
+                    if (match(KEYWORD, "class")) {
+                        result = parseAnnotationClassDeclaration();
+                    } else {
+                        result = parseAnnotationUse();
+                    }
+
+                    return result.setLine(line);
+                }
+
+                return parseUnaryOperator(token, line).setLine(line);
             default:
                 throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " (type=" + token.getType() + ") at line " + token.getLine());
         }
@@ -946,7 +960,41 @@ public final class ASTParser {
         return new EnumDeclarationNode(enumName, isConstant, fileName, enumValues);
     }
 
+    private ASTNode parseAnnotationClassDeclaration() {
+        consume(); // consume keyword 'class'
 
+        final String name = consume(VARIABLE).getValue();
+
+        // custom block parsing
+        consume(DIVIDER, "{");
+
+        final List<AnnotationDeclarationNode.AnnotationElement> elements = new ArrayList<>();
+        while (!matchAndConsume(DIVIDER, "}")) {
+            final String requiredValueName = consume(VARIABLE).getValue();
+            final ASTNode node = matchAndConsume(KEYWORD, "default") ? parseExpression() : null;
+            elements.add(new AnnotationDeclarationNode.AnnotationElement(requiredValueName, node));
+        }
+
+        return new  AnnotationDeclarationNode(name, elements);
+    }
+
+    private ASTNode parseAnnotationUse() {
+        final String used = consume(VARIABLE).getValue();
+        final List<AnnotationUseNode.AnnotationValueAssign> values = new ArrayList<>();
+        if (matchAndConsume(DIVIDER, "(")) {
+            while (true) {
+                if (!match(VARIABLE)) break;
+                final String name = consume().getValue();
+                consume(OPERATOR, "=");
+                final ASTNode value = parseExpression();
+                values.add(new AnnotationUseNode.AnnotationValueAssign(name, value));
+                if (!matchAndConsume(DIVIDER, ",")) break;
+            }
+            consume(DIVIDER, ")");
+        }
+
+        return new AnnotationUseNode(used, values, parseExpression());
+    }
 
 
 

@@ -8,6 +8,8 @@ import me.kuwg.clarity.ast.nodes.block.*;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationUseNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
@@ -106,6 +108,9 @@ public class Interpreter {
         } else if (node instanceof ReflectedNativeFunctionDeclaration) {
             final ReflectedNativeFunctionDeclaration reflected = (ReflectedNativeFunctionDeclaration) node;
             if (reflected.isStatic()) interpretReflectedNativeFunctionDeclaration(reflected, context);
+        } else if (node instanceof AnnotationDeclarationNode) {
+            interpretAnnotationDeclaration((AnnotationDeclarationNode) node, context);
+            block.getChildren().remove(node);
         }
     }
 
@@ -192,6 +197,10 @@ public class Interpreter {
             return interpretIs((IsNode) node, context);
         } else if (node instanceof EnumDeclarationNode) {
             return interpretEnumDeclaration((EnumDeclarationNode) node, context);
+        } else if (node instanceof AnnotationDeclarationNode) {
+            return interpretAnnotationDeclaration((AnnotationDeclarationNode) node, context);
+        } else if (node instanceof AnnotationUseNode) {
+            return interpretAnnotationUse((AnnotationUseNode) node, context);
         } else {
             throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
         }
@@ -1701,6 +1710,30 @@ public class Interpreter {
 
         context.defineClass(name, definition);
 
+        return VOID_OBJECT;
+    }
+
+    private Object interpretAnnotationDeclaration(final AnnotationDeclarationNode node, final Context context) {
+        final AnnotationDefinition definition = new AnnotationDefinition(node.getName(), node.getAnnotationElements());
+        context.defineAnnotation(definition.getName(), definition);
+        return VOID_OBJECT;
+    }
+
+    private Object interpretAnnotationUse(final AnnotationUseNode node, final Context context) {
+        /*
+        Some day I'll implement this
+        context.addCurrentAnnotationName(node.getName());
+
+        final List<AnnotationDefinition.AnnotationValue> values = new ArrayList<>();
+        for (final AnnotationUseNode.AnnotationValueAssign value : node.getValues()) {
+            final Object objval = interpretNode(value.getValue(), context);
+            if (objval instanceof VoidObject) except("Assigning annotation parameter as void", node.getLine());
+            values.add(new AnnotationDefinition.AnnotationValue(value.getName(), objval));
+        }
+
+        interpretNode(node.getFollowing(), context);
+        context.removeCurrentAnnotationName(node.getName());
+        */
         return VOID_OBJECT;
     }
 

@@ -6,7 +6,10 @@ import me.kuwg.clarity.ast.nodes.block.ReturnNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
 import me.kuwg.clarity.ast.nodes.clazz.NativeClassDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationUseNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
+import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
@@ -86,6 +89,9 @@ public class ASTData {
         registerNode(ClassInstantiationNode.class, 0x701);
         registerNode(NativeClassDeclarationNode.class, 0x702);
         registerNode(NativeCastNode.class, 0x703);
+        registerNode(EnumDeclarationNode.class, 0x704);
+        registerNode(AnnotationDeclarationNode.class, 0x705);
+        registerNode(AnnotationUseNode.class, 0x706);
 
         // FREE 0x800
 

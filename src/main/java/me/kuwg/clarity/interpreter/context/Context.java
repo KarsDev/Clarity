@@ -1,6 +1,7 @@
 package me.kuwg.clarity.interpreter.context;
 
 import me.kuwg.clarity.ObjectType;
+import me.kuwg.clarity.interpreter.definition.AnnotationDefinition;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
 import me.kuwg.clarity.interpreter.definition.VariableDefinition;
@@ -15,7 +16,9 @@ public class Context {
     private final Map<String, ObjectType> variables = new HashMap<>();
     private final Map<String, List<FunctionDefinition>> functions = new HashMap<>();
     private final Map<String, ObjectType> classes = new HashMap<>();
+    private final Map<String, AnnotationDefinition> annotations = new HashMap<>();
     private final List<String> natives = new ArrayList<>();
+    private final List<String> currentAnnotationNames = new ArrayList<>();
 
     private String currentClassName;
     private String currentFunctionName;
@@ -97,6 +100,18 @@ public class Context {
         return result != null ? result : (parentContext != null ? parentContext.getClass(name) : VOID_OBJECT);
     }
 
+    public void defineAnnotation(final String name, final AnnotationDefinition definition) {
+        if (annotations.putIfAbsent(name, definition) != null) {
+            Register.throwException("Declaring an already declared annotation: " + name);
+        }
+    }
+
+    public AnnotationDefinition getAnnotation(final String name) {
+        if (name == null) return null;
+        final AnnotationDefinition result = annotations.get(name);
+        return result != null ? result : (parentContext != null ? parentContext.getAnnotation(name) : null);
+    }
+
     public List<String> getNatives() {
         return natives;
     }
@@ -117,6 +132,18 @@ public class Context {
         this.currentFunctionName = currentFunctionName;
     }
 
+    public List<String> getCurrentAnnotationNames() {
+        return currentAnnotationNames;
+    }
+
+    public void addCurrentAnnotationName(final String currentAnnotationName) {
+        this.currentAnnotationNames.add(currentAnnotationName);
+    }
+
+    public void removeCurrentAnnotationName(final String currentAnnotationName) {
+        this.currentAnnotationNames.remove(currentAnnotationName);
+    }
+
     public void mergeContext(final Context source) {
         if (source == null) return;
 
@@ -135,11 +162,15 @@ public class Context {
 
         source.classes.forEach(this.classes::putIfAbsent);
 
+        source.annotations.forEach(this.annotations::putIfAbsent);
+
         for (final String nativeName : source.natives) {
             if (!this.natives.contains(nativeName)) {
                 this.natives.add(nativeName);
             }
         }
+
+        this.currentAnnotationNames.addAll(source.currentAnnotationNames);
     }
 
     public Context parentContext() {
@@ -152,12 +183,14 @@ public class Context {
                         "variables=%s,%n" +
                         "functions=%s,%n" +
                         "classes=%s,%n" +
+                        "annotations=%s,%n" +
                         "natives=%s,%n" +
+                        "currentAnnotationNames=%s,%n" +
                         "currentClassName='%s',%n" +
                         "currentFunctionName='%s',%n" +
                         "parentContext=%s%n" +
                         "}",
-                variables, functions, classes, natives,
-                currentClassName, currentFunctionName, parentContext);
+                variables, functions, classes, annotations, natives,
+                currentAnnotationNames, currentClassName, currentFunctionName, parentContext);
     }
 }

@@ -1,9 +1,10 @@
 include native system
 
-fn main() {
-    loadLibraries()
+@Test(name = "Karji")
+fn lol() {
+
 }
 
-fn loadLibraries() {
-    System.loadNativeLibrary("lol")
+@class Test {
+    name
 }
