@@ -8,7 +8,8 @@
 		{ "include": "#operators" },
 		{ "include": "#numbers" },
 		{ "include": "#dividers" },
-		{ "include": "#variables" }
+		{ "include": "#variables" },
+		{ "include": "#annotations" }
 	],
 	"repository": {
 		"comments": {
@@ -46,12 +47,62 @@
 			"match": "\\b(?:(?:0[xX][0-9a-fA-F]+(?:_[0-9a-fA-F]+)*)|(?:0[bB][01]+(?:_[01]+)*)|(?:0[0-7]+(?:_[0-7]+)*)|(?:\\d+(?:_\\d+)*))(?:\\.\\d+(?:_\\d+)*([eE][+-]?\\d+(?:_\\d+)*)?|[eE][+-]?\\d+(?:_\\d+)*|[fF])?\\b"
 		},
 		"dividers": {
-			"name": "punctuation.definition.separator",
+			"name": "markup.punctuation.list.beginning",
 			"match": "[\\(\\)\\[\\]\\{\\},]"
 		},
 		"variables": {
 			"name": "variable",
 			"match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
+		},
+		"annotations": {
+			"patterns": [
+				{
+					"begin": "((@)\\s*([^\\s(]+))(\\()",
+					"beginCaptures": {
+						"2": {
+							"name": "punctuation.definition.annotation.java"
+						},
+						"3": {
+							"name": "storage.type.annotation.java"
+						},
+						"4": {
+							"name": "punctuation.definition.annotation-arguments.begin.bracket.round.java"
+						}
+					},
+					"end": "\\)",
+					"endCaptures": {
+						"0": {
+							"name": "punctuation.definition.annotation-arguments.end.bracket.round.java"
+						}
+					},
+					"name": "meta.declaration.annotation.java",
+					"patterns": [
+						{
+							"captures": {
+								"1": {
+									"name": "constant.other.key.java"
+								},
+								"2": {
+									"name": "keyword.operator.assignment.java"
+								}
+							},
+							"match": "(\\w*)\\s*(=)"
+						},
+						{
+							"include": "#code"
+						}
+					]
+				},
+				{
+					"match": "(@)(class)\\s+(\\w*)|((@)\\s*(\\w+))",
+					"name": "meta.declaration.annotation.java",
+					"captures": {
+						"1": {
+							"name": "storage.type.annotation.java"
+						}
+					}
+				}
+			]
 		}
 	},
 	"scopeName": "source.clarity"
