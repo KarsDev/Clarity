@@ -1,6 +1,7 @@
 package me.kuwg.clarity.interpreter.context;
 
 import me.kuwg.clarity.ObjectType;
+import me.kuwg.clarity.VoidObject;
 import me.kuwg.clarity.interpreter.definition.AnnotationDefinition;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
@@ -16,7 +17,7 @@ public class Context {
     private final Map<String, ObjectType> variables = new HashMap<>();
     private final Map<String, List<FunctionDefinition>> functions = new HashMap<>();
     private final Map<String, ObjectType> classes = new HashMap<>();
-    private final Map<String, AnnotationDefinition> annotations = new HashMap<>();
+    private final Map<String, ObjectType> annotations = new HashMap<>();
     private final List<String> natives = new ArrayList<>();
     private final List<String> currentAnnotationNames = new ArrayList<>();
 
@@ -106,10 +107,10 @@ public class Context {
         }
     }
 
-    public AnnotationDefinition getAnnotation(final String name) {
+    public ObjectType getAnnotation(final String name) {
         if (name == null) return null;
-        final AnnotationDefinition result = annotations.get(name);
-        return result != null ? result : (parentContext != null ? parentContext.getAnnotation(name) : null);
+        final ObjectType result = annotations.getOrDefault(name, VOID_OBJECT);
+        return result != VOID_OBJECT ? result : (parentContext != null ? parentContext.getAnnotation(name) : VOID_OBJECT);
     }
 
     public List<String> getNatives() {

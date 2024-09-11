@@ -1734,7 +1734,19 @@ public class Interpreter {
         interpretNode(node.getFollowing(), context);
         context.removeCurrentAnnotationName(node.getName());
         */
-        return VOID_OBJECT;
+        final Object ret = VOID_OBJECT;
+        final ObjectType rawDefinition = context.getAnnotation(node.getName());
+        if (!(rawDefinition instanceof AnnotationDefinition)) {
+            Register.throwException("Annotation not found: " + node.getName());
+            return ret;
+        }
+
+        final AnnotationDefinition annotation = (AnnotationDefinition) rawDefinition;
+        if (annotation.getAnnotationElements().size() != node.getValues().size()) {
+            Register.throwException("Not all required elements are declared in annotation: " + node.getName());
+            return ret;
+        }
+        return ret;
     }
 
 }
