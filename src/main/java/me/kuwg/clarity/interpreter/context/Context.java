@@ -1,7 +1,6 @@
 package me.kuwg.clarity.interpreter.context;
 
 import me.kuwg.clarity.ObjectType;
-import me.kuwg.clarity.VoidObject;
 import me.kuwg.clarity.interpreter.definition.AnnotationDefinition;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
