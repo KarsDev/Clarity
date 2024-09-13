@@ -1,0 +1,13 @@
+/##
+ # Annotation: Deprecated
+ #
+ # Description:
+ # The annotation @Deprecated is used when an element of any type should be not used in code, and might get removed in the future
+ #
+ # Example:
+ # @Deprecated
+ # static const var PATH = ...
+ #/
+
+@class Deprecated {
+}

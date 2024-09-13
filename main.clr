@@ -1,8 +1,0 @@
-@Test(name = "Karji")
-fn lol() {
-
-}
-
-@class Test {
-    name
-}
