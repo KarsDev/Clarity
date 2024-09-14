@@ -202,7 +202,7 @@ public final class ASTParser {
             final String name = consume(VARIABLE).getValue();
             final List<ParameterNode> params = parseParameters();
 
-            final String typeDefault = matchAndConsume(OPERATOR, "->") ? consume().getValue() : null;
+            final String typeDefault = parseScopedValue();
 
             final int line = current().getLine();
             return new ReflectedNativeFunctionDeclaration(name, typeDefault, fileName, params, isStatic).setLine(line);
@@ -214,7 +214,7 @@ public final class ASTParser {
         final int line = current().getLine();
         final List<ParameterNode> params = parseParameters();
 
-        final String typeDefault = matchAndConsume(OPERATOR, "->") ? consume().getValue() : null;
+        final String typeDefault = parseScopedValue();
 
 
         final BlockNode block = parseBlock();
@@ -888,12 +888,14 @@ public final class ASTParser {
 
     private ASTNode parseFloatDeclaration() {
         final int line = consume().getLine(); // consume "float"
-        return new NativeCastNode(CastType.FLOAT, parseExpression()).setLine(line);
+        consume(DIVIDER, "(");
+        return new NativeCastNode(CastType.FLOAT, parseExpression()).setLine(consume(DIVIDER, ")").getLine()).setLine(line);
     }
 
     private ASTNode parseIntDeclaration() {
         final int line = consume().getLine(); // consume "int"
-        return new NativeCastNode(CastType.INT, parseExpression()).setLine(line);
+        consume(DIVIDER, "(");
+        return new NativeCastNode(CastType.INT, parseExpression()).setLine(consume(DIVIDER, ")").getLine()).setLine(line);
     }
 
     private ASTNode parseAssertDeclaration() {
@@ -931,12 +933,14 @@ public final class ASTParser {
 
     private ASTNode parseStrDeclaration() {
         final int line = consume().getLine(); // consume "str"
-        return new NativeCastNode(CastType.STR, parseExpression()).setLine(line);
+        consume(DIVIDER, "(");
+        return new NativeCastNode(CastType.STR, parseExpression()).setLine(consume(DIVIDER, ")").getLine()).setLine(line);
     }
 
     private ASTNode parseArrDeclaration() {
-        final int line = consume().getLine(); // consume "str"
-        return new NativeCastNode(CastType.ARR, parseExpression()).setLine(line);
+        final int line = consume().getLine(); // consume "arr"
+        consume(DIVIDER, "(");
+        return new NativeCastNode(CastType.ARR, parseExpression()).setLine(consume(DIVIDER, ")").getLine()).setLine(line);
     }
 
     private ASTNode parseEnumDeclaration()  {
@@ -1001,6 +1005,11 @@ public final class ASTParser {
         return new AnnotationUseNode(used, values, parseExpression());
     }
 
+    private String parseScopedValue() {
+        return matchAndConsume(OPERATOR, "->") ? consume().getValue() : null;
+    }
+
+
 
 
 
@@ -1048,11 +1057,12 @@ public final class ASTParser {
         return token;
     }
 
-    private void consume(final TokenType expectedType, final String expectedValue) {
+    private Token consume(final TokenType expectedType, final String expectedValue) {
         final Token token = consume();
         if (token.getType() != expectedType || !token.getValue().equals(expectedValue)) {
             throw new IllegalStateException("Expected value " + expectedValue + " but found " + token.getValue() + " at line " + token.getLine() + ", in file: " + fileName);
         }
+        return token;
     }
 
     private boolean match(final TokenType expectedType) {
