@@ -10,12 +10,14 @@ import java.util.stream.Collectors;
 
 public class FunctionDefinition extends ObjectType {
     private final String name;
+    private final String typeDefault;
     private final boolean isStatic;
     private final List<String> params;
     private final BlockNode block;
 
-    public FunctionDefinition(final String name, final boolean isStatic, final List<String> params, final BlockNode block) {
+    public FunctionDefinition(final String name, final String typeDefault, final boolean isStatic, final List<String> params, final BlockNode block) {
         this.name = name;
+        this.typeDefault = typeDefault;
         this.isStatic = isStatic;
         this.params = params;
         this.block = block;
@@ -24,6 +26,7 @@ public class FunctionDefinition extends ObjectType {
     public FunctionDefinition(final FunctionDeclarationNode node) {
         this(
                 node.getFunctionName(),
+                node.getTypeDefault(),
                 node.isStatic(),
                 node.getParameterNodes().stream().map(ParameterNode::getName).collect(Collectors.toList()),
                 node.getBlock()
@@ -32,6 +35,10 @@ public class FunctionDefinition extends ObjectType {
 
     public final String getName() {
         return name;
+    }
+
+    public final String getTypeDefault() {
+        return typeDefault;
     }
 
     public final boolean isStatic() {

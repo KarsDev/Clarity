@@ -10,12 +10,14 @@ import java.util.List;
 public class ReflectedNativeFunctionDeclaration extends ASTNode {
 
     private String name;
+    private String typeDefault;
     private String fileName;
     private List<ParameterNode> params;
     private boolean isStatic;
 
-    public ReflectedNativeFunctionDeclaration(final String name, final String className, final List<ParameterNode> params, final boolean isStatic) {
+    public ReflectedNativeFunctionDeclaration(final String name, final String typeDefault, final String className, final List<ParameterNode> params, final boolean isStatic) {
         this.name = name;
+        this.typeDefault = typeDefault;
         this.fileName = className;
         this.params = params;
         this.isStatic = isStatic;
@@ -26,6 +28,10 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
 
     public final String getName() {
         return name;
+    }
+
+    public final String getTypeDefault() {
+        return typeDefault;
     }
 
     public final String getFileName() {
@@ -42,7 +48,7 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
 
     @Override
     public void print(final StringBuilder sb, final String indent) {
-        sb.append(indent).append("Reflected Native Call: ").append(isStatic ? "static " : "").append(name).append("(");
+        sb.append(indent).append("Reflected Native Call: ").append(isStatic ? "static " : "").append(name).append(typeDefault != null ? "(" + typeDefault + ")" : "").append("(");
         sb.append(indent).append(indent).append("File: ").append(fileName);
         if (params.isEmpty()) {
             sb.append(")");
@@ -60,6 +66,7 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
     @Override
     protected void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
+        out.writeString(String.valueOf(typeDefault));
         out.writeString(fileName);
         out.writeNodeList(params);
         out.writeBoolean(isStatic);
@@ -68,6 +75,8 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
     @Override
     protected void load0(final ASTInputStream in) throws IOException {
         this.name = in.readString();
+        this.typeDefault = in.readString();
+        if (this.typeDefault.equals("null")) this.typeDefault = null;
         this.fileName = in.readString();
         this.params = in.readNodeListNoCast();
         this.isStatic = in.readBoolean();

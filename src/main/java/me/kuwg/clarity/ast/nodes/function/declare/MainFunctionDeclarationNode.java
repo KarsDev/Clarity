@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class MainFunctionDeclarationNode extends FunctionDeclarationNode {
     public MainFunctionDeclarationNode(final BlockNode body) {
-        super("main", false, new ArrayList<>(), body);
+        super("main", null, false, new ArrayList<>(), body);
     }
 
     public MainFunctionDeclarationNode() {

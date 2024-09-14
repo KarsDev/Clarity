@@ -284,13 +284,13 @@ public class Interpreter {
                     definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true));
                 }
             } else if (statement instanceof FunctionDeclarationNode) {
-                FunctionDeclarationNode declarationNode = (FunctionDeclarationNode) statement;
+                final FunctionDeclarationNode declarationNode = (FunctionDeclarationNode) statement;
                 final List<String> params = new ArrayList<>();
 
                 declarationNode.getParameterNodes().forEach(param -> params.add(param.getName()));
 
                 if (declarationNode.isStatic()) {
-                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), true, params, declarationNode.getBlock()));
+                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), declarationNode.getTypeDefault(), true, params, declarationNode.getBlock()));
                 }
             } else if (statement instanceof ReflectedNativeFunctionDeclaration) {
                 final Object o = interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) statement, context);
@@ -480,7 +480,7 @@ public class Interpreter {
             except("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
         }
 
-        final Context functionContext = new Context(context.parentContext());
+        final Context functionContext = new Context(context.parentContext() != null ? context.parentContext() : context);
         List<String> definitionParams = definition.getParams();
         for (int i = 0; i < definitionParams.size(); i++) {
             final String name = definitionParams.get(i);
@@ -494,8 +494,35 @@ public class Interpreter {
         Register.register(new Register.RegisterElement(Register.RegisterElementType.FUNCALL, ((VariableReferenceNode) node.getCaller()).getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
+
+        final String typeDefault = definition.getTypeDefault();
+
+        if (!doesMatch(typeDefault, result)) {
+            Register.throwException("Unexpected return: " + result.getClass().getSimpleName() + ", expected " + typeDefault);
+        }
+
         context.setCurrentFunctionName(null);
         return result;
+    }
+
+    private static boolean doesMatch(final String typeDefault, final Object result) {
+        final boolean match;
+        if (typeDefault == null) {
+            match = true;
+        } else if (result instanceof VoidObject) {
+            match = typeDefault.equals("void");
+        } else if (result instanceof String) {
+            match = typeDefault.equals("str");
+        } else if (result instanceof Integer) {
+            match = typeDefault.equals("int");
+        } else if (result instanceof Double) {
+            match = typeDefault.equals("float");
+        } else if (result instanceof ClassObject) {
+            match = typeDefault.equals(((ClassObject) result).getName());
+        } else {
+            throw new RuntimeException("unsupported return for type default: " + result);
+        }
+        return match;
     }
 
     private Object interpretReturnNode(final ReturnNode node, final Context context) {
@@ -1287,7 +1314,7 @@ public class Interpreter {
 
         for (final ParameterNode param : node.getParams()) params.add(param.getName());
 
-        final FunctionDefinition function = new FunctionDefinition(node.getName(), node.isStatic(), params, block);
+        final FunctionDefinition function = new FunctionDefinition(node.getName(), node.getTypeDefault(), node.isStatic(), params, block);
 
         if (node.isStatic()) {
             final ObjectType obj = context.getClass(node.getFileName());
@@ -1324,7 +1351,7 @@ public class Interpreter {
                 declarationNode.getParameterNodes().forEach(param -> params.add(param.getName()));
 
                 if (declarationNode.isStatic()) {
-                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), true, params, declarationNode.getBlock()));
+                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), declarationNode.getTypeDefault(), true, params, declarationNode.getBlock()));
                 }
             } else if (statement instanceof ReflectedNativeFunctionDeclaration) {
                 final Object o = interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) statement, context);

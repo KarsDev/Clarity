@@ -1,0 +1,10 @@
+
+class Obj {
+}
+
+fn getVoid() -> int {
+    var x = 2
+    return 2
+}
+
+getVoid()

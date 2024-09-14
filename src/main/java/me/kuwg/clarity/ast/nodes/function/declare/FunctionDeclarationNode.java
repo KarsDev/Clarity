@@ -11,12 +11,14 @@ import java.util.List;
 public class FunctionDeclarationNode extends ASTNode {
 
     protected String functionName;
+    private String typeDefault;
     private boolean isStatic;
     protected List<ParameterNode> parameterNodes;
     protected BlockNode block;
 
-    public FunctionDeclarationNode(final String functionName, final boolean isStatic, final List<ParameterNode> parameterNodes, final BlockNode block) {
+    public FunctionDeclarationNode(final String functionName, final String typeDefault, final boolean isStatic, final List<ParameterNode> parameterNodes, final BlockNode block) {
         this.functionName = functionName;
+        this.typeDefault = typeDefault;
         this.isStatic = isStatic;
         this.parameterNodes = parameterNodes;
         this.block = block;
@@ -28,6 +30,10 @@ public class FunctionDeclarationNode extends ASTNode {
 
     public final String getFunctionName() {
         return functionName;
+    }
+
+    public final String getTypeDefault() {
+        return typeDefault;
     }
 
     public final boolean isStatic() {
@@ -44,8 +50,7 @@ public class FunctionDeclarationNode extends ASTNode {
 
     @Override
     public void print(final StringBuilder sb, final String indent) {
-        sb.append(indent).append("Function: ").append(functionName).append("\n");
-
+        sb.append(indent).append("Function: ").append(functionName).append(typeDefault != null ? " (" + typeDefault + ")" : "").append("\n");
         sb.append(indent).append("Parameters: ");
         if (parameterNodes.isEmpty()) {
             sb.append("None\n");
@@ -64,6 +69,7 @@ public class FunctionDeclarationNode extends ASTNode {
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(functionName);
+        out.writeString(String.valueOf(typeDefault));
         out.writeBoolean(isStatic);
         out.writeNodeList(parameterNodes);
         out.writeNode(block);
@@ -72,6 +78,8 @@ public class FunctionDeclarationNode extends ASTNode {
     @Override
     public void load0(final ASTInputStream in) throws IOException {
         this.functionName = in.readString();
+        this.typeDefault = in.readString();
+        if (this.typeDefault.equals("null")) this.typeDefault = null;
         this.isStatic = in.readBoolean();
         this.parameterNodes = in.readNodeListNoCast();
         this.block = (BlockNode) in.readNode();

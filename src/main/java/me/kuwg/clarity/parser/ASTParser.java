@@ -202,8 +202,10 @@ public final class ASTParser {
             final String name = consume(VARIABLE).getValue();
             final List<ParameterNode> params = parseParameters();
 
+            final String typeDefault = matchAndConsume(OPERATOR, "->") ? consume().getValue() : null;
+
             final int line = current().getLine();
-            return new ReflectedNativeFunctionDeclaration(name, fileName, params, isStatic).setLine(line);
+            return new ReflectedNativeFunctionDeclaration(name, typeDefault, fileName, params, isStatic).setLine(line);
         }
 
         matchAndConsume(KEYWORD, "fn");
@@ -212,13 +214,16 @@ public final class ASTParser {
         final int line = current().getLine();
         final List<ParameterNode> params = parseParameters();
 
+        final String typeDefault = matchAndConsume(OPERATOR, "->") ? consume().getValue() : null;
+
+
         final BlockNode block = parseBlock();
 
         if (name.equals("main") && params.isEmpty()) {
             return new MainFunctionDeclarationNode(block).setLine(line);
         }
 
-        return new FunctionDeclarationNode(name, isStatic, params, block).setLine(line);
+        return new FunctionDeclarationNode(name, typeDefault, isStatic, params, block).setLine(line);
     }
 
     private ASTNode parseNativeDeclaration() {
