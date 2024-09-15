@@ -196,8 +196,8 @@ For example:
 
 ```clarity
 
-include system
-include math
+include native system
+include native math
 ```
 Common Native Functions
 ```clarity
@@ -239,7 +239,7 @@ class Test {
     }
 }
 
-for var i = 1, i <= 100, i = i + 1 {
+for var i = 1, i <= 100, i = i++ {
     native.print(Test.getName() + " loves you " + i + " times\n")
 }
 ```
