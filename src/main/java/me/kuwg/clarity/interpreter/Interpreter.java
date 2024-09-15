@@ -64,13 +64,14 @@ public class Interpreter {
 
         for (final ASTNode node : ast.getRoot()) {
             if (node instanceof MainFunctionDeclarationNode) {
-                if (main != null) throw new MultipleMainMethodsException();
+                if (main != null) {
+                    Register.throwException("Found multiple main functions, at line: " + main.getLine() + " and " + node.getLine());
+                }
                 main = (MainFunctionDeclarationNode) node;
                 ast.getRoot().getChildren().remove(node);
             } else {
                 preInterpret(node, ast.getRoot(), general);
             }
-
         }
 
         if (main != null) {
@@ -101,6 +102,10 @@ public class Interpreter {
         } else if (node instanceof ClassDeclarationNode) {
             final ClassDeclarationNode cdn = (ClassDeclarationNode) node;
             if (context.getClass(cdn.getName()) == VOID_OBJECT) interpretClassDeclaration(cdn, context);
+            block.getChildren().remove(node);
+        } else if (node instanceof EnumDeclarationNode) {
+            final EnumDeclarationNode cdn = (EnumDeclarationNode) node;
+            if (context.getClass(cdn.getName()) == VOID_OBJECT) interpretEnumDeclaration(cdn, context);
             block.getChildren().remove(node);
         } else if (node instanceof IncludeNode) {
             interpretInclude((IncludeNode) node, context);

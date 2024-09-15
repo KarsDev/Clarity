@@ -1,12 +1,2 @@
-class Device {
-    const str name
-    constructor(name) {
-        local.name = name
-    }
-
-    fn getName() -> str {
-        return name
-    }
-}
-
-const var device = new Device("device")
+var typeofSTR = native.typeof("this is a str")
+native.println(typeofSTR) // prints "str"
