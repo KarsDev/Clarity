@@ -236,10 +236,10 @@ public class Interpreter {
             if (valueObj instanceof VoidObject) {
                 Register.throwException("Creating a void variable: " + node.getName());
             }
-        }
 
-        if (!doesMatch(node.getTypeDefault(), valueObj)) {
-            Register.throwException("Unexpected value in variable declaration: " + Interpreter.getAsCLRStr(valueObj) + ", expected " + node.getTypeDefault(), node.getLine());
+            if (!doesMatch(node.getTypeDefault(), valueObj)) {
+                Register.throwException("Unexpected value in variable declaration: " + Interpreter.getAsCLRStr(valueObj) + ", expected " + node.getTypeDefault(), node.getLine());
+            }
         }
 
         context.defineVariable(node.getName(), new VariableDefinition(node.getName(), node.getTypeDefault(), valueObj, node.isConstant(), node.isStatic()));
@@ -573,14 +573,13 @@ public class Interpreter {
 
         // Iterate through the inheritance chain
         while (currentDefinition.getInheritedClass() != null) {
-            ClassDefinition inheritedClass = currentDefinition.getInheritedClass();
+            final ClassDefinition inheritedClass = currentDefinition.getInheritedClass();
 
             context.setCurrentClassName(inheritedClass.getName());
             interpretBlock(inheritedClass.getBody(), context);
             context.setCurrentClassName(name);
 
             final FunctionDefinition[] inheritedConstructors = inheritedClass.getConstructors();
-
             inheritedObject = interpretConstructors(inheritedObject, inheritedConstructors, params, classContext, inheritedClass.getName());
             classContext.mergeContext(inheritedObject.getContext());
 
@@ -592,9 +591,7 @@ public class Interpreter {
         if (val != VOID_OBJECT) {
             except("Return in class body", node.getLine());
         }
-
         final Object result = interpretConstructors(inheritedObject, definition.getConstructors(), params, classContext, name);
-
         context.setCurrentClassName(null);
         return result;
     }
@@ -1108,6 +1105,7 @@ public class Interpreter {
         else if (o instanceof Double) return "float";
         else if (o instanceof Object[]) return "arr";
         else if (o instanceof String) return "str";
+        else if (o instanceof VoidObject) return "void";
         else return o.getClass().getSimpleName().toLowerCase();
     }
 

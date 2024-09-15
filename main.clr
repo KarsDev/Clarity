@@ -1,5 +1,12 @@
-fn eval() -> bool {
-    return bool(native.input("Write true or false: "))
+class Device {
+    const str name
+    constructor(name) {
+        local.name = name
+    }
+
+    fn getName() -> str {
+        return name
+    }
 }
 
-native.println(eval())
+const var device = new Device("device")
