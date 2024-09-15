@@ -32,7 +32,6 @@ import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.*;
-import me.kuwg.clarity.interpreter.exceptions.MultipleMainMethodsException;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.interpreter.types.ClassObject;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
