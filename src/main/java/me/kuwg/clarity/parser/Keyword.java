@@ -35,6 +35,7 @@ public enum Keyword {
     ARR,
     STR,
     ENUM,
+    BOOL,
 
     ;
 
@@ -71,6 +72,7 @@ public enum Keyword {
             case "arr": return ARR;
             case "str": return STR;
             case "enum": return ENUM;
+            case "bool": return BOOL;
 
             default: throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
         }

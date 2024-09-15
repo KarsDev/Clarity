@@ -524,6 +524,8 @@ public class Interpreter {
             match = typeDefault.equals(((ClassObject) result).getName());
         } else if (result instanceof Object[]) {
             match = typeDefault.equals("arr");
+        } else if (result instanceof Boolean) {
+            match = typeDefault.equals("bool");
         } else {
             throw new RuntimeException("unsupported return for type default: " + result);
         }
@@ -1423,6 +1425,8 @@ public class Interpreter {
                 return castToInt(expression, node);
             case ARR:
                 return castToArr(expression, node);
+            case BOOL:
+                return castToBool(expression, node);
             default:
                 Register.throwException("Unknown cast: " + node.getType().name().toLowerCase(), node.getLine());
                 return null;
@@ -1488,6 +1492,24 @@ public class Interpreter {
             return null;
         }
     }
+
+    private Boolean castToBool(final Object expression, final NativeCastNode node) {
+        try {
+            if (expression instanceof Integer) {
+                final int val = (int) expression;
+                if (val == 0) {
+                    return false;
+                } else if (val == 1) {
+                    return true;
+                }
+            }
+            return (boolean) expression;
+        } catch (final ClassCastException ignore) {
+            Register.throwException("Could not cast to bool", node.getLine());
+            return null;
+        }
+    }
+
 
     private Double parseDoubleOrThrow(final String expression,final  NativeCastNode node) {
         try {

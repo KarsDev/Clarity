@@ -142,6 +142,8 @@ public final class ASTParser {
                 return parseArrDeclaration();
             case ENUM:
                 return parseEnumDeclaration();
+            case BOOL:
+                return parseBoolDeclaration();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -1024,6 +1026,16 @@ public final class ASTParser {
     private String parseScopedValue() {
         return matchAndConsume(OPERATOR, "->") ? consume().getValue() : null;
     }
+
+    private ASTNode parseBoolDeclaration() {
+        final int line = consume().getLine(); // consume "bool"
+        if (!matchAndConsume(DIVIDER, "(")) {
+            undo();
+            return parseVariableDeclaration();
+        }
+        return new NativeCastNode(CastType.BOOL, parseExpression()).setLine(consume(DIVIDER, ")").getLine()).setLine(line);
+    }
+
 
 
 

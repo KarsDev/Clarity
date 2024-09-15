@@ -5,7 +5,8 @@ public enum CastType {
     FLOAT(null),
     INT(null),
     ARR(null),
-    CLASS("");
+    CLASS(""),
+    BOOL(null);
 
     private String value;
 
@@ -37,6 +38,9 @@ public enum CastType {
 
             case "str":
                 return STR;
+
+            case "bool":
+                return BOOL;
 
             default:
                 return null;
