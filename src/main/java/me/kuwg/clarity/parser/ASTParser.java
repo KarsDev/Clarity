@@ -353,7 +353,7 @@ public final class ASTParser {
                     Register.throwException("Unknown native type: " + lookahead(-1).getValue());
                     return null;
                 }
-                return new IsNode(left, valueOf);
+                return new IsNode(left, valueOf).setLine(line);
             }
 
             ASTNode right = parsePrecedence(currentPrecedence + 1);

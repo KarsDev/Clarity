@@ -6,7 +6,9 @@ public enum CastType {
     INT(null),
     ARR(null),
     CLASS(""),
-    BOOL(null);
+    BOOL(null),
+    VOID(null),
+    ;
 
     private String value;
 
@@ -41,6 +43,9 @@ public enum CastType {
 
             case "bool":
                 return BOOL;
+
+            case "void":
+                return VOID;
 
             default:
                 return null;

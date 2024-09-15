@@ -1,5 +1,6 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.system;
 
+import me.kuwg.clarity.VoidObject;
 import me.kuwg.clarity.register.Register;
 
 import java.util.List;
@@ -30,6 +31,8 @@ public class CheckNativeTypeNative extends SystemNativeFunction<Boolean> {
                 return got instanceof Boolean;
             case "arr":
                 return got instanceof Object[];
+            case "void":
+                return got instanceof VoidObject;
             default:
                 Register.throwException("Unknown native type: " + required);
         }

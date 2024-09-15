@@ -1,2 +1,1 @@
-var typeofSTR = native.typeof("this is a str")
-native.println(typeofSTR) // prints "str"
+bool x = void is void

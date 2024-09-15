@@ -1738,10 +1738,6 @@ public class Interpreter {
     private boolean interpretIs(final IsNode node, final Context context) {
         final Object result = interpretNode(node.getExpression(), context);
 
-        if (result instanceof VoidObject) {
-            Register.throwException("Void can't be any type", node.getLine());
-        }
-
         switch (node.getType()) {
             case STR:
                 return result instanceof String;
@@ -1755,6 +1751,10 @@ public class Interpreter {
                 if (!(result instanceof ClassObject)) return false;
                 ClassObject object = (ClassObject) result;
                 return object.isInstance(node.getType().getValue());
+            case BOOL:
+                return result instanceof Boolean;
+            case VOID:
+                return result instanceof VoidObject;
             default:
                 Register.throwException("Unknown 'is' type: " + node.getType().name().toLowerCase(), node.getLine());
                 return false;
