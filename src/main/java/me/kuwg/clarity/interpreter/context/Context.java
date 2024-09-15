@@ -1,6 +1,7 @@
 package me.kuwg.clarity.interpreter.context;
 
 import me.kuwg.clarity.ObjectType;
+import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.interpreter.definition.AnnotationDefinition;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
@@ -59,6 +60,10 @@ public class Context {
             return;
         }
         final VariableDefinition variableDefinition = (VariableDefinition) definition;
+        if (!Interpreter.doesMatch(variableDefinition.getTypeDefault(), value)) {
+            Register.throwException("Unexpected value for variable " + variableDefinition.getName() + ", expected " + variableDefinition.getTypeDefault() + " but got " + Interpreter.getAsCLRStr(value));
+        }
+
         if (variableDefinition.isConstant() && variableDefinition.getValue() != VOID_OBJECT) {
             Register.throwException("Variable that has const cannot be edited: " + name);
         }

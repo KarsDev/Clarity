@@ -8,11 +8,13 @@ import java.io.IOException;
 
 public class VariableDeclarationNode extends ASTNode {
     private String name;
+    private String typeDefault;
     private boolean isConstant, isStatic;
     private ASTNode value;
 
-    public VariableDeclarationNode(final String name, final ASTNode value, final boolean isConstant,  final boolean isStatic) {
+    public VariableDeclarationNode(final String name, final String typeDefault, final ASTNode value, final boolean isConstant,  final boolean isStatic) {
         this.name = name;
+        this.typeDefault = typeDefault;
         this.isConstant = isConstant;
         this.isStatic = isStatic;
         this.value = value;
@@ -24,6 +26,10 @@ public class VariableDeclarationNode extends ASTNode {
 
     public final String getName() {
         return name;
+    }
+
+    public final String getTypeDefault() {
+        return typeDefault;
     }
 
     public final ASTNode getValue() {
@@ -41,8 +47,9 @@ public class VariableDeclarationNode extends ASTNode {
     @Override
     public String toString() {
         return "VariableDeclarationNode{" +
-                "name='" + name + '\'' +
-                ", isConstant=" + isConstant +
+                "isConstant=" + isConstant +
+                ", name='" + name + '\'' +
+                ", typeDefault='" + typeDefault + '\'' +
                 ", isStatic=" + isStatic +
                 ", value=" + value +
                 '}';
@@ -50,7 +57,7 @@ public class VariableDeclarationNode extends ASTNode {
 
     @Override
     public void print(final StringBuilder sb, final String indent) {
-        sb.append(indent).append("Variable Declaration:\n");
+        sb.append(indent).append("Variable Declaration: ").append(typeDefault != null ? "(" + typeDefault + ")\n" : "\n");
 
         sb.append(indent).append("  Name: ").append(name).append("\n");
 
@@ -72,6 +79,7 @@ public class VariableDeclarationNode extends ASTNode {
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
+        out.writeString(String.valueOf(typeDefault));
         out.writeNode(value);
         out.writeBoolean(isConstant);
         out.writeBoolean(isStatic);
@@ -80,6 +88,8 @@ public class VariableDeclarationNode extends ASTNode {
     @Override
     public void load0(final ASTInputStream in) throws IOException {
         this.name = in.readString();
+        this.typeDefault = in.readString();
+        if (this.typeDefault.equals("null")) this.typeDefault = null;
         this.value = in.readNode();
         this.isConstant = in.readBoolean();
         this.isStatic = in.readBoolean();

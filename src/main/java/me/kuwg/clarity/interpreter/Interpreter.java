@@ -225,21 +225,24 @@ public class Interpreter {
     }
 
     private Object interpretVariableDeclaration(final VariableDeclarationNode node, final Context context) {
-        final VariableDefinition variableDefinition;
         final ASTNode value = node.getValue();
 
+        final Object valueObj;
+
         if (value instanceof VoidNode) {
-            variableDefinition = new VariableDefinition(node.getName(), VOID_OBJECT, node.isConstant(), node.isStatic());
+            valueObj = VOID_OBJECT;
         } else {
-            final Object interpretedValue = interpretNode(value, context);
-            if (interpretedValue instanceof VoidObject) {
+            valueObj = interpretNode(value, context);
+            if (valueObj instanceof VoidObject) {
                 Register.throwException("Creating a void variable: " + node.getName());
             }
-            variableDefinition = new VariableDefinition(node.getName(), interpretedValue, node.isConstant(), node.isStatic());
         }
 
+        if (!doesMatch(node.getTypeDefault(), valueObj)) {
+            Register.throwException("Unexpected value in variable declaration: " + Interpreter.getAsCLRStr(valueObj) + ", expected " + node.getTypeDefault(), node.getLine());
+        }
 
-        context.defineVariable(node.getName(), variableDefinition);
+        context.defineVariable(node.getName(), new VariableDefinition(node.getName(), node.getTypeDefault(), valueObj, node.isConstant(), node.isStatic()));
 
         return VOID_OBJECT;
     }
@@ -279,9 +282,9 @@ public class Interpreter {
 
         for (final ASTNode statement : definition.getBody()) {
             if (statement instanceof VariableDeclarationNode) {
-                VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
+                final VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
                 if (declarationNode.isStatic()) {
-                    definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true));
+                    definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getTypeDefault(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true));
                 }
             } else if (statement instanceof FunctionDeclarationNode) {
                 final FunctionDeclarationNode declarationNode = (FunctionDeclarationNode) statement;
@@ -488,7 +491,7 @@ public class Interpreter {
             if (value instanceof VoidObject) {
                 Register.throwException("Passing void as parameter");
             }
-            functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
+            functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false));
         }
 
         Register.register(new Register.RegisterElement(Register.RegisterElementType.FUNCALL, ((VariableReferenceNode) node.getCaller()).getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
@@ -505,7 +508,7 @@ public class Interpreter {
         return result;
     }
 
-    private static boolean doesMatch(final String typeDefault, final Object result) {
+    public static boolean doesMatch(final String typeDefault, final Object result) {
         final boolean match;
         if (typeDefault == null) {
             match = true;
@@ -519,6 +522,8 @@ public class Interpreter {
             match = typeDefault.equals("float");
         } else if (result instanceof ClassObject) {
             match = typeDefault.equals(((ClassObject) result).getName());
+        } else if (result instanceof Object[]) {
+            match = typeDefault.equals("arr");
         } else {
             throw new RuntimeException("unsupported return for type default: " + result);
         }
@@ -618,7 +623,7 @@ public class Interpreter {
             if (params.get(i) instanceof VoidObject) {
                 Register.throwException("Passing void as parameter");
             }
-            constructorContext.defineVariable(constructorParams.get(i), new VariableDefinition(constructorParams.get(i), params.get(i), false, false));
+            constructorContext.defineVariable(constructorParams.get(i), new VariableDefinition(constructorParams.get(i), null, params.get(i), false, false));
         }
 
         final Object result = interpretBlock(matchingConstructor.getBlock(), constructorContext);
@@ -905,7 +910,7 @@ public class Interpreter {
         for (int i = 0; i < definitionParams.size(); i++) {
             final String name = definitionParams.get(i);
             final Object value = params.get(i);
-            functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
+            functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false));
         }
     }
 
@@ -955,7 +960,7 @@ public class Interpreter {
             final String name = definitionParams.get(i);
             final Object value = params.get(i);
 
-            functionContext.defineVariable(name, new VariableDefinition(name, value, false, false));
+            functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false));
         }
 
         Register.register(new Register.RegisterElement(Register.RegisterElementType.LOCALCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
@@ -1083,23 +1088,25 @@ public class Interpreter {
         return VOID_OBJECT;
     }
 
-    private String getParams(final List<?> objects) {
+    public static String getParams(final List<?> objects) {
         final StringBuilder s = new StringBuilder("(");
         for (int i = 0, size = objects.size(); i < size; i++) {
             final Object o = objects.get(i);
-            if (o == null) {
-                s.append((String) null);
-            }
-            else {
-                if (o instanceof Integer) s.append("int");
-                else if (o instanceof Double) s.append("float");
-                else if (o instanceof Object[]) s.append("arr");
-                else if (o instanceof String) s.append("str");
-                else s.append(o.getClass().getSimpleName().toLowerCase());
-            }
+            s.append(getAsCLRStr(o));
             if (i < size - 1) s.append(", ");
         }
         return s + ")";
+    }
+
+    public static String getAsCLRStr(final Object o) {
+        if (o == null) {
+            return "null";
+        }
+        if (o instanceof Integer) return "int";
+        else if (o instanceof Double) return "float";
+        else if (o instanceof Object[]) return "arr";
+        else if (o instanceof String) return "str";
+        else return o.getClass().getSimpleName().toLowerCase();
     }
 
     private Object interpretIf(final IfNode node, final Context context) {
@@ -1226,7 +1233,7 @@ public class Interpreter {
             final int range = (int) object;
             int i = 0;
             while (i < range){
-                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), i, false, false));
+                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, i, false, false));
                 final Object val = interpretBlock(node.getBlock(), forEachContext);
                 if (val == BREAK) {
                     break;
@@ -1250,7 +1257,7 @@ public class Interpreter {
             final double range = (double) object;
             double i = 0;
             while (i < range) {
-                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), i, false, false));
+                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, i, false, false));
                 final Object val = interpretBlock(node.getBlock(), forEachContext);
                 if (val == BREAK) {
                     break;
@@ -1275,7 +1282,7 @@ public class Interpreter {
             return null;
         }
 
-        forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, false, false));
+        forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, null, false, false));
 
         for (final Object o : arr) {
             forEachContext.setVariable(node.getVariable(), o);
@@ -1287,7 +1294,7 @@ public class Interpreter {
                 return new ReturnValue(val);
             }
             forEachContext = new Context(context);
-            forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, false, false));
+            forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, null, false, false));
         }
 
         return VOID_OBJECT;
@@ -1342,7 +1349,7 @@ public class Interpreter {
             if (statement instanceof VariableDeclarationNode) {
                 VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
                 if (declarationNode.isStatic()) {
-                    definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true));
+                    definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getTypeDefault(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true));
                 }
             } else if (statement instanceof FunctionDeclarationNode) {
                 FunctionDeclarationNode declarationNode = (FunctionDeclarationNode) statement;

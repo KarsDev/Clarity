@@ -5,11 +5,13 @@ import me.kuwg.clarity.ObjectType;
 public class VariableDefinition extends ObjectType {
 
     private final String name;
+    private final String typeDefault;
     private Object value;
     private final boolean isConstant, isStatic;
 
-    public VariableDefinition(final String name, final Object value, final boolean isConstant, final boolean isStatic) {
+    public VariableDefinition(final String name, final String typeDefault, final Object value, final boolean isConstant, final boolean isStatic) {
         this.name = name;
+        this.typeDefault = typeDefault;
         this.value = value;
         this.isConstant = isConstant;
         this.isStatic = isStatic;
@@ -17,6 +19,10 @@ public class VariableDefinition extends ObjectType {
 
     public final String getName() {
         return name;
+    }
+
+    public final String getTypeDefault() {
+        return typeDefault;
     }
 
     public final Object getValue() {
@@ -38,9 +44,10 @@ public class VariableDefinition extends ObjectType {
     @Override
     public String toString() {
         return "VariableDefinition{" +
-                "name='" + name + '\'' +
+                "isConstant=" + isConstant +
+                ", name='" + name + '\'' +
+                ", typeDefault='" + typeDefault + '\'' +
                 ", value=" + value +
-                ", isConstant=" + isConstant +
                 ", isStatic=" + isStatic +
                 '}';
     }

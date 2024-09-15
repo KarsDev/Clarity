@@ -16,7 +16,7 @@ public class ReflectionsNativeClass extends NativeClass {
     public Object handleCall(final String name, final List<Object> params, final Context context) {
         switch (name) {
             case "editVariable": {
-                check("Invalid parameters for 'editVariable'. Expected 2 parameters (String variableName, Object value), got " + params.size() + " with types " + getParamTypes(params),
+                check("Invalid parameters for 'editVariable'. Expected 2 parameters (str variableName, value), got " + params.size() + " with types " + getParamTypes(params),
                         params.size() == 2 && params.get(0) instanceof String);
                 final String var = (String) params.get(0);
                 final Object val = params.get(1);
@@ -29,14 +29,14 @@ public class ReflectionsNativeClass extends NativeClass {
                 break;
             }
             case "createVariable": {
-                check("Invalid parameters for 'createVariable'. Expected 4 parameters (String variableName, Object initialValue, Boolean isStatic, Boolean isConstant), got " + params.size() + " with types " + getParamTypes(params),
+                check("Invalid parameters for 'createVariable'. Expected 5 parameters (str variableName, initialValue, bool isStatic, bool isConstant), got " + params.size() + " with types " + getParamTypes(params),
                         params.size() == 4 && params.get(0) instanceof String && params.get(2) instanceof Boolean && params.get(3) instanceof Boolean);
                 final String var = (String) params.get(0);
                 final Object val = params.get(1);
                 final boolean isStatic = (Boolean) params.get(2);
                 final boolean isConstant = (Boolean) params.get(3);
 
-                context.parentContext().defineVariable(var, new VariableDefinition(var, val, isStatic, isConstant));
+                context.parentContext().defineVariable(var, new VariableDefinition(var, null, val, isStatic, isConstant));
                 break;
             }
             case "getCallerClass": {

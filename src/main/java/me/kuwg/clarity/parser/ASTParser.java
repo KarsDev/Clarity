@@ -181,7 +181,11 @@ public final class ASTParser {
 
         final int line = current().getLine();
 
-        if (!matchAndConsume(KEYWORD, "var")) {
+        final String typeDefault = consume().getValue();
+
+        if (typeDefault.equals("fn")) {
+            undo(); // undo typeDefault
+
             if (isStatic) undo();
             if (isConst) throw new UnsupportedOperationException("Constant functions still not supported, at line " + line);
             return parseFunctionDeclaration().setLine(line);
@@ -191,7 +195,7 @@ public final class ASTParser {
 
         final ASTNode value = matchAndConsume(OPERATOR, "=") ? parseExpression() : new VoidNode().setLine(line);
 
-        return new VariableDeclarationNode(name, value, isConst, isStatic).setLine(lookahead(-1).getLine());
+        return new VariableDeclarationNode(name, typeDefault, value, isConst, isStatic).setLine(lookahead(-1).getLine());
     }
 
     private ASTNode parseFunctionDeclaration() {
@@ -888,13 +892,19 @@ public final class ASTParser {
 
     private ASTNode parseFloatDeclaration() {
         final int line = consume().getLine(); // consume "float"
-        consume(DIVIDER, "(");
+        if (!matchAndConsume(DIVIDER, "(")) {
+            undo();
+            return parseVariableDeclaration();
+        }
         return new NativeCastNode(CastType.FLOAT, parseExpression()).setLine(consume(DIVIDER, ")").getLine()).setLine(line);
     }
 
     private ASTNode parseIntDeclaration() {
         final int line = consume().getLine(); // consume "int"
-        consume(DIVIDER, "(");
+        if (!matchAndConsume(DIVIDER, "(")) {
+            undo();
+            return parseVariableDeclaration();
+        }
         return new NativeCastNode(CastType.INT, parseExpression()).setLine(consume(DIVIDER, ")").getLine()).setLine(line);
     }
 
@@ -933,13 +943,19 @@ public final class ASTParser {
 
     private ASTNode parseStrDeclaration() {
         final int line = consume().getLine(); // consume "str"
-        consume(DIVIDER, "(");
+        if (!matchAndConsume(DIVIDER, "(")) {
+            undo();
+            return parseVariableDeclaration();
+        }
         return new NativeCastNode(CastType.STR, parseExpression()).setLine(consume(DIVIDER, ")").getLine()).setLine(line);
     }
 
     private ASTNode parseArrDeclaration() {
         final int line = consume().getLine(); // consume "arr"
-        consume(DIVIDER, "(");
+        if (!matchAndConsume(DIVIDER, "(")) {
+            undo();
+            return parseVariableDeclaration();
+        }
         return new NativeCastNode(CastType.ARR, parseExpression()).setLine(consume(DIVIDER, ")").getLine()).setLine(line);
     }
 
@@ -966,7 +982,7 @@ public final class ASTParser {
         }
 
         consume(DIVIDER, "}");
-        return new EnumDeclarationNode(enumName, isConstant, fileName, enumValues);
+        return new EnumDeclarationNode(enumName, isConstant, fileName, enumValues).setLine(line);
     }
 
     private ASTNode parseAnnotationClassDeclaration() {

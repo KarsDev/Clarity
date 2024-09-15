@@ -24,14 +24,31 @@ public class PrintlnNative extends DefaultNativeFunction<VoidObject> {
     }
 
     private String paramsToString(final List<Object> params) {
-        if (params.size() == 1)
-            if (params.get(0) instanceof Object[]) return Arrays.toString((Object[]) params.get(0));
-
         StringBuilder s = new StringBuilder();
         for (final Object param : params) {
-            if (param instanceof Object[]) s.append(Arrays.toString((Object[]) param));
-            else s.append(param);
+            if (param instanceof Object[]) {
+                s.append(arrayToString((Object[]) param));
+            } else {
+                s.append(param);
+            }
+            s.append(" ");
         }
+        return s.toString().trim();
+    }
+
+    private String arrayToString(final Object[] array) {
+        StringBuilder s = new StringBuilder("[");
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] instanceof Object[]) {
+                s.append(arrayToString((Object[]) array[i]));
+            } else {
+                s.append(array[i]);
+            }
+            if (i < array.length - 1) {
+                s.append(", ");
+            }
+        }
+        s.append("]");
         return s.toString();
     }
 }
