@@ -1,7 +1,6 @@
 package me.kuwg.clarity.ast.nodes.expression;
 
 import me.kuwg.clarity.ast.ASTNode;
-import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 import me.kuwg.clarity.compiler.ast.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.ast.stream.ASTOutputStream;
 
