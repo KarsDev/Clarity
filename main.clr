@@ -1,1 +1,5 @@
-void x
+include native System
+
+var x = true ^ true
+
+native.println(x)
