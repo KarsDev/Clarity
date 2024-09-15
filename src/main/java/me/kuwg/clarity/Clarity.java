@@ -13,8 +13,6 @@ import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.Tokenizer;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -122,6 +120,8 @@ public class Clarity {
                 return false;
             }
         }.start();
+
+        await(() -> System.exit(EXIT_CODE));
     }
 
     private static void installClarity() {
@@ -252,5 +252,32 @@ public class Clarity {
         System.out.println("  Format:");
         System.out.println("   Default: CLR");
         System.out.println("   Compressed: CCLR");
+    }
+
+    @SuppressWarnings("LoopConditionNotUpdatedInsideLoop")
+    private static void await(final Runnable runnable) {
+        final ThreadGroup group = Thread.currentThread().getThreadGroup();
+        while (group != null) {
+            final Thread[] threads = new Thread[group.activeCount()];
+            group.enumerate(threads);
+
+            boolean hasActiveNonDaemonThread = false;
+            for (final Thread thread : threads) {
+                if (thread != null && !thread.isDaemon() && thread != Thread.currentThread()) {
+                    try {
+                        thread.join();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    hasActiveNonDaemonThread = true;
+                }
+            }
+
+            if (!hasActiveNonDaemonThread) {
+                break;
+            }
+        }
+
+        runnable.run();
     }
 }

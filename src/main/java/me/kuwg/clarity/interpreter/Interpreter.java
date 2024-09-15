@@ -386,7 +386,8 @@ public class Interpreter {
             case "||": return left || right;
             case "==": return left == right;
             case "!=": return left != right;
-            default: except("Unsupported operator for booleans: " + operator, line); return null;
+            case "^": return left ^ right;
+            default: return except("Unsupported operator for booleans: " + operator, line);
         }
     }
 
@@ -404,7 +405,7 @@ public class Interpreter {
             case ">=": return left >= right;
             case "==": return left == right;
             case "!=": return left != right;
-            default: except("Unsupported operator for floats: " + operator, line); return null;
+            default: return except("Unsupported operator for floats: " + operator, line);
         }
     }
 
@@ -427,7 +428,7 @@ public class Interpreter {
             case "&": return left & right;
             case "|": return left | right;
             case "^^": return left ^ right;
-            default: except("Unsupported operator for integers: " + operator, line); return null;
+            default: return except("Unsupported operator for integers: " + operator, line);
         }
     }
 
