@@ -1070,7 +1070,7 @@ public final class ASTParser {
 
     private Token consume() {
         if (currentTokenIndex >= tokens.size()) {
-            throw new IllegalStateException("Unexpected end of input" + ", in file: " + fileName);
+            throw new IllegalStateException("Unexpected end of input, in file: " + fileName);
         }
         return tokens.get(currentTokenIndex++);
     }
