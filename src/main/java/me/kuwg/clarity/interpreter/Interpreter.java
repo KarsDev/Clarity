@@ -241,7 +241,7 @@ public class Interpreter {
                 Register.throwException("Creating a void variable: " + node.getName());
             }
 
-            if (!doesMatch(node.getTypeDefault(), valueObj)) {
+            if (checkTypes(node.getTypeDefault(), valueObj)) {
                 Register.throwException("Unexpected value in variable declaration: " + Interpreter.getAsCLRStr(valueObj) + ", expected " + node.getTypeDefault(), node.getLine());
             }
         }
@@ -504,7 +504,7 @@ public class Interpreter {
 
         final String typeDefault = definition.getTypeDefault();
 
-        if (!doesMatch(typeDefault, result)) {
+        if (checkTypes(typeDefault, result)) {
             Register.throwException("Unexpected return: " + result.getClass().getSimpleName() + ", expected " + typeDefault);
         }
 
@@ -512,7 +512,7 @@ public class Interpreter {
         return result;
     }
 
-    public static boolean doesMatch(final String typeDefault, final Object result) {
+    public static boolean checkTypes(final String typeDefault, final Object result) {
         final boolean match;
         if (typeDefault == null) {
             match = true;
@@ -533,7 +533,7 @@ public class Interpreter {
         } else {
             throw new RuntimeException("unsupported return for type default: " + result);
         }
-        return match;
+        return !match;
     }
 
     private Object interpretReturnNode(final ReturnNode node, final Context context) {

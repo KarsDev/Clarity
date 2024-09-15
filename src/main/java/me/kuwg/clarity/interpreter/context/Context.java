@@ -60,7 +60,7 @@ public class Context {
             return;
         }
         final VariableDefinition variableDefinition = (VariableDefinition) definition;
-        if (!Interpreter.doesMatch(variableDefinition.getTypeDefault(), value)) {
+        if (Interpreter.checkTypes(variableDefinition.getTypeDefault(), value)) {
             Register.throwException("Unexpected value for variable " + variableDefinition.getName() + ", expected " + variableDefinition.getTypeDefault() + " but got " + Interpreter.getAsCLRStr(value));
         }
 

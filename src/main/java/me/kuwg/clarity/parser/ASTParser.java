@@ -195,6 +195,10 @@ public final class ASTParser {
 
         final String name = consume(VARIABLE).getValue();
 
+        if (typeDefault.equals("void")) { // can't create void variables
+            Register.throwException("Void variables are not supported: " + name, line);
+        }
+
         final ASTNode value = matchAndConsume(OPERATOR, "=") ? parseExpression() : new VoidNode().setLine(line);
 
         return new VariableDeclarationNode(name, typeDefault, value, isConst, isStatic).setLine(lookahead(-1).getLine());
