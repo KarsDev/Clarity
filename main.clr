@@ -1,1 +1,5 @@
-bool x = false
+fn eval() -> bool {
+    return bool(native.input("Write true or false: "))
+}
+
+native.println(eval())

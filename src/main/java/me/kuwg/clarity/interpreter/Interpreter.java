@@ -1502,6 +1502,13 @@ public class Interpreter {
                 } else if (val == 1) {
                     return true;
                 }
+            } else if (expression instanceof String) {
+                final String val = (String) expression;
+                if (val.equals("true")) {
+                    return true;
+                } else if (val.equals("false")) {
+                    return false;
+                }
             }
             return (boolean) expression;
         } catch (final ClassCastException ignore) {
