@@ -413,6 +413,7 @@ public final class ASTParser {
                     case "-=":
                     case "*=":
                     case "/=":
+                    case "^=":
                     case "%=": {
                         if (node instanceof VariableReferenceNode) {
                             final char v = consume().getValue().charAt(0); // consume op

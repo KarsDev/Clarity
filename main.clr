@@ -1,5 +1,6 @@
 include native System
 
-var x = true ^ true
+var x = 1
+x ^= 4
 
 native.println(x)

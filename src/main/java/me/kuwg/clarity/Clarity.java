@@ -120,7 +120,7 @@ public class Clarity {
                 return false;
             }
         }.start();
-
+        
         await(() -> System.exit(EXIT_CODE));
     }
 
