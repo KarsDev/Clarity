@@ -24,9 +24,11 @@ Clarity is a high-level, object-oriented programming language designed to priori
 To install Clarity, follow these steps based on your operating system:
 
 ##### download Required Files:
+
 Windows: Download install_windows.bat
 Mac: Download install_mac.sh
 Linux: Download install_linux.sh
+
 Also, download clarity.jar
 
 ##### Prepare for Installation:
@@ -136,16 +138,19 @@ while !finished {
 Select Statement:
 
 ```clarity
-var i = native.input("Write a number from 1 to 3: ")
+var i = int(native.input("Write a number from 1 to 3: "))
 select i {
     when 1 {
         native.println("You wrote 1")
+        break
     }
-    when 1 {
+    when 2 {
         native.println("You wrote 2")
+        break
     }
-    when 1 {
+    when 3 {
         native.println("You wrote 3")
+        break
     }
     default {
         native.println(i + " is not a number between 1 and 3")
