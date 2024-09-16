@@ -100,7 +100,7 @@ public class NativeMethodHandler {
             return function.call(params);
         }
 
-        Register.throwException("Packaged native function " + pkg +(pkg.endsWith(".") ? "" : ".") + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
+        Register.throwException("Packaged native function " + pkg + (pkg.endsWith(".") ? "" : ".") + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
         return null;
     }
 

@@ -152,22 +152,6 @@ public final class ASTParser {
 
     private ASTNode parseVariableDeclaration() {
 
-        if (lookahead().is(KEYWORD, "class")) {
-            return parseClassDeclaration();
-        }
-
-        if (lookahead().is(KEYWORD, "enum")) {
-            return parseEnumDeclaration();
-        }
-
-        if (match(KEYWORD, "static") && lookahead().is(KEYWORD, "native")) {
-            return parseFunctionDeclaration();
-        }
-
-        if (lookahead().is(KEYWORD, "native")) {
-            return parseNativeClassDeclaration();
-        }
-
         boolean isConst = false;
         boolean isStatic = false;
         boolean isLocal = false;
@@ -182,6 +166,34 @@ public final class ASTParser {
             } else {
                 break;
             }
+        }
+
+        if (current().is(KEYWORD, "class")) {
+            if (isStatic) throw new RuntimeException("Static classes are not allowed, at line " + current().getLine());
+            if (isLocal) throw new RuntimeException("Local classes are not allowed, at line " + current().getLine());
+            if (isConst) undo();
+            return parseClassDeclaration();
+        }
+
+        if (lookahead().is(KEYWORD, "enum")) {
+            if (isStatic) throw new RuntimeException("Static enums are not allowed, at line " + current().getLine());
+            if (isLocal) throw new RuntimeException("Local enums are not allowed, at line " + current().getLine());
+            if (isConst) undo();
+            return parseEnumDeclaration();
+        }
+
+        if (match(KEYWORD, "static") && lookahead().is(KEYWORD, "native")) {
+            if (isStatic) undo();
+            if (isLocal) undo();
+            if (isConst) undo();
+            return parseFunctionDeclaration();
+        }
+
+        if (current().is(KEYWORD, "native")) {
+            if (isStatic) undo();
+            if (isLocal) undo();
+            if (isConst) undo();
+            return parseNativeDeclaration();
         }
 
         final int line = current().getLine();
@@ -256,7 +268,24 @@ public final class ASTParser {
     }
 
     private ASTNode parseNativeDeclaration() {
-        consume(); // consume native
+
+        boolean isConst = false;
+        boolean isStatic = false;
+        boolean isLocal = false;
+
+        while (true) {
+            if (matchAndConsume(KEYWORD, "const") && !isConst) {
+                isConst = true;
+            } else if (matchAndConsume(KEYWORD, "static") && !isStatic) {
+                isStatic = true;
+            } else if (matchAndConsume(KEYWORD, "local") && !isLocal) {
+                isLocal = true;
+            } else {
+                break;
+            }
+        }
+
+        consume(); // consume "native"
 
         if (match(KEYWORD, "class") || match(KEYWORD, "const")) {
             undo();
@@ -264,6 +293,10 @@ public final class ASTParser {
         }
 
         if (match(KEYWORD, "fn")) {
+            if (isStatic) undo();
+            if (isLocal) undo();
+            if (isConst) undo();
+
             undo();
             return parseFunctionDeclaration();
         }

@@ -1,7 +1,9 @@
-class Test {
-     local fn exe() -> str{
-        return "exestr"
-     }
+include native math
+include native system
+include native random
+
+class IDK {
+    local static native fn exe()
 }
 
-native.println(new Test().exe())
+IDK.exe()

@@ -1665,12 +1665,14 @@ public class Interpreter {
             context.setCurrentClassName(classDefinition.getName());
             context.setCurrentFunctionName(node.getName());
 
-            final Object result = interpretBlock(definition.getBlock(), functionContext);
-
             if (definition.isLocal() && !classDefinition.getName().equals(preName)) {
                 except("Accessing a local function: " + definition.getName(), node.getLine());
                 return null;
             }
+
+            final Object result = interpretBlock(definition.getBlock(), functionContext);
+
+
 
             context.setCurrentClassName(null);
             context.setCurrentFunctionName(null);
