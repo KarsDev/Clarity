@@ -1,12 +1,11 @@
 package me.kuwg.clarity.ast.nodes.literal;
 
-import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.compiler.ast.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.ast.stream.ASTOutputStream;
 
 import java.io.IOException;
 
-public class DecimalNode extends ASTNode {
+public class DecimalNode extends AbstractNumberNode {
 
     private double value;
 

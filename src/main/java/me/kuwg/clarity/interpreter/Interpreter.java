@@ -32,6 +32,7 @@ import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.*;
+import me.kuwg.clarity.optimizer.ASTOptimizer;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.interpreter.types.ClassObject;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
@@ -52,7 +53,8 @@ public class Interpreter {
     private final Context general;
 
     public Interpreter(final AST ast) {
-        this.ast = ast;
+        final ASTOptimizer optimizer = new ASTOptimizer(ast);
+        this.ast = optimizer.optimize();
         this.nmh = new NativeMethodHandler();
         this.general = new Context();
         ClassObject.setInterpreter(this);
@@ -356,7 +358,7 @@ public class Interpreter {
             case "!=":
                 return leftValue != rightValue;
         }
-        except("Only operator available for null is '=='", line);
+        except("Only operators available for null are '==' and '!='", line);
         return VOID_OBJECT;
     }
 
@@ -387,7 +389,7 @@ public class Interpreter {
             case "||": return left || right;
             case "==": return left == right;
             case "!=": return left != right;
-            case "^": return left ^ right;
+            case "^^": return left ^ right;
             default: return except("Unsupported operator for booleans: " + operator, line);
         }
     }

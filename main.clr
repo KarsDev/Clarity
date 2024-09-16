@@ -1,5 +1,3 @@
-include native System
-
-var x = int("0xff")
+var x = 1 * 5
 
 native.println(x)

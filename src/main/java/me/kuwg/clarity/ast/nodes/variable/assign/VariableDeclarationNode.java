@@ -14,7 +14,7 @@ public class VariableDeclarationNode extends ASTNode {
 
     public VariableDeclarationNode(final String name, final String typeDefault, final ASTNode value, final boolean isConstant,  final boolean isStatic) {
         this.name = name;
-        this.typeDefault = !typeDefault.equals("var") ? typeDefault : null;
+        this.typeDefault = typeDefault;
         this.isConstant = isConstant;
         this.isStatic = isStatic;
         this.value = value;

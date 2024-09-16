@@ -201,7 +201,7 @@ public final class ASTParser {
 
         final ASTNode value = matchAndConsume(OPERATOR, "=") ? parseExpression() : new VoidNode().setLine(line);
 
-        return new VariableDeclarationNode(name, typeDefault, value, isConst, isStatic).setLine(lookahead(-1).getLine());
+        return new VariableDeclarationNode(name, typeDefault.equals("var") ? null : typeDefault, value, isConst, isStatic).setLine(lookahead(-1).getLine());
     }
 
     private ASTNode parseFunctionDeclaration() {
