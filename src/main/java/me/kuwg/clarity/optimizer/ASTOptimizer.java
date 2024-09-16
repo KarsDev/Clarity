@@ -44,7 +44,7 @@ public class ASTOptimizer {
     }
 
     private ASTNode interpretVariableDeclaration(final VariableDeclarationNode node) {
-        return new VariableDeclarationNode(node.getName(), node.getTypeDefault(), optimizeNode(node.getValue()), node.isConstant(), node.isStatic());
+        return new VariableDeclarationNode(node.getName(), node.getTypeDefault(), optimizeNode(node.getValue()), node.isConstant(), node.isStatic(), node.isLocal());
     }
 
     private Object parseValue(final ASTNode node) {

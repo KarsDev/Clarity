@@ -170,12 +170,15 @@ public final class ASTParser {
 
         boolean isConst = false;
         boolean isStatic = false;
+        boolean isLocal = false;
 
         while (true) {
-            if (matchAndConsume(KEYWORD, "const")) {
+            if (matchAndConsume(KEYWORD, "const") && !isConst) {
                 isConst = true;
-            } else if (matchAndConsume(KEYWORD, "static")) {
+            } else if (matchAndConsume(KEYWORD, "static") && !isStatic) {
                 isStatic = true;
+            } else if (matchAndConsume(KEYWORD, "local") && !isLocal) {
+                isLocal = true;
             } else {
                 break;
             }
@@ -189,6 +192,7 @@ public final class ASTParser {
             undo(); // undo typeDefault
 
             if (isStatic) undo();
+            if (isLocal) undo();
             if (isConst) throw new UnsupportedOperationException("Constant functions still not supported, at line " + line);
             return parseFunctionDeclaration().setLine(line);
         }
@@ -201,11 +205,26 @@ public final class ASTParser {
 
         final ASTNode value = matchAndConsume(OPERATOR, "=") ? parseExpression() : new VoidNode().setLine(line);
 
-        return new VariableDeclarationNode(name, typeDefault.equals("var") ? null : typeDefault, value, isConst, isStatic).setLine(lookahead(-1).getLine());
+        return new VariableDeclarationNode(name, typeDefault.equals("var") ? null : typeDefault, value, isConst, isStatic, isLocal).setLine(lookahead(-1).getLine());
     }
 
     private ASTNode parseFunctionDeclaration() {
-        boolean isStatic = matchAndConsume(KEYWORD, "static");
+        boolean isConst = false;
+        boolean isStatic = false;
+        boolean isLocal = false;
+
+        while (true) {
+            if (matchAndConsume(KEYWORD, "const") && !isConst) {
+                isConst = true;
+            } else if (matchAndConsume(KEYWORD, "static") && !isStatic) {
+                isStatic = true;
+            } else if (matchAndConsume(KEYWORD, "local") && !isLocal) {
+                isLocal = true;
+            } else {
+                break;
+            }
+        }
+
         if (matchAndConsume(KEYWORD, "native")) {
             consume(KEYWORD, "fn");
 
@@ -215,7 +234,7 @@ public final class ASTParser {
             final String typeDefault = parseScopedValue();
 
             final int line = current().getLine();
-            return new ReflectedNativeFunctionDeclaration(name, typeDefault, fileName, params, isStatic).setLine(line);
+            return new ReflectedNativeFunctionDeclaration(name, typeDefault, fileName, params, isStatic, isConst, isLocal).setLine(line);
         }
 
         matchAndConsume(KEYWORD, "fn");
@@ -233,7 +252,7 @@ public final class ASTParser {
             return new MainFunctionDeclarationNode(block).setLine(line);
         }
 
-        return new FunctionDeclarationNode(name, typeDefault, isStatic, params, block).setLine(line);
+        return new FunctionDeclarationNode(name, typeDefault, isStatic, isConst, isLocal, params, block).setLine(line);
     }
 
     private ASTNode parseNativeDeclaration() {
@@ -598,6 +617,7 @@ public final class ASTParser {
             return new LocalVariableReferenceNode(name).setLine(line);
         }
         undo();
+
         return parseVariableDeclaration();
     }
 

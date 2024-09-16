@@ -1,3 +1,7 @@
-var x = 1 * 5
+class Test {
+     local fn exe() -> str{
+        return "exestr"
+     }
+}
 
-native.println(x)
+native.println(new Test().exe())

@@ -249,7 +249,7 @@ public class Interpreter {
             }
         }
 
-        context.defineVariable(node.getName(), new VariableDefinition(node.getName(), node.getTypeDefault(), valueObj, node.isConstant(), node.isStatic()));
+        context.defineVariable(node.getName(), new VariableDefinition(node.getName(), node.getTypeDefault(), valueObj, node.isConstant(), node.isStatic(), node.isLocal()));
 
         return VOID_OBJECT;
     }
@@ -291,7 +291,7 @@ public class Interpreter {
             if (statement instanceof VariableDeclarationNode) {
                 final VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
                 if (declarationNode.isStatic()) {
-                    definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getTypeDefault(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true));
+                    definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getTypeDefault(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true, declarationNode.isLocal()));
                 }
             } else if (statement instanceof FunctionDeclarationNode) {
                 final FunctionDeclarationNode declarationNode = (FunctionDeclarationNode) statement;
@@ -300,7 +300,7 @@ public class Interpreter {
                 declarationNode.getParameterNodes().forEach(param -> params.add(param.getName()));
 
                 if (declarationNode.isStatic()) {
-                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), declarationNode.getTypeDefault(), true, params, declarationNode.getBlock()));
+                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), declarationNode.getTypeDefault(), true, declarationNode.isConst(), declarationNode.isLocal(), params, declarationNode.getBlock()));
                 }
             } else if (statement instanceof ReflectedNativeFunctionDeclaration) {
                 final Object o = interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) statement, context);
@@ -499,7 +499,7 @@ public class Interpreter {
             if (value instanceof VoidObject) {
                 Register.throwException("Passing void as parameter");
             }
-            functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false));
+            functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
         }
 
         Register.register(new Register.RegisterElement(Register.RegisterElementType.FUNCALL, ((VariableReferenceNode) node.getCaller()).getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
@@ -630,7 +630,7 @@ public class Interpreter {
             if (params.get(i) instanceof VoidObject) {
                 Register.throwException("Passing void as parameter");
             }
-            constructorContext.defineVariable(constructorParams.get(i), new VariableDefinition(constructorParams.get(i), null, params.get(i), false, false));
+            constructorContext.defineVariable(constructorParams.get(i), new VariableDefinition(constructorParams.get(i), null, params.get(i), false, false, false));
         }
 
         final Object result = interpretBlock(matchingConstructor.getBlock(), constructorContext);
@@ -709,6 +709,8 @@ public class Interpreter {
 
         final ClassDefinition classDefinition = (ClassDefinition) rawDefinition;
 
+        final String preName = context.getCurrentClassName();
+
         context.setCurrentClassName(classDefinition.getName());
         context.setCurrentFunctionName(node.getName());
 
@@ -723,6 +725,11 @@ public class Interpreter {
 
         final Context functionContext = new Context(context);
         defineFunctionParameters(functionContext, definition, params);
+
+        if (definition.isLocal() && !classDefinition.getName().equals(preName)) {
+            except("Accessing a local function: " + definition.getName(), node.getLine());
+            return null;
+        }
 
         Register.register(new Register.RegisterElement(Register.RegisterElementType.STATICCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
         final Object result = interpretBlock(definition.getBlock(), functionContext);
@@ -917,7 +924,7 @@ public class Interpreter {
         for (int i = 0; i < definitionParams.size(); i++) {
             final String name = definitionParams.get(i);
             final Object value = params.get(i);
-            functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false));
+            functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
         }
     }
 
@@ -967,7 +974,7 @@ public class Interpreter {
             final String name = definitionParams.get(i);
             final Object value = params.get(i);
 
-            functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false));
+            functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
         }
 
         Register.register(new Register.RegisterElement(Register.RegisterElementType.LOCALCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
@@ -1005,6 +1012,13 @@ public class Interpreter {
                 return null;
             }
 
+            if (staticVariable.isLocal()) {
+                if (!classDefinition.getName().equals(context.getCurrentClassName())) {
+                    except("Accessing a local static variable: " + staticVariable.getName(), node.getLine());
+                    return null;
+                }
+            }
+
             return staticVariable.getValue();
         }
 
@@ -1013,14 +1027,23 @@ public class Interpreter {
             return null;
         }
 
-        final Object calledVariable = ((ClassObject) callerObject).getContext().getVariable(calledObjectName);
+        final ObjectType cvr = ((ClassObject) callerObject).getContext().getVariableDefinition(calledObjectName);
 
-        if (calledVariable == null) {
+        if (cvr == null) {
             except("Accessing an instance variable that does not exist: " + node.getCaller() + "." + calledObjectName, node.getLine());
             return null;
         }
 
-        return calledVariable;
+        final VariableDefinition calledVariable = (VariableDefinition) cvr;
+
+        if (calledVariable.isLocal()) {
+            if (!calledVariable.getName().equals(context.getCurrentClassName())) {
+                except("Accessing a local variable: " + calledVariable.getName(), node.getLine());
+                return null;
+            }
+        }
+
+        return calledVariable.getValue();
     }
 
     private Object interpretObjectVariableReassignment(final ObjectVariableReassignmentNode node, final Context context) {
@@ -1241,7 +1264,7 @@ public class Interpreter {
             final int range = (int) object;
             int i = 0;
             while (i < range){
-                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, i, false, false));
+                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, i, false, false, false));
                 final Object val = interpretBlock(node.getBlock(), forEachContext);
                 if (val == BREAK) {
                     break;
@@ -1265,7 +1288,7 @@ public class Interpreter {
             final double range = (double) object;
             double i = 0;
             while (i < range) {
-                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, i, false, false));
+                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, i, false, false, false));
                 final Object val = interpretBlock(node.getBlock(), forEachContext);
                 if (val == BREAK) {
                     break;
@@ -1290,7 +1313,7 @@ public class Interpreter {
             return null;
         }
 
-        forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, null, false, false));
+        forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, null, false, false, false));
 
         for (final Object o : arr) {
             forEachContext.setVariable(node.getVariable(), o);
@@ -1302,7 +1325,7 @@ public class Interpreter {
                 return new ReturnValue(val);
             }
             forEachContext = new Context(context);
-            forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, null, false, false));
+            forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, null, false, false, false));
         }
 
         return VOID_OBJECT;
@@ -1329,7 +1352,7 @@ public class Interpreter {
 
         for (final ParameterNode param : node.getParams()) params.add(param.getName());
 
-        final FunctionDefinition function = new FunctionDefinition(node.getName(), node.getTypeDefault(), node.isStatic(), params, block);
+        final FunctionDefinition function = new FunctionDefinition(node.getName(), node.getTypeDefault(), node.isStatic(), node.isConst(), node.isLocal(), params, block);
 
         if (node.isStatic()) {
             final ObjectType obj = context.getClass(node.getFileName());
@@ -1357,7 +1380,7 @@ public class Interpreter {
             if (statement instanceof VariableDeclarationNode) {
                 VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
                 if (declarationNode.isStatic()) {
-                    definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getTypeDefault(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true));
+                    definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getTypeDefault(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true, declarationNode.isLocal()));
                 }
             } else if (statement instanceof FunctionDeclarationNode) {
                 FunctionDeclarationNode declarationNode = (FunctionDeclarationNode) statement;
@@ -1366,7 +1389,7 @@ public class Interpreter {
                 declarationNode.getParameterNodes().forEach(param -> params.add(param.getName()));
 
                 if (declarationNode.isStatic()) {
-                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), declarationNode.getTypeDefault(), true, params, declarationNode.getBlock()));
+                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), declarationNode.getTypeDefault(), true, declarationNode.isConst(), declarationNode.isLocal(), params, declarationNode.getBlock()));
                 }
             } else if (statement instanceof ReflectedNativeFunctionDeclaration) {
                 final Object o = interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) statement, context);
@@ -1637,10 +1660,17 @@ public class Interpreter {
 
             Register.register(new Register.RegisterElement(Register.RegisterElementType.NATIVECALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
 
+            final String preName = context.getCurrentClassName();
+
             context.setCurrentClassName(classDefinition.getName());
             context.setCurrentFunctionName(node.getName());
 
             final Object result = interpretBlock(definition.getBlock(), functionContext);
+
+            if (definition.isLocal() && !classDefinition.getName().equals(preName)) {
+                except("Accessing a local function: " + definition.getName(), node.getLine());
+                return null;
+            }
 
             context.setCurrentClassName(null);
             context.setCurrentFunctionName(null);
@@ -1676,6 +1706,11 @@ public class Interpreter {
         }
 
         final FunctionDefinition definition = (FunctionDefinition) rawDefinition;
+
+        if (definition.isLocal() && !object.getName().equals(context.getCurrentClassName())) {
+            except("Accessing a local function: " + definition.getName(), node.getLine());
+            return null;
+        }
 
         final Context functionContext = new Context(object.getContext());
         final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());

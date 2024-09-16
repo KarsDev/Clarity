@@ -12,14 +12,16 @@ public class FunctionDeclarationNode extends ASTNode {
 
     protected String functionName;
     private String typeDefault;
-    private boolean isStatic;
+    private boolean isStatic, isConst, isLocal;
     protected List<ParameterNode> parameterNodes;
     protected BlockNode block;
 
-    public FunctionDeclarationNode(final String functionName, final String typeDefault, final boolean isStatic, final List<ParameterNode> parameterNodes, final BlockNode block) {
+    public FunctionDeclarationNode(final String functionName, final String typeDefault, final boolean isStatic, final boolean isConst, final boolean isLocal, final List<ParameterNode> parameterNodes, final BlockNode block) {
         this.functionName = functionName;
         this.typeDefault = typeDefault;
         this.isStatic = isStatic;
+        this.isConst = isConst;
+        this.isLocal = isLocal;
         this.parameterNodes = parameterNodes;
         this.block = block;
     }
@@ -40,6 +42,14 @@ public class FunctionDeclarationNode extends ASTNode {
         return isStatic;
     }
 
+    public final boolean isConst() {
+        return isConst;
+    }
+
+    public final boolean isLocal() {
+        return isLocal;
+    }
+
     public final List<ParameterNode> getParameterNodes() {
         return parameterNodes;
     }
@@ -52,6 +62,17 @@ public class FunctionDeclarationNode extends ASTNode {
     public void print(final StringBuilder sb, final String indent) {
         sb.append(indent).append("Function: ").append(functionName).append(typeDefault != null ? " (" + typeDefault + ")" : "").append("\n");
         sb.append(indent).append("Parameters: ");
+
+        if (isConst) {
+            sb.append(indent).append("  Type: Constant\n");
+        }
+        if (isStatic) {
+            sb.append(indent).append("  Type: Static\n");
+        }
+        if (isLocal) {
+            sb.append(indent).append("  Type: Local\n");
+        }
+
         if (parameterNodes.isEmpty()) {
             sb.append("None\n");
         } else {
@@ -71,6 +92,8 @@ public class FunctionDeclarationNode extends ASTNode {
         out.writeString(functionName);
         out.writeString(String.valueOf(typeDefault));
         out.writeBoolean(isStatic);
+        out.writeBoolean(isConst);
+        out.writeBoolean(isLocal);
         out.writeNodeList(parameterNodes);
         out.writeNode(block);
     }
@@ -81,6 +104,8 @@ public class FunctionDeclarationNode extends ASTNode {
         this.typeDefault = in.readString();
         if (this.typeDefault.equals("null")) this.typeDefault = null;
         this.isStatic = in.readBoolean();
+        this.isConst = in.readBoolean();
+        this.isLocal = in.readBoolean();
         this.parameterNodes = in.readNodeListNoCast();
         this.block = (BlockNode) in.readNode();
     }

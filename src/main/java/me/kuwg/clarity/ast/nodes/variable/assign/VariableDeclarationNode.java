@@ -9,14 +9,15 @@ import java.io.IOException;
 public class VariableDeclarationNode extends ASTNode {
     private String name;
     private String typeDefault;
-    private boolean isConstant, isStatic;
+    private boolean isConstant, isStatic, isLocal;
     private ASTNode value;
 
-    public VariableDeclarationNode(final String name, final String typeDefault, final ASTNode value, final boolean isConstant,  final boolean isStatic) {
+    public VariableDeclarationNode(final String name, final String typeDefault, final ASTNode value, final boolean isConstant,  final boolean isStatic, final boolean isLocal) {
         this.name = name;
         this.typeDefault = typeDefault;
         this.isConstant = isConstant;
         this.isStatic = isStatic;
+        this.isLocal = isLocal;
         this.value = value;
     }
 
@@ -44,6 +45,10 @@ public class VariableDeclarationNode extends ASTNode {
         return isStatic;
     }
 
+    public final boolean isLocal() {
+        return isLocal;
+    }
+
     @Override
     public String toString() {
         return "VariableDeclarationNode{" +
@@ -51,6 +56,7 @@ public class VariableDeclarationNode extends ASTNode {
                 ", name='" + name + '\'' +
                 ", typeDefault='" + typeDefault + '\'' +
                 ", isStatic=" + isStatic +
+                ", isLocal=" + isLocal +
                 ", value=" + value +
                 '}';
     }
@@ -66,6 +72,9 @@ public class VariableDeclarationNode extends ASTNode {
         }
         if (isStatic) {
             sb.append(indent).append("  Type: Static\n");
+        }
+        if (isLocal) {
+            sb.append(indent).append("  Type: Local\n");
         }
 
         sb.append(indent).append("  Value:\n");
@@ -83,6 +92,7 @@ public class VariableDeclarationNode extends ASTNode {
         out.writeNode(value);
         out.writeBoolean(isConstant);
         out.writeBoolean(isStatic);
+        out.writeBoolean(isLocal);
     }
 
     @Override
@@ -93,5 +103,6 @@ public class VariableDeclarationNode extends ASTNode {
         this.value = in.readNode();
         this.isConstant = in.readBoolean();
         this.isStatic = in.readBoolean();
+        this.isLocal = in.readBoolean();
     }
 }

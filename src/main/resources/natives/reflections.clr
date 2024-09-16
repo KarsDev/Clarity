@@ -80,7 +80,7 @@ native class Reflections {
      # Example:
      # Reflections.createVariable("newVar", 100, true, false)  // Creates a static variable 'newVar' with the value 100.
      #/
-    static native fn createVariable(name, value, isStatic, isConstant)
+    static native fn createVariable(name, value, isStatic, isConstant, isLocal)
 
     /##
      # Native Method: getCallerClass

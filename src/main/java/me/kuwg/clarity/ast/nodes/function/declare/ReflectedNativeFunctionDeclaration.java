@@ -13,14 +13,16 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
     private String typeDefault;
     private String fileName;
     private List<ParameterNode> params;
-    private boolean isStatic;
+    private boolean isStatic, isConst, isLocal;
 
-    public ReflectedNativeFunctionDeclaration(final String name, final String typeDefault, final String className, final List<ParameterNode> params, final boolean isStatic) {
+    public ReflectedNativeFunctionDeclaration(final String name, final String typeDefault, final String className, final List<ParameterNode> params, final boolean isStatic, final boolean isConst, final boolean isLocal) {
         this.name = name;
         this.typeDefault = typeDefault;
         this.fileName = className;
         this.params = params;
         this.isStatic = isStatic;
+        this.isConst = isConst;
+        this.isLocal = isLocal;
     }
 
     public ReflectedNativeFunctionDeclaration() {
@@ -46,9 +48,28 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
         return isStatic;
     }
 
+    public final boolean isConst() {
+        return isConst;
+    }
+
+    public final boolean isLocal() {
+        return isLocal;
+    }
+
     @Override
     public void print(final StringBuilder sb, final String indent) {
         sb.append(indent).append("Reflected Native Call: ").append(isStatic ? "static " : "").append(name).append(typeDefault != null ? "(" + typeDefault + ")" : "").append("(");
+
+        if (isConst) {
+            sb.append(indent).append("  Type: Constant\n");
+        }
+        if (isStatic) {
+            sb.append(indent).append("  Type: Static\n");
+        }
+        if (isLocal) {
+            sb.append(indent).append("  Type: Local\n");
+        }
+
         sb.append(indent).append(indent).append("File: ").append(fileName);
         if (params.isEmpty()) {
             sb.append(")");
@@ -70,6 +91,8 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
         out.writeString(fileName);
         out.writeNodeList(params);
         out.writeBoolean(isStatic);
+        out.writeBoolean(isConst);
+        out.writeBoolean(isLocal);
     }
 
     @Override
@@ -80,15 +103,20 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
         this.fileName = in.readString();
         this.params = in.readNodeListNoCast();
         this.isStatic = in.readBoolean();
+        this.isConst = in.readBoolean();
+        this.isLocal = in.readBoolean();
     }
 
     @Override
     public String toString() {
         return "ReflectedNativeFunctionDeclaration{" +
-                "name='" + name + '\'' +
-                ", fileName='" + fileName + '\'' +
+                "fileName='" + fileName + '\'' +
+                ", name='" + name + '\'' +
+                ", typeDefault='" + typeDefault + '\'' +
                 ", params=" + params +
                 ", isStatic=" + isStatic +
+                ", isConst=" + isConst +
+                ", isLocal=" + isLocal +
                 '}';
     }
 }

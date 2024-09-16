@@ -29,14 +29,14 @@ public class ReflectionsNativeClass extends NativeClass {
                 break;
             }
             case "createVariable": {
-                check("Invalid parameters for 'createVariable'. Expected 5 parameters (str variableName, initialValue, bool isStatic, bool isConstant), got " + params.size() + " with types " + getParamTypes(params),
-                        params.size() == 4 && params.get(0) instanceof String && params.get(2) instanceof Boolean && params.get(3) instanceof Boolean);
+                check("Invalid parameters for 'createVariable'. Expected 5 parameters (str variableName, initialValue, bool isStatic, bool isConstant, bool isLocal), got " + params.size() + " with types " + getParamTypes(params),
+                        params.size() == 5 && params.get(0) instanceof String && params.get(2) instanceof Boolean && params.get(3) instanceof Boolean && params.get(4) instanceof Boolean);
                 final String var = (String) params.get(0);
                 final Object val = params.get(1);
                 final boolean isStatic = (Boolean) params.get(2);
                 final boolean isConstant = (Boolean) params.get(3);
-
-                context.parentContext().defineVariable(var, new VariableDefinition(var, null, val, isStatic, isConstant));
+                final boolean isLocal = (Boolean) params.get(4);
+                context.parentContext().defineVariable(var, new VariableDefinition(var, null, val, isStatic, isConstant, isLocal));
                 break;
             }
             case "getCallerClass": {

@@ -7,14 +7,15 @@ public class VariableDefinition extends ObjectType {
     private final String name;
     private final String typeDefault;
     private Object value;
-    private final boolean isConstant, isStatic;
+    private final boolean isConstant, isStatic, isLocal;
 
-    public VariableDefinition(final String name, final String typeDefault, final Object value, final boolean isConstant, final boolean isStatic) {
+    public VariableDefinition(final String name, final String typeDefault, final Object value, final boolean isConstant, final boolean isStatic, final boolean isLocal) {
         this.name = name;
         this.typeDefault = typeDefault;
         this.value = value;
         this.isConstant = isConstant;
         this.isStatic = isStatic;
+        this.isLocal = isLocal;
     }
 
     public final String getName() {
@@ -41,6 +42,10 @@ public class VariableDefinition extends ObjectType {
         return isStatic;
     }
 
+    public final boolean isLocal() {
+        return isLocal;
+    }
+
     @Override
     public String toString() {
         return "VariableDefinition{" +
@@ -49,6 +54,7 @@ public class VariableDefinition extends ObjectType {
                 ", typeDefault='" + typeDefault + '\'' +
                 ", value=" + value +
                 ", isStatic=" + isStatic +
+                ", isLocal=" + isLocal +
                 '}';
     }
 }
