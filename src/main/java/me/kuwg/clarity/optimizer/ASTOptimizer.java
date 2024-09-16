@@ -2,7 +2,9 @@ package me.kuwg.clarity.optimizer;
 
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
+import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.register.Register;
@@ -21,7 +23,9 @@ public class ASTOptimizer {
 
     private ASTNode optimizeNode(final ASTNode node) {
         if (node instanceof BinaryExpressionNode) return optimizeBinaryExpression((BinaryExpressionNode) node);
-        if (node instanceof VariableDeclarationNode) return interpretVariableDeclaration((VariableDeclarationNode) node);
+        if (node instanceof VariableDeclarationNode) return optimizeVariableDeclaration((VariableDeclarationNode) node);
+        if (node instanceof FunctionDeclarationNode) return optimizeFunctionDeclaration((FunctionDeclarationNode) node);
+        if (node instanceof BlockNode) return optimizeBlock((BlockNode) node);
         return node;
     }
 
@@ -43,7 +47,7 @@ public class ASTOptimizer {
         return node;
     }
 
-    private ASTNode interpretVariableDeclaration(final VariableDeclarationNode node) {
+    private ASTNode optimizeVariableDeclaration(final VariableDeclarationNode node) {
         return new VariableDeclarationNode(node.getName(), node.getTypeDefault(), optimizeNode(node.getValue()), node.isConstant(), node.isStatic(), node.isLocal());
     }
 
@@ -218,6 +222,16 @@ public class ASTOptimizer {
         }
         Register.throwException("Only operators available for null are '==' and '!='", line);
         return null;
+    }
+
+    private ASTNode optimizeFunctionDeclaration(final FunctionDeclarationNode node) {
+        node.getBlock().getChildren().replaceAll(this::optimizeNode);
+        return node;
+    }
+
+    private ASTNode optimizeBlock(final BlockNode node) {
+        node.getChildren().replaceAll(this::optimizeNode);
+        return node;
     }
 
 }
