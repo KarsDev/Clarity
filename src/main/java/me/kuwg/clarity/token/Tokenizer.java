@@ -46,7 +46,7 @@ public class Tokenizer {
         return tokens;
     }
 
-    private static Number processNumber(final String number) {
+    public static Number processNumber(final String number) {
         final String cleanedNumber = number.replaceAll("_", "");
 
         // Check for hexadecimal numbers

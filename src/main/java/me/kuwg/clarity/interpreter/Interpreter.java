@@ -36,6 +36,7 @@ import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.interpreter.types.ClassObject;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.privilege.Privileges;
+import me.kuwg.clarity.token.Tokenizer;
 
 import java.util.*;
 
@@ -1532,12 +1533,12 @@ public class Interpreter {
 
     private Integer parseIntegerOrThrow(final String expression, final NativeCastNode node) {
         try {
-            return Integer.parseInt(expression);
-        } catch (NumberFormatException e) {
+            return (Integer) Tokenizer.processNumber(expression);
+        } catch (final NumberFormatException e) {
             if (expression.contains(".")) {
                 try {
-                    return Integer.parseInt(expression.split("\\.")[0]);
-                } catch (NumberFormatException ignored) {
+                    return (Integer) Tokenizer.processNumber(expression.split("\\.")[0]);
+                } catch (final NumberFormatException ignored) {
                 }
             }
             Register.throwException("Could not cast to int", node.getLine());

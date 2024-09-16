@@ -1,6 +1,5 @@
 include native System
 
-var x = 1
-x ^= 4
+var x = int("0xff")
 
 native.println(x)
