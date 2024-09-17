@@ -58,7 +58,7 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
 
     @Override
     public void print(final StringBuilder sb, final String indent) {
-        sb.append(indent).append("Reflected Native Call: ").append(isStatic ? "static " : "").append(name).append(typeDefault != null ? "(" + typeDefault + ")" : "").append("(");
+        sb.append(indent).append("Reflected Native Declaration: ").append(name).append(typeDefault != null ? "(" + typeDefault + ")\n" : "\n");
 
         if (isConst) {
             sb.append(indent).append("  Type: Constant\n");
@@ -70,17 +70,15 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
             sb.append(indent).append("  Type: Local\n");
         }
 
-        sb.append(indent).append(indent).append("File: ").append(fileName);
-        if (params.isEmpty()) {
-            sb.append(")");
-        } else {
-            sb.append("\n");
+        sb.append(indent).append("  File: ").append(fileName);
+        sb.append("\n");
+        if (!params.isEmpty()) {
+            sb.append(indent).append("  Params: ").append("{").append("\n");
             final String paramIndent = indent + "    ";
-            for (final ASTNode param : params) {
+            for (final ParameterNode param : params) {
                 param.print(sb, paramIndent);
-                sb.append("\n");
             }
-            sb.append(indent).append(")");
+            sb.append(indent).append("  ").append("}");
         }
     }
 
