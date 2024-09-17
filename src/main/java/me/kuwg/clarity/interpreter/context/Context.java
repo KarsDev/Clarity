@@ -84,7 +84,7 @@ public class Context {
                     if (node instanceof FunctionDeclarationNode) {
                         final FunctionDeclarationNode fdn = (FunctionDeclarationNode) node;
                         if (fdn.getFunctionName().equals(name) && fdn.getParameterNodes().size() == definition.getParams().size() && fdn.isConst()) {
-                            Register.throwException("Overriding const classes is not allowed", definition.getBlock().getLine());
+                            Register.throwException("Overriding const functions is not allowed", definition.getBlock().getLine());
                             return;
                         }
                     }
