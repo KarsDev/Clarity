@@ -1029,7 +1029,7 @@ public class Interpreter {
 
         final ObjectType cvr = ((ClassObject) callerObject).getContext().getVariableDefinition(calledObjectName);
 
-        if (cvr == null) {
+        if (cvr instanceof VoidObject) {
             except("Accessing an instance variable that does not exist: " + node.getCaller() + "." + calledObjectName, node.getLine());
             return null;
         }

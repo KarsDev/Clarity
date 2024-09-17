@@ -205,7 +205,7 @@ public final class ASTParser {
 
             if (isStatic) undo();
             if (isLocal) undo();
-            if (isConst) throw new UnsupportedOperationException("Constant functions still not supported, at line " + line);
+            if (isConst) undo();
             return parseFunctionDeclaration().setLine(line);
         }
 

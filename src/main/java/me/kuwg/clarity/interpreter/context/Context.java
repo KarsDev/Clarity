@@ -1,6 +1,8 @@
 package me.kuwg.clarity.interpreter.context;
 
 import me.kuwg.clarity.ObjectType;
+import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.interpreter.definition.AnnotationDefinition;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
@@ -71,6 +73,26 @@ public class Context {
     }
 
     public void defineFunction(final String name, final FunctionDefinition definition) {
+
+        final String currentClass = getCurrentClassName();
+
+        if (currentClass != null) {
+            ClassDefinition classDefinition = (ClassDefinition) getClass(currentClass);
+            while (classDefinition.getInheritedClass() != null) {
+                final ClassDefinition inherited = classDefinition.getInheritedClass();
+                for (ASTNode node : inherited.getBody()) {
+                    if (node instanceof FunctionDeclarationNode) {
+                        final FunctionDeclarationNode fdn = (FunctionDeclarationNode) node;
+                        if (fdn.getFunctionName().equals(name) && fdn.getParameterNodes().size() == definition.getParams().size() && fdn.isConst()) {
+                            Register.throwException("Overriding const classes is not allowed", definition.getBlock().getLine());
+                            return;
+                        }
+                    }
+                }
+                classDefinition = inherited;
+            }
+        }
+
         final List<FunctionDefinition> existingDefinitions = functions.computeIfAbsent(name, k -> new ArrayList<>());
         for (final FunctionDefinition d : existingDefinitions) {
             if (d.getParams().size() == definition.getParams().size()) {
