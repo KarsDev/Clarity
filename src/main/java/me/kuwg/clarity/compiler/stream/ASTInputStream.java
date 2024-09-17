@@ -1,8 +1,8 @@
-package me.kuwg.clarity.compiler.ast.stream;
+package me.kuwg.clarity.compiler.stream;
 
 import me.kuwg.clarity.ast.ASTNode;
-import me.kuwg.clarity.compiler.ast.ASTData;
-import me.kuwg.clarity.compiler.ast.ASTNodeCompiler;
+import me.kuwg.clarity.compiler.ASTNodeCompiler;
+import me.kuwg.clarity.compiler.ASTData;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -11,8 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static me.kuwg.clarity.compiler.ast.ASTData.CONTINUE_BIT;
-import static me.kuwg.clarity.compiler.ast.ASTData.SEGMENT_BITS;
+import static me.kuwg.clarity.compiler.ASTData.CONTINUE_BIT;
+import static me.kuwg.clarity.compiler.ASTData.SEGMENT_BITS;
 
 public class ASTInputStream extends DataInputStream {
     public ASTInputStream(InputStream inputStream) {

@@ -28,7 +28,7 @@ import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
-import me.kuwg.clarity.compiler.ast.ASTLoader;
+import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.TokenType;

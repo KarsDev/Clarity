@@ -1,9 +1,9 @@
 package me.kuwg.clarity;
 
 import me.kuwg.clarity.ast.AST;
-import me.kuwg.clarity.compiler.ast.ASTData;
-import me.kuwg.clarity.compiler.ast.ASTLoader;
-import me.kuwg.clarity.compiler.ast.ASTSaver;
+import me.kuwg.clarity.compiler.ASTData;
+import me.kuwg.clarity.compiler.ASTLoader;
+import me.kuwg.clarity.compiler.ASTSaver;
 import me.kuwg.clarity.compiler.cir.CIRCompiler;
 import me.kuwg.clarity.installer.modules.ClarityModuleInstaller;
 import me.kuwg.clarity.installer.sys.ClarityInstaller;

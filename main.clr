@@ -1,18 +1,3 @@
-class Test0 {
-    const fn exe() {
-        native.println("super")
-    }
+if void is void {
+    native.println(int("071"))
 }
-
-class Test inherits Test0{
-}
-
-class TestDown inherits Test {
-    fn exe() { // error here, inheriting const function "exe"
-        native.println("down")
-    }
-}
-
-var test = new TestDown()
-
-test.exe()

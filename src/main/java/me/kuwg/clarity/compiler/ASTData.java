@@ -1,4 +1,4 @@
-package me.kuwg.clarity.compiler.ast;
+package me.kuwg.clarity.compiler;
 
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.block.ConditionedReturnNode;
