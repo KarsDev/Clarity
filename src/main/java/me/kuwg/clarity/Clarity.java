@@ -107,6 +107,9 @@ public class Clarity {
                         else System.out.println("Installing modules...");
                         installModule(args);
                         break;
+                    case "filesize":
+                        System.out.println(file.getName() + "'s size: " + file.length() + " bytes");
+                        break;
                     default:
                         printUsage();
                         break;
@@ -120,7 +123,7 @@ public class Clarity {
                 return false;
             }
         }.start();
-        
+
         await(() -> System.exit(EXIT_CODE));
     }
 
