@@ -1,9 +1,18 @@
-include native math
-include native system
-include native random
-
-class IDK {
-    local static native fn exe()
+class Test0 {
+    const fn exe() {
+        native.println("super")
+    }
 }
 
-IDK.exe()
+class Test inherits Test0{
+}
+
+class TestDown inherits Test {
+    fn exe() { // error here, inheriting const function "exe"
+        native.println("down")
+    }
+}
+
+var test = new TestDown()
+
+test.exe()
