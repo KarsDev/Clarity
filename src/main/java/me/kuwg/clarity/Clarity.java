@@ -4,7 +4,6 @@ import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.compiler.ASTData;
 import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
-import me.kuwg.clarity.compiler.cir.CIRCompiler;
 import me.kuwg.clarity.installer.modules.ClarityModuleInstaller;
 import me.kuwg.clarity.installer.sys.ClarityInstaller;
 import me.kuwg.clarity.installer.sys.OS;
@@ -97,11 +96,6 @@ public class Clarity {
                         System.out.println("Running the compiled file: " + file.getName());
                         runCompiledFile(file);
                         break;
-                    case "cpp":
-                        if (requireFile(file)) return;
-                        System.out.println("Compiling the file to cpp: " + file.getName());
-                        compileToCPP(file);
-                        break;
                     case "install":
                         if (args.length == 2) System.out.println("Installing module: " + args[1]);
                         else System.out.println("Installing modules...");
@@ -160,12 +154,6 @@ public class Clarity {
         final String[] modules = new String[args.length-1];
         System.arraycopy(args, 1, modules, 0, args.length - 1);
         ClarityModuleInstaller.installModules(modules);
-    }
-
-    private static void compileToCPP(File file) throws IOException {
-        AST ast = loadOrParseAST(file);
-        CIRCompiler compiler = new CIRCompiler(ast, new File(file.getName().substring(file.getName().lastIndexOf(".") + 1) + ".cpp"));
-        compiler.compile();
     }
 
     private static void runOrInterpretFile(File file) throws IOException {
