@@ -205,4 +205,29 @@ class List {
         result = result + "]"
         return result
     }
+
+    /##
+     # Function: contains
+     #
+     # Description:
+     # Checks if the specified item is present in the list.
+     #
+     # Parameters:
+     # - item: The item to search for in the list.
+     #
+     # Returns:
+     # - bool value: `true` if the item is found, `false` otherwise.
+     #
+     # Example:
+     # var exists = list.contains(10)  // Returns true if 10 is in the list, false otherwise.
+     #/
+    fn contains(item) {
+        const var size = elements.size()
+        for var i = 0, i < size, i = i + 1 {
+            if elements.at(i) == item {
+                return true
+            }
+        }
+        return false
+    }
 }

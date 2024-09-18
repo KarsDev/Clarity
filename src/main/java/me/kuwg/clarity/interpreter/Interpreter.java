@@ -347,6 +347,10 @@ public class Interpreter {
             return handleNumericOperation((Number) leftValue, (Number) rightValue, operator, node.getLine());
         }
 
+        if (leftValue instanceof Boolean && rightValue instanceof Integer) {
+            return evaluateBooleanOperation((Boolean) leftValue, (int) rightValue == 1, operator, node.getLine());
+        }
+
         except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " " + operator + " " + rightValue.getClass().getSimpleName(), node.getLine());
         return null;
     }
@@ -1207,6 +1211,9 @@ public class Interpreter {
             if (val == BREAK) {
                 break;
             }
+            if (val == CONTINUE) {
+                continue;
+            }
             if (val != VOID_OBJECT) {
                 return new ReturnValue(val);
             }
@@ -1231,6 +1238,9 @@ public class Interpreter {
             final Object val = interpretBlock(node.getBlock(), whileContext);
             if (val == BREAK) {
                 break;
+            }
+            if (val == CONTINUE) {
+                continue;
             }
             if (val != VOID_OBJECT) {
                 return new ReturnValue(val);
@@ -1269,6 +1279,9 @@ public class Interpreter {
                 if (val == BREAK) {
                     break;
                 }
+                if (val == CONTINUE) {
+                    continue;
+                }
                 if (val != VOID_OBJECT) {
                     return new ReturnValue(val);
                 }
@@ -1292,6 +1305,9 @@ public class Interpreter {
                 final Object val = interpretBlock(node.getBlock(), forEachContext);
                 if (val == BREAK) {
                     break;
+                }
+                if (val == CONTINUE) {
+                    continue;
                 }
                 if (val != VOID_OBJECT) {
                     return new ReturnValue(val);
@@ -1320,6 +1336,9 @@ public class Interpreter {
             final Object val = interpretBlock(node.getBlock(), forEachContext);
             if (val == BREAK) {
                 break;
+            }
+            if (val == CONTINUE) {
+                continue;
             }
             if (val != VOID_OBJECT) {
                 return new ReturnValue(val);

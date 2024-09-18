@@ -1,22 +1,39 @@
 include native random
+include native list
 
-var num = new Random().randInt(1, 10)
+const var min = int(native.input("Write min number: "))
+const var max = int(native.input("Write max number: "))
 
-var guessed = false
-var guesses = 0
 
-while !guessed {
+const int randomNumber = new Random().randInt(min, max)
 
-    var guess = int(native.input("Scrivi un numero: "))
+native.println("Guess the number between " + min + " and " + max + "!")
 
-    guesses++
-    if guess == num {
-        break
-    } else if guess > num {
-        native.println("Lower")
-    } else if guess < num {
-        native.println("Higher")
+int nGuesses = 0
+
+var guesses = new List()
+
+while true {
+    const int guess = int(native.input("Your guess: "))
+
+    if guesses.contains(guess) {
+        native.println("You already wrote this number, guesses will not change.")
+        continue
     }
+
+    nGuesses += 1
+
+    guesses.add(guess)
+
+    if guess == randomNumber {
+        break
+    } else if (guess > randomNumber) {
+        native.println("Your number is too high!")
+    } else {
+        native.println("Your number is too low!")
+    }
+
 }
 
-native.println("You guessed it in " + guesses + " attempts")
+native.println("You guessed it!")
+native.println("Guesses: " + nGuesses)
