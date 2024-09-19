@@ -495,7 +495,7 @@ public class Interpreter {
             except("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
         }
 
-        final Context functionContext = new Context(context.parentContext() != null ? context.parentContext() : context);
+        final Context functionContext = new Context(context.parentContext());
         List<String> definitionParams = definition.getParams();
         for (int i = 0; i < definitionParams.size(); i++) {
             final String name = definitionParams.get(i);

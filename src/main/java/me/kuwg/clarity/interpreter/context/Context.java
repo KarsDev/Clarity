@@ -201,7 +201,7 @@ public class Context {
     }
 
     public Context parentContext() {
-        return parentContext;
+        return parentContext != null ? parentContext : this;
     }
 
     @Override
