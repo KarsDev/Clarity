@@ -36,6 +36,7 @@ public enum Keyword {
     STR,
     ENUM,
     BOOL,
+    ASYNC,
 
     ;
 
@@ -73,6 +74,7 @@ public enum Keyword {
             case "str": return STR;
             case "enum": return ENUM;
             case "bool": return BOOL;
+            case "async": return ASYNC;
 
             default: throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
         }

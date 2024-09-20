@@ -208,6 +208,8 @@ public class Interpreter {
             return interpretAnnotationDeclaration((AnnotationDeclarationNode) node, context);
         } else if (node instanceof AnnotationUseNode) {
             return interpretAnnotationUse((AnnotationUseNode) node, context);
+        } else if (node instanceof AsyncBlockNode) {
+            return interpretAsyncBlock((AsyncBlockNode) node, context);
         } else {
             throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
         }
@@ -545,7 +547,8 @@ public class Interpreter {
     }
 
     private Object interpretReturnNode(final ReturnNode node, final Context context) {
-        return new ReturnValue(interpretNode(node.getValue(), context));
+        final Object ret = interpretNode(node.getValue(), context);
+        return ret instanceof ReturnValue ? ret : new ReturnValue(ret);
     }
 
     private Object interpretClassInstantiation(final ClassInstantiationNode node, final Context context) {
@@ -1915,6 +1918,13 @@ public class Interpreter {
             return ret;
         }
         return ret;
+    }
+
+    private Object interpretAsyncBlock(final AsyncBlockNode node, final Context context) {
+        new Thread(() -> {
+            interpretBlock(node.getBlock(), context);
+        }, node.getName()).start();
+        return VOID_OBJECT;
     }
 
 }

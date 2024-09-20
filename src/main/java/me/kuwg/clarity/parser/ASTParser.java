@@ -144,6 +144,8 @@ public final class ASTParser {
                 return parseEnumDeclaration();
             case BOOL:
                 return parseBoolDeclaration();
+            case ASYNC:
+                return parseAsyncDeclaration();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -1093,6 +1095,21 @@ public final class ASTParser {
         }
         return new NativeCastNode(CastType.BOOL, parseExpression()).setLine(consume(DIVIDER, ")").getLine()).setLine(line);
     }
+
+    private ASTNode parseAsyncDeclaration() {
+        final int line = consume().getLine(); // consume "async"
+
+        final String name;
+
+        if (matchAndConsume(OPERATOR, "->")) {
+            name = consume(STRING).getValue();
+        } else {
+            name = "async-?";
+        }
+
+        return new AsyncBlockNode(name, parseBlock());
+    }
+
 
 
 

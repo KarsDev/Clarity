@@ -1,7 +1,9 @@
-include native uuid
+include native system
 
-fn main() {
-    var uuid = new UUID()
+native.println("Starting..." + System.currentThreadName())
 
-    native.println(UUID.validateUUID(new UUID("32131232")))
+async -> "another thread" {
+    native.println("Executing on another thread: " + System.currentThreadName())
 }
+
+native.println("Continuing...")
