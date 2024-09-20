@@ -3,7 +3,7 @@ package me.kuwg.clarity.nmh.natives.impl.pkg.system;
 import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.register.Register;
-import me.kuwg.clarity.ClarityNativeLibrary;
+import me.kuwg.clarity.library.ClarityNativeLibrary;
 
 import java.io.*;
 import java.net.URL;

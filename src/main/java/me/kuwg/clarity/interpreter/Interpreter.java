@@ -1,7 +1,7 @@
 package me.kuwg.clarity.interpreter;
 
-import me.kuwg.clarity.ObjectType;
-import me.kuwg.clarity.VoidObject;
+import me.kuwg.clarity.library.ObjectType;
+import me.kuwg.clarity.library.VoidObject;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.*;
@@ -41,8 +41,8 @@ import me.kuwg.clarity.token.Tokenizer;
 
 import java.util.*;
 
-import static me.kuwg.clarity.VoidObject.VOID_OBJECT;
-import static me.kuwg.clarity.VoidObject.VOID_RETURN;
+import static me.kuwg.clarity.library.VoidObject.VOID_OBJECT;
+import static me.kuwg.clarity.library.VoidObject.VOID_RETURN;
 import static me.kuwg.clarity.interpreter.definition.BreakValue.BREAK;
 import static me.kuwg.clarity.interpreter.definition.ContinueValue.CONTINUE;
 

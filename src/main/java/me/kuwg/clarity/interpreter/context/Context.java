@@ -1,6 +1,6 @@
 package me.kuwg.clarity.interpreter.context;
 
-import me.kuwg.clarity.ObjectType;
+import me.kuwg.clarity.library.ObjectType;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.interpreter.Interpreter;
@@ -12,7 +12,7 @@ import me.kuwg.clarity.register.Register;
 
 import java.util.*;
 
-import static me.kuwg.clarity.VoidObject.VOID_OBJECT;
+import static me.kuwg.clarity.library.VoidObject.VOID_OBJECT;
 
 public class Context {
 

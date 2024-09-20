@@ -1,6 +1,6 @@
 package me.kuwg.clarity.interpreter.definition;
 
-import me.kuwg.clarity.ObjectType;
+import me.kuwg.clarity.library.ObjectType;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 
 import java.util.*;

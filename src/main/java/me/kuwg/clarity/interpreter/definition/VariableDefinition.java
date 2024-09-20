@@ -1,6 +1,6 @@
 package me.kuwg.clarity.interpreter.definition;
 
-import me.kuwg.clarity.ObjectType;
+import me.kuwg.clarity.library.ObjectType;
 
 public class VariableDefinition extends ObjectType {
 

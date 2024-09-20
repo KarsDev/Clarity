@@ -1,6 +1,6 @@
 package me.kuwg.clarity.interpreter.types;
 
-import me.kuwg.clarity.ObjectType;
+import me.kuwg.clarity.library.ObjectType;
 import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;

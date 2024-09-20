@@ -1,6 +1,6 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.system;
 
-import me.kuwg.clarity.VoidObject;
+import me.kuwg.clarity.library.VoidObject;
 import me.kuwg.clarity.register.Register;
 
 import java.util.List;
