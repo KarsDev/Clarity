@@ -22,6 +22,8 @@ public class Clarity {
 
     private static int EXIT_CODE = 0;
 
+    public static Interpreter INTERPRETER;
+
     public static final String USER_HOME = System.getProperty("user.home");
 
     public static void main(final String[] args) {
@@ -158,15 +160,14 @@ public class Clarity {
 
     private static void runOrInterpretFile(File file) throws IOException {
         AST ast = loadOrParseAST(file);
-        Interpreter interpreter = new Interpreter(ast);
-        EXIT_CODE = interpreter.interpret();
+        INTERPRETER = new Interpreter(ast);
+        EXIT_CODE = INTERPRETER.interpret();
     }
 
     private static void runCompiledFile(File file) {
         AST ast = loadASTFromFile(file);
-
-        Interpreter interpreter = new Interpreter(ast);
-        EXIT_CODE = interpreter.interpret();
+        INTERPRETER = new Interpreter(ast);
+        EXIT_CODE = INTERPRETER.interpret();
     }
 
     private static AST loadOrParseAST(File file) throws IOException {

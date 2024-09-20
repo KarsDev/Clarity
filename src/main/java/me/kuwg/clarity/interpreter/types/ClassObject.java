@@ -1,17 +1,12 @@
 package me.kuwg.clarity.interpreter.types;
 
+import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.library.ObjectType;
 import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
 
 public class ClassObject {
-
-    private static Interpreter interpreter;
-
-    public static void setInterpreter(final Interpreter interpreter) {
-        ClassObject.interpreter = interpreter;
-    }
 
     private final String name;
     private final ClassObject inherited;
@@ -39,7 +34,7 @@ public class ClassObject {
     public String toString() {
         final ObjectType type = context.getFunction("print", 0);
         if (type instanceof FunctionDefinition) {
-            final Object ret = interpreter.interpretNode(((FunctionDefinition) type).getBlock(), context);
+            final Object ret = Clarity.INTERPRETER.interpretNode(((FunctionDefinition) type).getBlock(), context);
             if (ret instanceof String) {
                 return (String) ret;
             }

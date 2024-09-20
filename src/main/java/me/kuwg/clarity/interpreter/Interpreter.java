@@ -57,7 +57,6 @@ public class Interpreter {
         this.ast = optimizer.optimize();
         this.nmh = new NativeMethodHandler();
         this.general = new Context();
-        ClassObject.setInterpreter(this);
     }
 
     public int interpret() {
@@ -215,7 +214,7 @@ public class Interpreter {
         }
     }
 
-    private Object interpretBlock(final BlockNode block, final Context context) {
+    public Object interpretBlock(final BlockNode block, final Context context) {
         if (block == null || block.isEmpty()) {
             return VOID_OBJECT;
         }
@@ -602,16 +601,16 @@ public class Interpreter {
         }
 
         // Interpret the class body
-        Object val = interpretBlock(definition.getBody(), classContext);
+        final Object val = interpretBlock(definition.getBody(), classContext);
         if (val != VOID_OBJECT) {
             except("Return in class body", node.getLine());
         }
-        final Object result = interpretConstructors(inheritedObject, definition.getConstructors(), params, classContext, name);
+        final ClassObject result = interpretConstructors(inheritedObject, definition.getConstructors(), params, classContext, name);
         context.setCurrentClassName(null);
         return result;
     }
 
-    private ClassObject interpretConstructors(final ClassObject inherited, final FunctionDefinition[] constructors, final List<Object> params, final Context context, final String cn) {
+    public ClassObject interpretConstructors(final ClassObject inherited, final FunctionDefinition[] constructors, final List<Object> params, final Context context, final String cn) {
         if (constructors.length == 0) {
             return new ClassObject(cn, inherited, new Context(context));
         }
@@ -1161,7 +1160,7 @@ public class Interpreter {
         return objects;
     }
 
-    private Object except(final String message, final int line) {
+    public Object except(final String message, final int line) {
         Register.throwException(message, line);
         return VOID_OBJECT;
     }
