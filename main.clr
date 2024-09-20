@@ -3,5 +3,5 @@ include native uuid
 fn main() {
     var uuid = new UUID()
 
-    native.println(UUID.validateUUID(uuid))
+    native.println(UUID.validateUUID(new UUID("32131232")))
 }

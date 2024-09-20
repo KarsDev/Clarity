@@ -1,60 +1,97 @@
-include native Random
+include native random
 
 class UUID {
-
-    static const str CHARS = "0123456789abcdef"
-    static const str TEMPLATE ="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
-
-    // Variable to store the UUID value
+    // Variable to store the UUID value as a string
     str uuid
 
     /##
      # Constructor: UUID
      #
      # Description:
-     # Initializes the UUID object with a new random UUID value.
+     # Default constructor that initializes the UUID object with a new random UUID value.
+     # This constructor uses the generateUUID() function to assign a new random UUID string.
      #
      # Example:
      # var id = new UUID()  // Initializes the UUID with a random value.
      #/
     constructor() {
+        // Assign a new random UUID using the generateUUID function
         uuid = generateUUID()
+    }
+
+    /##
+     # Constructor: UUID (Overloaded)
+     #
+     # Description:
+     # Initializes the UUID object with a preset string value.
+     # This constructor is useful when you want to create a UUID object from an existing string.
+     #
+     # Example:
+     # var id = new UUID("00c63669-c933-4c3c-8306-933030066906")  // Initializes the UUID with a provided value.
+     #/
+    constructor(uuid) {
+        // Ensure the input uuid is of type string
+        assert uuid is str
+        // Set the UUID string to the provided value
+        local.uuid = uuid
     }
 
     /##
      # Function: generateUUID
      #
      # Description:
-     # Generates a new random UUID.
+     # Generates a new random UUID in the format "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".
+     # The UUID format is consistent with version 4 UUID, where '4' indicates version, and 'y' is either 8, 9, a, or b.
      #
      # Parameters:
      # - None.
      #
      # Returns:
-     # - A new UUID string in the format "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".
+     # - A newly generated UUID string.
      #
      # Example:
      # var newUuid = UUID.generateUUID()  // Returns a new random UUID.
      #/
     static fn generateUUID() {
-        const arr chars = CHARS.split("")
-        const arr template = TEMPLATE.split("")
+        // List of hexadecimal characters used for random UUID generation
+        const arr chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]
+
+        // UUID template: "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx" 
+        // The "x" and "y" are placeholders to be replaced by random values
+        const arr template = [
+            "x", "x", "x", "x", "x", "x", "x", "x", "-", 
+            "x", "x", "x", "x", "-", 
+            "4", "x", "x", "x", "-", 
+            "y", "x", "x", "x", "-", 
+            "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x"
+        ]
+
+        // Variable to store the final generated UUID
         var result = ""
 
+        // Create a new instance of native Random for generating random values
         const var rand = new Random()
 
+        // Loop over the template to construct the UUID
         for int i = 0, i < template.size(), i = i + 1 {
+            // Get the current character from the template
             var char = template.at(i)
 
+            // Replace 'x' with a random hexadecimal character (0-15)
             if char == "x" {
                 result = result + chars.at(rand.randInt(0, 15))
-            } else if char == "y" {
-                result = result + chars.at(rand.randInt(8, 11))  // 'y' is from 8 to b in UUID spec
-            } else {
+            } 
+            // Replace 'y' with a random value between 8 and 11 (UUID specification for 'y')
+            else if char == "y" {
+                result = result + chars.at(rand.randInt(8, 11))
+            } 
+            // Preserve any other characters (like dashes '-')
+            else {
                 result = result + char
             }
         }
 
+        // Return the generated UUID string
         return result
     }
 
@@ -63,12 +100,13 @@ class UUID {
      #
      # Description:
      # Returns the UUID string of this UUID object.
+     # This method is useful for retrieving the UUID value stored in the object.
      #
      # Parameters:
      # - None.
      #
      # Returns:
-     # - The UUID string.
+     # - The UUID string value.
      #
      # Example:
      # var uuidStr = id.get()  // Returns the string representation of the UUID.
@@ -78,49 +116,29 @@ class UUID {
     }
 
     /##
-     # Function: toString
-     #
-     # Description:
-     # Returns the string representation of the UUID.
-     #
-     # Parameters:
-     # - None.
-     #
-     # Returns:
-     # - The UUID string in the standard format.
-     #
-     # Example:
-     # var output = id.toString()  // Returns the string format of the UUID.
-     #/
-    fn toString() {
-        return uuid
-    }
-
-    /##
      # Function: set
      #
      # Description:
-     # Sets the UUID value for this object if the provided string is valid.
+     # Allows setting a new UUID string for the current object.
+     # This method is used when the UUID value needs to be changed manually.
      #
      # Parameters:
-     # - uuidString: The UUID string to set.
+     # - uuidString: A valid UUID string that will replace the current UUID.
      #
      # Example:
-     # id.set("550e8400-e29b-41d4-a716-446655440000")  // Sets the UUID value.
+     # id.set("550e8400-e29b-41d4-a716-446655440000")  // Sets the UUID value to the given string.
      #/
     fn set(uuidString) {
-        if UUID.validateUUID(uuidString) {
-            uuid = uuidString
-        } else {
-            throw "Invalid UUID format"
-        }
+        // Set the UUID to the provided string value
+        uuid = uuidString
     }
 
     /##
      # Function: generateNew
      #
      # Description:
-     # Generates a new UUID and replaces the current one.
+     # Generates a new UUID and replaces the current one in this object.
+     # This is useful when you want to refresh the UUID with a new random value.
      #
      # Parameters:
      # - None.
@@ -129,10 +147,12 @@ class UUID {
      # - The newly generated UUID string.
      #
      # Example:
-     # var newUuid = id.generateNew()  // Generates and sets a new UUID.
+     # var newUuid = id.generateNew()  // Generates and sets a new UUID for the object.
      #/
     fn generateNew() {
+        // Replace the current UUID with a newly generated UUID
         uuid = generateUUID()
+        // Return the new UUID string
         return uuid
     }
 
@@ -140,22 +160,45 @@ class UUID {
      # Function: equals
      #
      # Description:
-     # Compares two UUID objects or strings to check if they are equal.
+     # Compares two UUIDs (either UUID objects or strings) to check if they are equal.
+     # This function helps in determining if two UUIDs match.
      #
      # Parameters:
-     # - otherUuid: The other UUID (object or string) to compare against.
+     # - otherUuid: The UUID (either as an object or string) to compare against the current UUID.
      #
      # Returns:
      # - `true` if the UUIDs are equal, `false` otherwise.
      #
      # Example:
-     # var isEqual = id.equals("550e8400-e29b-41d4-a716-446655440000")  // Returns true if equal.
+     # var isEqual = id.equals("550e8400-e29b-41d4-a716-446655440000")  // Returns true if UUIDs match.
      #/
     fn equals(otherUuid) {
+        // If the other UUID is an instance of the UUID class, compare the UUID values
         if otherUuid is UUID {
             return uuid == otherUuid.get()
         }
+        // Otherwise, return false as they are not the same object
         return false
+    }
+
+    /##
+     # Function: print
+     #
+     # Description:
+     # Prints a simple string representation of the UUID object in the format "UUID{<uuid>}".
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - The formatted string representation of the UUID object.
+     #
+     # Example:
+     # var uuidStr = id.print()  // Returns the string "UUID{<uuid>}".
+     #/
+    fn print() {
+        // Return the UUID in the format "UUID{<uuid>}"
+        return "UUID{" + uuid + "}"
     }
 
     /##
