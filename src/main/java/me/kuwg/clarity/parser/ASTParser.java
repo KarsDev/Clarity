@@ -1107,7 +1107,7 @@ public final class ASTParser {
             name = "async-?";
         }
 
-        return new AsyncBlockNode(name, parseBlock());
+        return new AsyncBlockNode(name, parseBlock()).setLine(line);
     }
 
 
