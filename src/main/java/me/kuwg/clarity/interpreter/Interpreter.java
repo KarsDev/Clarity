@@ -36,7 +36,7 @@ import me.kuwg.clarity.optimizer.ASTOptimizer;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.library.objects.types.ClassObject;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
-import me.kuwg.clarity.privilege.Privileges;
+import me.kuwg.clarity.library.privilege.Privileges;
 import me.kuwg.clarity.token.Tokenizer;
 
 import java.util.*;

@@ -1,9 +1,0 @@
-include native system
-
-native.println("Starting on thread " + System.currentThreadName())
-
-async -> "another thread" {
-    native.println("Executing async on thread " + System.currentThreadName())
-}
-
-native.println("Continuing always on thread " + System.currentThreadName())
