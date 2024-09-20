@@ -662,6 +662,8 @@ public class Interpreter {
                 return VOID_OBJECT;
             }
             return resultArray;
+        } else if (caller instanceof String) {
+            return handleStringFunctionCall(node, context, (String) caller);
         } else if (caller instanceof ClassObject) {
             return handleInstanceMethodCall(node, context, (ClassObject) caller);
         } else if (caller instanceof VoidObject) {
@@ -758,92 +760,131 @@ public class Interpreter {
         }
     }
 
-    private Object handleArrayFunctionCall(final ObjectFunctionCallNode node, final Context context, final Object[] array) {
-        final List<Object> params = getFunctionParameters(node, context, -1);
-        if (params == null) return null;
+    private Object handleArrayFunctionCall(final ASTNode raw, final Context context, final Object[] array) {
+        String fn;
+        List<Object> params;
 
-        final String fn = node.getCalled();
-
-        Register.register(new Register.RegisterElement(Register.RegisterElementType.ARRAYCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+        if (raw instanceof ObjectFunctionCallNode) {
+            ObjectFunctionCallNode node = (ObjectFunctionCallNode) raw;
+            fn = node.getCalled();
+            params = getFunctionParameters(node, context, -1);
+            Register.register(new Register.RegisterElement(Register.RegisterElementType.ARRAYCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+        } else if (raw instanceof MemberFunctionCallNode) {
+            MemberFunctionCallNode node = (MemberFunctionCallNode) raw;
+            fn = node.getName();
+            params = getFunctionParameters(node, context, -1);
+            Register.register(new Register.RegisterElement(Register.RegisterElementType.ARRAYCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+        } else {
+            return null;
+        }
 
         switch (fn) {
             case "at":
                 if (params.size() == 1 && params.get(0) instanceof Integer) {
                     try {
                         return array[(int) params.get(0)];
-                    } catch (final ArrayIndexOutOfBoundsException ex) {
-                        except("Array out of bounds: " + params.get(0), node.getLine());
+                    } catch (ArrayIndexOutOfBoundsException ex) {
+                        except("Array out of bounds: " + params.get(0), raw.getLine());
                     }
                 }
+                break;
             case "size":
                 if (params.isEmpty()) {
                     return array.length;
                 }
+                break;
             case "set":
                 if (params.size() == 2 && params.get(0) instanceof Integer) {
                     try {
                         array[(int) params.get(0)] = params.get(1);
-                    } catch (final IndexOutOfBoundsException e) {
-                        except("Array index out of bounds: " + params.get(0), node.getLine());
+                    } catch (IndexOutOfBoundsException e) {
+                        except("Array index out of bounds: " + params.get(0), raw.getLine());
                     }
                     return VOID_OBJECT;
                 }
+                break;
             case "setSize":
                 if (params.size() == 1 && params.get(0) instanceof Integer) {
                     int newSize = (int) params.get(0);
-                    if (newSize < 0) except("Negative array size: " + newSize, node.getLine());
+                    if (newSize < 0) {
+                        except("Negative array size: " + newSize, raw.getLine());
+                    }
                     Object[] newArray = new Object[newSize];
                     System.arraycopy(array, 0, newArray, 0, Math.min(array.length, newSize));
                     return newArray;
                 }
+                break;
             default:
-                except("Illegal function in array context: " + fn + " with params " + params, node.getLine());
+                except("Illegal function in array context: " + fn + " with params " + params, raw.getLine());
                 return null;
         }
+
+        return null;
     }
 
-    private Object handleArrayFunctionCall(final MemberFunctionCallNode node, final Context context, final Object[] array) {
-        final List<Object> params = getFunctionParameters(node, context, -1);
+    private Object handleStringFunctionCall(final ASTNode raw, final Context context, final String caller) {
+        String fn;
+        List<Object> params;
 
-        final String fn = node.getName();
-
-        Register.register(new Register.RegisterElement(Register.RegisterElementType.ARRAYCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+        if (raw instanceof ObjectFunctionCallNode) {
+            ObjectFunctionCallNode node = (ObjectFunctionCallNode) raw;
+            fn = node.getCalled();
+            params = getFunctionParameters(node, context, -1);
+            Register.register(new Register.RegisterElement(Register.RegisterElementType.STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+        } else if (raw instanceof MemberFunctionCallNode) {
+            MemberFunctionCallNode node = (MemberFunctionCallNode) raw;
+            fn = node.getName();
+            params = getFunctionParameters(node, context, -1);
+            Register.register(new Register.RegisterElement(Register.RegisterElementType.STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+        } else {
+            return null;
+        }
 
         switch (fn) {
-            case "at":
-                if (params.size() == 1 && params.get(0) instanceof Integer) {
-                    try {
-                        return array[(int) params.get(0)];
-                    } catch (final ArrayIndexOutOfBoundsException ex) {
-                        except("Array out of bounds: " + params.get(0), node.getLine());
+            case "match":
+                if (params.size() == 1 && params.get(0) instanceof String) {
+                    return caller.matches((String) params.get(0));
+                }
+                break;
+            case "subs":
+                try {
+                    if (params.size() == 1 && params.get(0) instanceof Integer) {
+                        return caller.substring((int) params.get(0));
+                    } else if (params.size() == 2 && params.get(0) instanceof Integer && params.get(1) instanceof Integer) {
+                        return caller.substring((int) params.get(0), (int) params.get(1));
                     }
+                } catch (IndexOutOfBoundsException e) {
+                    except("String index out of bounds: " + params, raw.getLine());
                 }
-            case "size":
-                if (params.isEmpty()) {
-                    return array.length;
+                break;
+            case "contains":
+                if (params.size() == 1 && params.get(0) instanceof String) {
+                    return caller.contains((String) params.get(0));
                 }
-            case "set":
-                if (params.size() == 2 && params.get(0) instanceof Integer) {
-                    try {
-                        array[(int) params.get(0)] = params.get(1);
-                    } catch (final IndexOutOfBoundsException e) {
-                        except("Array index out of bounds: " + params.get(0), node.getLine());
-                    }
-                    return VOID_OBJECT;
+                break;
+            case "startsw":
+                if (params.size() == 1 && params.get(0) instanceof String) {
+                    return caller.startsWith((String) params.get(0));
                 }
-            case "setSize":
-                if (params.size() == 1 && params.get(0) instanceof Integer) {
-                    int newSize = (int) params.get(0);
-                    if (newSize < 0) except("Negative array size: " + newSize, node.getLine());
-                    Object[] newArray = new Object[newSize];
-                    System.arraycopy(array, 0, newArray, 0, Math.min(array.length, newSize));
-                    return newArray;
+                break;
+            case "endsw":
+                if (params.size() == 1 && params.get(0) instanceof String) {
+                    return caller.endsWith((String) params.get(0));
                 }
+                break;
+            case "split":
+                if (params.size() == 1 && params.get(0) instanceof String) {
+                    return caller.split((String) params.get(0));
+                }
+                break;
             default:
-                except("Illegal function in array context: " + fn + " with params " + params, node.getLine());
+                except("Illegal function in string context: " + fn + " with params " + params, raw.getLine());
                 return null;
         }
+
+        return null;
     }
+
 
     private Object handleInstanceMethodCall(final ObjectFunctionCallNode node, final Context context, final ClassObject classObject) {
         context.setCurrentClassName(classObject.getName());
@@ -1712,6 +1753,8 @@ public class Interpreter {
                 return VOID_OBJECT;
             }
             return resultArray;
+        } else if (caller instanceof String) {
+            return handleStringFunctionCall(node, context, (String) caller);
         } else if (!(caller instanceof ClassObject)) {
             except("Expected class object caller", node.getLine());
             return null;

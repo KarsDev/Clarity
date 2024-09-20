@@ -1,6 +1,10 @@
 include native Random
 
 class UUID {
+
+    static const str CHARS = "0123456789abcdef"
+    static const str TEMPLATE ="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx"
+
     // Variable to store the UUID value
     str uuid
 
@@ -33,8 +37,8 @@ class UUID {
      # var newUuid = UUID.generateUUID()  // Returns a new random UUID.
      #/
     static fn generateUUID() {
-        const arr chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]
-        const arr template = ["x", "x", "x", "x", "x","x", "x", "x", "-", "x", "x", "x", "x", "-", "4", "x", "x", "x", "-", "y", "x", "x", "x", "-", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x"]
+        const arr chars = CHARS.split("")
+        const arr template = TEMPLATE.split("")
         var result = ""
 
         const var rand = new Random()
@@ -96,7 +100,7 @@ class UUID {
      # Function: set
      #
      # Description:
-     # Sets the UUID value for this object.
+     # Sets the UUID value for this object if the provided string is valid.
      #
      # Parameters:
      # - uuidString: The UUID string to set.
@@ -105,8 +109,11 @@ class UUID {
      # id.set("550e8400-e29b-41d4-a716-446655440000")  // Sets the UUID value.
      #/
     fn set(uuidString) {
-        assert uuidString is str
-        uuid = uuidString
+        if UUID.validateUUID(uuidString) {
+            uuid = uuidString
+        } else {
+            throw "Invalid UUID format"
+        }
     }
 
     /##
@@ -149,5 +156,26 @@ class UUID {
             return uuid == otherUuid.get()
         }
         return false
+    }
+
+    /##
+     # Function: validateUUID
+     #
+     # Description:
+     # Validates if a given string follows the UUID format.
+     #
+     # Parameters:
+     # - uuidString: The string to validate.
+     #
+     # Returns:
+     # - `true` if the string is a valid UUID, `false` otherwise.
+     #
+     # Example:
+     # var isValid = UUID.validateUUID("550e8400-e29b-41d4-a716-446655440000")  // Returns true.
+     #/
+    static fn validateUUID(uuid) {
+        assert uuid is UUID
+        const var uuidPattern = "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        return uuid.get().match(uuidPattern)
     }
 }

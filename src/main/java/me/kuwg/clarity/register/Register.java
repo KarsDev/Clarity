@@ -53,7 +53,8 @@ public final class Register {
         CLASSINST,
         STATICCALL,
         ARRAYCALL,
-        LOCALCALL
+        LOCALCALL,
+        STRINGCALL,
     }
 
     public static class RegisterElement {
@@ -105,6 +106,9 @@ public final class Register {
                 }
                 case STATICCALL: {
                     return "static call " + getParam() + formatClass() + formatLine();
+                }
+                case STRINGCALL: {
+                    return "string function " + getParam() + formatClass() + formatLine();
                 }
                 default: {
                     throwException("Unsupported register element type: " + getType());
