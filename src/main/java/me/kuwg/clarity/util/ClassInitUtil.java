@@ -3,14 +3,13 @@ package me.kuwg.clarity.util;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
-import me.kuwg.clarity.interpreter.types.ClassObject;
-import me.kuwg.clarity.library.ObjectType;
-import me.kuwg.clarity.register.Register;
+import me.kuwg.clarity.library.objects.types.ClassObject;
+import me.kuwg.clarity.library.objects.ObjectType;
 
 import java.util.List;
 
 import static me.kuwg.clarity.Clarity.INTERPRETER;
-import static me.kuwg.clarity.library.VoidObject.VOID_OBJECT;
+import static me.kuwg.clarity.library.objects.VoidObject.VOID_OBJECT;
 
 public class ClassInitUtil {
 

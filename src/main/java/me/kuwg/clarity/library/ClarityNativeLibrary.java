@@ -1,5 +1,8 @@
 package me.kuwg.clarity.library;
 
+import me.kuwg.clarity.library.cnc.ClarityNativeClass;
+import me.kuwg.clarity.library.cnf.ClarityNativeFunction;
+
 /**
  * An interface representing a library of native functions and classes in the Clarity language.
  * Implementations of this interface should provide a collection of natives

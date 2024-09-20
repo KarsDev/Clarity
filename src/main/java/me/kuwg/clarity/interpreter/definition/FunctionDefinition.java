@@ -1,6 +1,6 @@
 package me.kuwg.clarity.interpreter.definition;
 
-import me.kuwg.clarity.library.ObjectType;
+import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;

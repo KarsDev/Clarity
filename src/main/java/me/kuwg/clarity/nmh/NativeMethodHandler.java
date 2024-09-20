@@ -1,7 +1,7 @@
 package me.kuwg.clarity.nmh;
 
-import me.kuwg.clarity.library.ClarityNativeClass;
-import me.kuwg.clarity.library.ClarityNativeFunction;
+import me.kuwg.clarity.library.cnc.ClarityNativeClass;
+import me.kuwg.clarity.library.cnf.ClarityNativeFunction;
 import me.kuwg.clarity.library.ClarityNativeLibrary;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetDayNative;

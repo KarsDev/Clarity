@@ -1,7 +1,7 @@
 package me.kuwg.clarity.nmh.natives.impl.def;
 
-import me.kuwg.clarity.library.VoidObject;
-import me.kuwg.clarity.interpreter.types.ClassObject;
+import me.kuwg.clarity.library.objects.VoidObject;
+import me.kuwg.clarity.library.objects.types.ClassObject;
 import me.kuwg.clarity.nmh.natives.aclass.DefaultNativeFunction;
 import me.kuwg.clarity.register.Register;
 

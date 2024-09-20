@@ -1,4 +1,4 @@
-package me.kuwg.clarity.library;
+package me.kuwg.clarity.library.objects;
 
 /**
  * An abstract class representing a special type of object in the Clarity language.

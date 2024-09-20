@@ -1,4 +1,6 @@
-package me.kuwg.clarity.library;
+package me.kuwg.clarity.library.cnf;
+
+import me.kuwg.clarity.library.objects.VoidObject;
 
 import java.util.List;
 

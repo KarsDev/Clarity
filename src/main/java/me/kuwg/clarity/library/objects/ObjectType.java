@@ -1,4 +1,4 @@
-package me.kuwg.clarity.library;
+package me.kuwg.clarity.library.objects;
 
 /**
  * A class representing a type of object in the Clarity language.

@@ -1,6 +1,7 @@
-package me.kuwg.clarity.library;
+package me.kuwg.clarity.library.cnc;
 
 import me.kuwg.clarity.interpreter.context.Context;
+import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.register.Register;
 
 import java.util.List;
