@@ -1,0 +1,153 @@
+include native Random
+
+class UUID {
+    // Variable to store the UUID value
+    str uuid
+
+    /##
+     # Constructor: UUID
+     #
+     # Description:
+     # Initializes the UUID object with a new random UUID value.
+     #
+     # Example:
+     # var id = new UUID()  // Initializes the UUID with a random value.
+     #/
+    constructor() {
+        uuid = generateUUID()
+    }
+
+    /##
+     # Function: generateUUID
+     #
+     # Description:
+     # Generates a new random UUID.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - A new UUID string in the format "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".
+     #
+     # Example:
+     # var newUuid = UUID.generateUUID()  // Returns a new random UUID.
+     #/
+    static fn generateUUID() {
+        const arr chars = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"]
+        const arr template = ["x", "x", "x", "x", "x","x", "x", "x", "-", "x", "x", "x", "x", "-", "4", "x", "x", "x", "-", "y", "x", "x", "x", "-", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x", "x"]
+        var result = ""
+
+        const var rand = new Random()
+
+        for int i = 0, i < template.size(), i = i + 1 {
+            var char = template.at(i)
+
+            if char == "x" {
+                result = result + chars.at(rand.randInt(0, 15))
+            } else if char == "y" {
+                result = result + chars.at(rand.randInt(8, 11))  // 'y' is from 8 to b in UUID spec
+            } else {
+                result = result + char
+            }
+        }
+
+        return result
+    }
+
+    /##
+     # Function: get
+     #
+     # Description:
+     # Returns the UUID string of this UUID object.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - The UUID string.
+     #
+     # Example:
+     # var uuidStr = id.get()  // Returns the string representation of the UUID.
+     #/
+    fn get() {
+        return uuid
+    }
+
+    /##
+     # Function: toString
+     #
+     # Description:
+     # Returns the string representation of the UUID.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - The UUID string in the standard format.
+     #
+     # Example:
+     # var output = id.toString()  // Returns the string format of the UUID.
+     #/
+    fn toString() {
+        return uuid
+    }
+
+    /##
+     # Function: set
+     #
+     # Description:
+     # Sets the UUID value for this object.
+     #
+     # Parameters:
+     # - uuidString: The UUID string to set.
+     #
+     # Example:
+     # id.set("550e8400-e29b-41d4-a716-446655440000")  // Sets the UUID value.
+     #/
+    fn set(uuidString) {
+        assert uuidString is str
+        uuid = uuidString
+    }
+
+    /##
+     # Function: generateNew
+     #
+     # Description:
+     # Generates a new UUID and replaces the current one.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - The newly generated UUID string.
+     #
+     # Example:
+     # var newUuid = id.generateNew()  // Generates and sets a new UUID.
+     #/
+    fn generateNew() {
+        uuid = generateUUID()
+        return uuid
+    }
+
+    /##
+     # Function: equals
+     #
+     # Description:
+     # Compares two UUID objects or strings to check if they are equal.
+     #
+     # Parameters:
+     # - otherUuid: The other UUID (object or string) to compare against.
+     #
+     # Returns:
+     # - `true` if the UUIDs are equal, `false` otherwise.
+     #
+     # Example:
+     # var isEqual = id.equals("550e8400-e29b-41d4-a716-446655440000")  // Returns true if equal.
+     #/
+    fn equals(otherUuid) {
+        if otherUuid is UUID {
+            return uuid == otherUuid.get()
+        }
+        return false
+    }
+}

@@ -1,39 +1,7 @@
-include native random
-include native list
+include native uuid
 
-const var min = int(native.input("Write min number: "))
-const var max = int(native.input("Write max number: "))
+fn main() {
+    var uuid = new UUID()
 
-
-const int randomNumber = new Random().randInt(min, max)
-
-native.println("Guess the number between " + min + " and " + max + "!")
-
-int nGuesses = 0
-
-var guesses = new List()
-
-while true {
-    const int guess = int(native.input("Your guess: "))
-
-    if guesses.contains(guess) {
-        native.println("You already wrote this number, guesses will not change.")
-        continue
-    }
-
-    nGuesses += 1
-
-    guesses.add(guess)
-
-    if guess == randomNumber {
-        break
-    } else if (guess > randomNumber) {
-        native.println("Your number is too high!")
-    } else {
-        native.println("Your number is too low!")
-    }
-
+    native.println(UUID.validateUUID(uuid))
 }
-
-native.println("You guessed it!")
-native.println("Guesses: " + nGuesses)

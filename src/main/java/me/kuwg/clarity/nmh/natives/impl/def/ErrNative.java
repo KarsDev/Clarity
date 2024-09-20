@@ -14,7 +14,7 @@ public class ErrNative extends DefaultNativeFunction<VoidObject> {
 
     @Override
     public VoidObject call(final List<Object> params) {
-        System.out.println(paramsToString(params));
+        System.err.println(paramsToString(params));
         return VOID;
     }
 

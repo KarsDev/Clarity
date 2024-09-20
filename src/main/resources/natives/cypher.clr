@@ -1,0 +1,167 @@
+class Cypher {
+    // Variable to store the key for the cipher
+    var key
+
+    /##
+     # Constructor: Cypher
+     #
+     # Description:
+     # Initializes the Cypher object with a provided key or a default key of 0 if no key is provided.
+     #
+     # Parameters:
+     # - key: An integer representing the shift for the cipher. Must be an integer; otherwise, an exception is thrown.
+     #
+     # Throws:
+     # - An exception if the provided key is not an integer.
+     #
+     # Example:
+     # var cypher = new Cypher(3)  // Initializes the Cypher with a key of 3.
+     #/
+    constructor(key) {
+        if !System.checkNativeType("int", key) {
+            System.throw("Expected integer value in Cypher constructor")
+        }
+
+        local.key = key
+    }
+
+    /##
+     # Constructor: Cypher (default)
+     #
+     # Description:
+     # Initializes the Cypher object with a default key of 0.
+     #
+     # Example:
+     # var cypher = new Cypher()  // Initializes the Cypher with a default key.
+     #/
+    constructor() {
+        key = 0
+    }
+
+    /##
+     # Function: encrypt
+     #
+     # Description:
+     # Encrypts the provided string using the key.
+     #
+     # Parameters:
+     # - text: The string to encrypt.
+     #
+     # Returns:
+     # - The encrypted string.
+     #
+     # Throws:
+     # - An exception if the provided text is not a string.
+     #
+     # Example:
+     # var encrypted = cypher.encrypt("hello")  // Encrypts the string "hello".
+     #/
+    fn encrypt(text) {
+        if !System.checkNativeType("string", text) {
+            System.throw("Expected string value in encrypt")
+        }
+
+        var encrypted = ""
+        for var i = 0, i < text.length(), i = i + 1 {
+            var char = text.at(i)
+            // Encrypt by shifting the character by the key value
+            var encryptedChar = charCode(char) + key
+            encrypted = encrypted + charFromCode(encryptedChar)
+        }
+        return encrypted
+    }
+
+    /##
+     # Function: decrypt
+     #
+     # Description:
+     # Decrypts the provided string using the key.
+     #
+     # Parameters:
+     # - text: The string to decrypt.
+     #
+     # Returns:
+     # - The decrypted string.
+     #
+     # Throws:
+     # - An exception if the provided text is not a string.
+     #
+     # Example:
+     # var decrypted = cypher.decrypt("khoor")  // Decrypts the string "khoor".
+     #/
+    fn decrypt(text) {
+        if !System.checkNativeType("str", text) {
+            System.throw("Expected string value in decrypt")
+        }
+
+        var decrypted = ""
+        for var i = 0, i < text.length(), i = i + 1 {
+            var char = text.at(i)
+            // Decrypt by shifting the character by the negative key value
+            var decryptedChar = charCode(char) - key
+            decrypted = decrypted + charFromCode(decryptedChar)
+        }
+        return decrypted
+    }
+
+    /##
+     # Function: setKey
+     #
+     # Description:
+     # Sets a new key for the cipher.
+     #
+     # Parameters:
+     # - newKey: The new key to set for the cipher.
+     #
+     # Throws:
+     # - An exception if the new key is not an integer.
+     #
+     # Example:
+     # cypher.setKey(5)  // Sets the cipher key to 5.
+     #/
+    fn setKey(newKey) {
+        if !System.checkNativeType("int", newKey) {
+            System.throw("Expected integer value in setKey")
+        }
+
+        key = newKey
+    }
+
+    /##
+     # Function: getKey
+     #
+     # Description:
+     # Retrieves the current cipher key.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - The current key of the cipher.
+     #
+     # Example:
+     # var currentKey = cypher.getKey()  // Gets the current cipher key.
+     #/
+    fn getKey() {
+        return key
+    }
+
+    /##
+     # Function: print
+     #
+     # Description:
+     # Returns a string representation of the cipher with its key value.
+     #
+     # Parameters:
+     # - None.
+     #
+     # Returns:
+     # - A string that represents the cipher in the format "Cypher(key)".
+     #
+     # Example:
+     # var output = cypher.print()  // Returns the string representation of the cipher.
+     #/
+    fn print() {
+        return "Cypher(" + key + ")"
+    }
+}
