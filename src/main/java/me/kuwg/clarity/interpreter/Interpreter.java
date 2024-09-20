@@ -1913,16 +1913,20 @@ public class Interpreter {
 
         final AnnotationDefinition annotation = (AnnotationDefinition) rawDefinition;
         if (annotation.getAnnotationElements().size() != node.getValues().size()) {
-            Register.throwException("Not all required elements are declared in annotation: " + node.getName());
+            Register.throwException("Not all required elements are declared in annotation: " + node.getName(), node.getLine());
             return ret;
         }
         return ret;
     }
 
     private Object interpretAsyncBlock(final AsyncBlockNode node, final Context context) {
-        new Thread(() -> {
-            interpretBlock(node.getBlock(), context);
-        }, node.getName()).start();
+        final Object rawName = interpretNode(node.getName(), context);
+
+        if (rawName instanceof VoidObject) {
+            Register.throwException("Unexpected async thread name (void)", node.getLine());
+        }
+
+        new Thread(() -> interpretBlock(node.getBlock(), context), rawName.toString()).start();
         return VOID_OBJECT;
     }
 

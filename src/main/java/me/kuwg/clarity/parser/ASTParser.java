@@ -1099,12 +1099,12 @@ public final class ASTParser {
     private ASTNode parseAsyncDeclaration() {
         final int line = consume().getLine(); // consume "async"
 
-        final String name;
+        final ASTNode name;
 
         if (matchAndConsume(OPERATOR, "->")) {
-            name = consume(STRING).getValue();
+            name = parseExpression();
         } else {
-            name = "async-?";
+            name = new LiteralNode("async-?");
         }
 
         return new AsyncBlockNode(name, parseBlock()).setLine(line);

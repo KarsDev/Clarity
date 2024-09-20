@@ -8,10 +8,10 @@ import java.io.IOException;
 
 public class AsyncBlockNode extends ASTNode {
 
-    private String name;
+    private ASTNode name;
     private BlockNode block;
 
-    public AsyncBlockNode(final String name, final BlockNode block) {
+    public AsyncBlockNode(final ASTNode name, final BlockNode block) {
         this.name = name;
         this.block = block;
     }
@@ -23,7 +23,7 @@ public class AsyncBlockNode extends ASTNode {
         return block;
     }
 
-    public final String getName() {
+    public final ASTNode getName() {
         return name;
     }
 
@@ -36,13 +36,13 @@ public class AsyncBlockNode extends ASTNode {
 
     @Override
     protected void save0(final ASTOutputStream out) throws IOException {
-        out.writeString(name);
+        out.writeNode(name);
         out.writeNode(block);
     }
 
     @Override
     protected void load0(final ASTInputStream in) throws IOException {
-        this.name = in.readString();
+        this.name = in.readNode();
         this.block = (BlockNode) in.readNode();
     }
 }
