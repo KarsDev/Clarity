@@ -1,6 +1,8 @@
 package me.kuwg.clarity.interpreter.definition;
 
-public class BreakValue {
+import me.kuwg.clarity.library.objects.VoidObject;
+
+public class BreakValue extends VoidObject {
     public static final BreakValue BREAK = new BreakValue();
 
     private BreakValue() {

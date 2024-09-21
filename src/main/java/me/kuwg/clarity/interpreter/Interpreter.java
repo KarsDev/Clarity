@@ -90,7 +90,7 @@ public class Interpreter {
                 return (int) result;
             }
         } else {
-            ast.getRoot().forEach(node -> interpretNode(node, general));
+            if (interpretNode(ast.getRoot(), general) != VOID_OBJECT) Register.throwException("Unexpected return without main function");
             return 0;
         }
 
@@ -235,12 +235,15 @@ public class Interpreter {
     private Object interpretVariableDeclaration(final VariableDeclarationNode node, final Context context) {
         final ASTNode value = node.getValue();
 
-        final Object valueObj;
+        Object valueObj;
 
         if (value instanceof VoidNode) {
             valueObj = VOID_OBJECT;
         } else {
             valueObj = interpretNode(value, context);
+
+            if (valueObj instanceof ReturnValue) valueObj = ((ReturnValue) valueObj).getValue();
+
             if (valueObj instanceof VoidObject) {
                 Register.throwException("Creating a void variable: " + node.getName());
             }

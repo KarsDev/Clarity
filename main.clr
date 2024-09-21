@@ -1,2 +1,2 @@
-arr x = "abc".split("")
+var x = break
 native.println(x)
