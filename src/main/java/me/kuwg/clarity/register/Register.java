@@ -16,6 +16,7 @@ public final class Register {
         error(message, line);
         printRegister();
         exit();
+        raise();
     }
 
     public static void throwException(final String message, final int line) {
@@ -45,6 +46,10 @@ public final class Register {
 
     private static void exit() {
         System.exit(-1);
+    }
+
+    private static void raise() {
+        throw new RegisterException();
     }
 
     public enum RegisterElementType {

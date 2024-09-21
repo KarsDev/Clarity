@@ -35,7 +35,7 @@ public class Privileges {
      *
      * @param name The name of the class to check.
      * @param line The line number where the class name appears, used for error reporting.
-     * @throws RuntimeException if the class name is privileged.
+     * @throws me.kuwg.clarity.register.RegisterException if the class name is privileged.
      */
     public static void checkClassName(final String name, final int line) {
         // Check if the provided class name is in the list of privileged class names
