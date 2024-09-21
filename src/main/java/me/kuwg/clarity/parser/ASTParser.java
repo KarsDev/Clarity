@@ -516,7 +516,24 @@ public final class ASTParser {
                 return node;
             }
             case NUMBER: {
-                return parseNumber(token);
+                ASTNode node = parseNumber(token).setLine(line);
+                while (true) {
+                    if (matchAndConsume(OPERATOR, ".")) {
+                        final String name = consume(VARIABLE).getValue();
+                        if (matchAndConsume(DIVIDER, "(")) {
+                            List<ASTNode> params = new ArrayList<>();
+                            while (!match(DIVIDER, ")")) {
+                                params.add(parseExpression());
+                                if (!matchAndConsume(DIVIDER, ",")) break;
+                            }
+                            consume(DIVIDER, ")");
+                            node = new MemberFunctionCallNode(node, name, params).setLine(line);
+                        } else {
+                            node = new ObjectVariableReferenceNode(node, name).setLine(current().getLine());
+                        }
+                    } else break;
+                }
+                return node;
             }
             case STRING: {
                 ASTNode node = new LiteralNode(token.getValue()).setLine(line);
