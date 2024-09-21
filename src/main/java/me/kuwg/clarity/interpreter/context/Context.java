@@ -67,7 +67,7 @@ public class Context {
         }
 
         if (variableDefinition.isConstant() && variableDefinition.getValue() != VOID_OBJECT) {
-            Register.throwException("Variable that has const cannot be edited: " + name);
+            Register.throwException("Editing a constant variable: " + name);
         }
         variableDefinition.setValue(value);
     }
