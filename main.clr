@@ -1,7 +1,6 @@
 class Test {
-    static fn exe() -> str {
-        return "executed"
+    constructor(val) {
+        assert val is str
+        native.println(val)
     }
 }
-
-native.println(Test.exe())

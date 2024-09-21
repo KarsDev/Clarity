@@ -59,6 +59,10 @@ public class Interpreter {
         this.general = new Context();
     }
 
+    public Context general() {
+        return general;
+    }
+
     public int interpret() {
 
         MainFunctionDeclarationNode main = null;
