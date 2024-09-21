@@ -40,11 +40,14 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static me.kuwg.clarity.token.TokenType.*;
 
 public final class ASTParser {
+
+    private static final List<IncludeNode> includes = new ArrayList<>();
 
     private final String ORIGINAL;
     private final String fileName;
@@ -60,9 +63,13 @@ public final class ASTParser {
     public AST parse() {
         final BlockNode node = new BlockNode();
 
+        // parse includes
         while (matchAndConsume(KEYWORD, "include")) {
-            final ASTNode include = parseInclude();
-            if (include != null) node.addChild(include);
+            final IncludeNode include = parseInclude();
+            if (includes.stream().noneMatch(included -> included.getName().equals(include.getName()))) {
+                includes.add(include);
+                node.addChild(include);
+            }
         }
 
         while (currentTokenIndex < tokens.size()) {
@@ -716,49 +723,69 @@ public final class ASTParser {
     }
 
     private IncludeNode parseInclude() {
-        boolean isNative = matchAndConsume(KEYWORD, "native");
-        boolean isCompiled = matchAndConsume(KEYWORD, "compiled");
+        IncludeNode included;
 
-        if (isNative && isCompiled) throw new UnsupportedOperationException("Native compiled files do not exist, at line " + current().getLine());
+        include:
+        {
+            boolean isNative = matchAndConsume(KEYWORD, "native");
+            boolean isCompiled = matchAndConsume(KEYWORD, "compiled");
 
-        final int line = current().getLine();
+            if (isNative && isCompiled)
+                throw new UnsupportedOperationException("Native compiled files do not exist, at line " + current().getLine());
 
-        final String path = parseIncludePath(isCompiled);
+            final int line = current().getLine();
 
-        if (isCompiled) {
-            final File file;
+            final String path = parseIncludePath(isCompiled);
 
-            if (matchAndConsume(VARIABLE, "from")) {
-                file = new File(Clarity.USER_HOME + "/Clarity/libraries/" + consume(VARIABLE).getValue(), path);
-            } else {
-                file = new File(path);
-            }
+            if (isCompiled) {
+                final File file;
 
-            ASTLoader loader = new ASTLoader(file);
-            try {
-                return new IncludeNode(path, loader.load().getRoot(), false).setLine(line);
-            } catch (IOException e) {
-                System.err.println("Failed to load the AST:");
-                if (e instanceof NoSuchFileException) {
-                    System.err.println("No such file: " + file);
+                if (matchAndConsume(VARIABLE, "from")) {
+                    file = new File(Clarity.USER_HOME + "/Clarity/libraries/" + consume(VARIABLE).getValue(), path);
+                } else {
+                    file = new File(path);
                 }
-                System.exit(1);
-            }
-        }
 
-        if (isNative) {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("natives/" + path);
-            if (inputStream == null) {
+                ASTLoader loader = new ASTLoader(file);
                 try {
-                    throw new IOException("Native library not found: '" + path + "'");
+                    included = new IncludeNode(path, loader.load().getRoot(), false).setLine(line);
+                    break include;
+                } catch (IOException e) {
+                    System.err.println("Failed to load the AST:");
+                    if (e instanceof NoSuchFileException) {
+                        System.err.println("No such file: " + file);
+                    }
+                    System.exit(1);
+                }
+            }
+
+            if (isNative) {
+                InputStream inputStream = getClass().getClassLoader().getResourceAsStream("natives/" + path);
+                if (inputStream == null) {
+                    try {
+                        throw new IOException("Native library not found: '" + path + "'");
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                String content;
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                    content = reader.lines().collect(Collectors.joining("\n"));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+
+                final List<Token> tokens = Tokenizer.tokenize(content);
+                final ASTParser parser = new ASTParser(ORIGINAL, path, tokens);
+                final AST ast = parser.parse();
+                included = new IncludeNode(path, ast.getRoot(), true).setLine(line);
+                break include;
             }
 
-            String content;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                content = reader.lines().collect(Collectors.joining("\n"));
+            final String content;
+            try {
+                content = new String(Files.readAllBytes(new File(new File(ORIGINAL).getParentFile(), path).toPath()), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -766,21 +793,11 @@ public final class ASTParser {
             final List<Token> tokens = Tokenizer.tokenize(content);
             final ASTParser parser = new ASTParser(ORIGINAL, path, tokens);
             final AST ast = parser.parse();
-            return new IncludeNode(path, ast.getRoot(), true).setLine(line);
+
+            included = new IncludeNode(path, ast.getRoot(), false).setLine(line);
         }
 
-        final String content;
-        try {
-            content = new String(Files.readAllBytes(new File(new File(ORIGINAL).getParentFile(), path).toPath()), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        final List<Token> tokens = Tokenizer.tokenize(content);
-        final ASTParser parser = new ASTParser(ORIGINAL, path, tokens);
-        final AST ast = parser.parse();
-
-        return new IncludeNode(path, ast.getRoot(), false).setLine(line);
+        return included;
     }
 
     private String parseIncludePath(final boolean compiled) {

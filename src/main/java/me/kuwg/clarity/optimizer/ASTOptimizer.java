@@ -9,11 +9,17 @@ import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.register.Register;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class ASTOptimizer {
     private final AST ast;
 
+    private final Map<String, ASTNode> commonSubexpressions;
+
     public ASTOptimizer(final AST ast) {
         this.ast = ast;
+        this.commonSubexpressions = new HashMap<>();
     }
 
     public AST optimize() {
@@ -34,17 +40,34 @@ public class ASTOptimizer {
         final String op = node.getOperator();
         final ASTNode right = optimizeNode(node.getRight());
 
-        if (left instanceof AbstractNumberNode && right instanceof AbstractNumberNode) {
-            return optimizeNumberOperation(left, op, right);
-        } else if (left instanceof LiteralNode || right instanceof LiteralNode) {
-            return optimizeStringOperation(left, op, right);
-        } else if (left instanceof BooleanNode && right instanceof BooleanNode) {
-            return optimizeBooleanOperation((BooleanNode) left, op, (BooleanNode) right);
-        } else if (left instanceof NullNode || right instanceof NullNode) {
-            return handleNullComparison(left, op, right, left.getLine());
+        // Generate a unique key for the binary expression (e.g., "a + b")
+        String exprKey = generateExpressionKey(left, op, right);
+
+        // Check if this expression has already been computed
+        if (commonSubexpressions.containsKey(exprKey)) {
+            // Return the previously computed value (CSE reuse)
+            return commonSubexpressions.get(exprKey);
         }
 
-        return node;
+        ASTNode optimizedNode;
+        if (left instanceof AbstractNumberNode && right instanceof AbstractNumberNode) {
+            optimizedNode = optimizeNumberOperation(left, op, right);
+        } else if (left instanceof LiteralNode || right instanceof LiteralNode) {
+            optimizedNode = optimizeStringOperation(left, op, right);
+        } else if (left instanceof BooleanNode && right instanceof BooleanNode) {
+            optimizedNode = optimizeBooleanOperation((BooleanNode) left, op, (BooleanNode) right);
+        } else if (left instanceof NullNode || right instanceof NullNode) {
+            optimizedNode = handleNullComparison(left, op, right, left.getLine());
+        } else {
+            optimizedNode = node;
+        }
+
+        commonSubexpressions.put(exprKey, optimizedNode);
+        return optimizedNode;
+    }
+
+    private String generateExpressionKey(ASTNode left, String op, ASTNode right) {
+        return left.toString() + " " + op + " " + right.toString();
     }
 
     private ASTNode optimizeVariableDeclaration(final VariableDeclarationNode node) {
