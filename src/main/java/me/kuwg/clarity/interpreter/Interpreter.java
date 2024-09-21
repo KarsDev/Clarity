@@ -457,7 +457,11 @@ public class Interpreter {
     }
 
     private Object interpretVariableReference(final VariableReferenceNode node, final Context context) {
-        return context.getVariable(node.getName());
+        final Object value = context.getVariable(node.getName());
+        if (value instanceof VoidObject) {
+            Register.throwException("Referencing a non-defined variable: " + node.getName(), node.getLine());
+        }
+        return value;
     }
 
     private Object interpretFunctionCall(final FunctionCallNode node, Context context) {
@@ -1669,7 +1673,10 @@ public class Interpreter {
     }
 
     private Object interpretMemberFunctionCall(final MemberFunctionCallNode node, final Context context) {
-        final Object caller = interpretNode(node.getCaller(), context);
+        final Object caller = node.getCaller() instanceof VariableReferenceNode ?
+                context.getVariable(((VariableReferenceNode) node.getCaller()).getName()) :
+                interpretNode(node.getCaller(), context);
+
         if (caller == VOID_OBJECT) {
             final String className = ((VariableReferenceNode) node.getCaller()).getName();
 

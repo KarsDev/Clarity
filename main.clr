@@ -1,2 +1,7 @@
-var x = break
-native.println(x)
+class Test {
+    static fn exe() -> str {
+        return "executed"
+    }
+}
+
+native.println(Test.exe())
