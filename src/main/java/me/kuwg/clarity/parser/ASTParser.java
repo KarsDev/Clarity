@@ -519,7 +519,6 @@ public final class ASTParser {
                 return parseNumber(token);
             }
             case STRING: {
-                // TODO: handle here string calls, such as "".split("") as MemberFunctionCallNode
                 ASTNode node = new LiteralNode(token.getValue()).setLine(line);
                 while (true) {
                     if (matchAndConsume(OPERATOR, ".")) {
