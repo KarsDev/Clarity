@@ -1929,8 +1929,9 @@ public class Interpreter {
 
         if (rawName instanceof VoidObject) {
             Register.throwException("Unexpected async thread name (void)", node.getLine());
+        } else if (!(rawName instanceof String)) {
+            Register.throwException("Unexpected async thread name (" + rawName.toString() + "), expected string", node.getLine());
         }
-
         new Thread(() -> interpretBlock(node.getBlock(), context), rawName.toString()).start();
         return VOID_OBJECT;
     }

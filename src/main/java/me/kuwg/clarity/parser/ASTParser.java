@@ -451,7 +451,7 @@ public final class ASTParser {
         final int line = token.getLine();
 
         switch (token.getType()) {
-            case VARIABLE:
+            case VARIABLE: {
                 ASTNode node = new VariableReferenceNode(token.getValue()).setLine(line);
 
                 while (true) {
@@ -483,8 +483,10 @@ public final class ASTParser {
 
                 if (matchAndConsume(OPERATOR, "=")) {
                     ASTNode expression = parseExpression();
-                    if (node instanceof ObjectVariableReferenceNode) return new VariableReassignmentNode(((ObjectVariableReferenceNode) node).getCalled(), expression).setLine(line);
-                    else return new VariableReassignmentNode(((VariableReferenceNode) node).getName(), expression).setLine(line);
+                    if (node instanceof ObjectVariableReferenceNode)
+                        return new VariableReassignmentNode(((ObjectVariableReferenceNode) node).getCalled(), expression).setLine(line);
+                    else
+                        return new VariableReassignmentNode(((VariableReferenceNode) node).getName(), expression).setLine(line);
                 }
 
                 switch (current().getValue()) {
@@ -512,18 +514,36 @@ public final class ASTParser {
                     }
                 }
                 return node;
-
-            case NUMBER:
+            }
+            case NUMBER: {
                 return parseNumber(token);
-
-            case STRING:
-                return new LiteralNode(token.getValue()).setLine(line);
-
-            case DIVIDER:
+            }
+            case STRING: {
+                // TODO: handle here string calls, such as "".split("") as MemberFunctionCallNode
+                ASTNode node = new LiteralNode(token.getValue()).setLine(line);
+                while (true) {
+                    if (matchAndConsume(OPERATOR, ".")) {
+                        final String name = consume(VARIABLE).getValue();
+                        if (matchAndConsume(DIVIDER, "(")) {
+                            List<ASTNode> params = new ArrayList<>();
+                            while (!match(DIVIDER, ")")) {
+                                params.add(parseExpression());
+                                if (!matchAndConsume(DIVIDER, ",")) break;
+                            }
+                            consume(DIVIDER, ")");
+                            node = new MemberFunctionCallNode(node, name, params).setLine(line);
+                        } else {
+                            node = new ObjectVariableReferenceNode(node, name).setLine(current().getLine());
+                        }
+                    } else break;
+                }
+                return node;
+            }
+            case DIVIDER: {
                 if (token.getValue().equals("(")) {
                     ASTNode astNode = parseExpression();
                     consume(DIVIDER, ")");
-                    while (match(OPERATOR)){
+                    while (match(OPERATOR)) {
                         final String op = consume().getValue();
                         ASTNode expression = parseExpression();
                         astNode = new BinaryExpressionNode(astNode, op, expression);
@@ -532,14 +552,15 @@ public final class ASTParser {
                 } else if (token.getValue().equals("[")) {
                     return parseArray(line);
                 }
-            case KEYWORD:
+            }
+            case KEYWORD: {
                 undo();
                 return parseKeyword();
-
-            case BOOLEAN:
+            }
+            case BOOLEAN: {
                 return new BooleanNode(Boolean.parseBoolean(token.getValue())).setLine(line);
-
-            case OPERATOR:
+            }
+            case OPERATOR: {
                 if (token.getValue().equals("@")) {
                     final ASTNode result;
 
@@ -553,9 +574,9 @@ public final class ASTParser {
                 }
 
                 return parseUnaryOperator(token, line).setLine(line);
-            default:
-                throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " (type=" + token.getType() + ") at line " + token.getLine());
+            }
         }
+        throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " (type=" + token.getType() + ") at line " + token.getLine());
     }
 
     private ASTNode parseNumber(Token token) {
