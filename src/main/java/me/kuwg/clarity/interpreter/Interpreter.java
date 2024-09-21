@@ -125,99 +125,54 @@ public class Interpreter {
     }
 
     public Object interpretNode(final ASTNode node, final Context context) {
-        if (node instanceof BlockNode) {
-            return interpretBlock((BlockNode) node, context);
-        } else if (node instanceof VariableDeclarationNode) {
-            return interpretVariableDeclaration((VariableDeclarationNode) node, context);
-        } else if (node instanceof BinaryExpressionNode) {
-            return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
-        } else if (node instanceof DefaultNativeFunctionCallNode) {
-            return interpretDefaultNativeFunctionCall((DefaultNativeFunctionCallNode) node, context);
-        } else if (node instanceof IntegerNode) {
-            return ((IntegerNode) node).getValue();
-        } else if (node instanceof DecimalNode) {
-            return ((DecimalNode) node).getValue();
-        } else if (node instanceof LiteralNode) {
-            return ((LiteralNode) node).getValue();
-        } else if (node instanceof VariableReferenceNode) {
-            return interpretVariableReference((VariableReferenceNode) node, context);
-        } else if (node instanceof FunctionCallNode) {
-            return interpretFunctionCall((FunctionCallNode) node, context);
-        } else if (node instanceof ReturnNode) {
-            return interpretReturnNode((ReturnNode) node, context);
-        } else if (node instanceof ClassInstantiationNode) {
-            return interpretClassInstantiation((ClassInstantiationNode) node, context);
-        } else if (node instanceof FunctionDeclarationNode) {
-            return interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
-        } else if (node instanceof ClassDeclarationNode) {
-            return interpretClassDeclaration((ClassDeclarationNode) node, context);
-        } else if (node instanceof VariableReassignmentNode) {
-            return interpretVariableReassignment((VariableReassignmentNode) node, context);
-        } else if (node instanceof ObjectFunctionCallNode) {
-            return interpretObjectFunctionCall((ObjectFunctionCallNode) node, context);
-        } else if (node instanceof LocalVariableReferenceNode) {
-            return interpretLocalVariableReferenceNode((LocalVariableReferenceNode) node, context);
-        } else if (node instanceof LocalFunctionCallNode) {
-            return interpretLocalFunctionCallNode((LocalFunctionCallNode) node, context);
-        } else if (node instanceof ObjectVariableReferenceNode) {
-            return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
-        } else if (node instanceof ObjectVariableReassignmentNode) {
-            return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
-        } else if (node instanceof VoidNode) {
-            return VOID_RETURN;
-        } else if (node instanceof IncludeNode) {
-            return interpretInclude((IncludeNode) node, context);
-        } else if (node instanceof PackagedNativeFunctionCallNode) {
-            return interpretPackagedNativeFunctionCall((PackagedNativeFunctionCallNode) node, context);
-        } else if (node instanceof ArrayNode) {
-            return interpretArray((ArrayNode) node, context);
-        } else if (node instanceof IfNode) {
-            return interpretIf((IfNode) node, context);
-        } else if (node instanceof NullNode) {
-            return null;
-        } else if (node instanceof ForNode) {
-            return interpretFor((ForNode) node, context);
-        } else if (node instanceof WhileNode) {
-            return interpretWhile((WhileNode) node, context);
-        } else if (node instanceof BooleanNode) {
-            return ((BooleanNode) node).getValue();
-        } else if (node instanceof ForeachNode) {
-            return interpretForeach((ForeachNode) node, context);
-        } else if (node instanceof ReflectedNativeFunctionDeclaration) {
-            return interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) node, context);
-        } else if (node instanceof NativeClassDeclarationNode) {
-            return interpretNativeClassDeclaration((NativeClassDeclarationNode) node, context);
-        } else if (node instanceof LocalVariableReassignmentNode) {
-            return interpretLocalVariableReassignment((LocalVariableReassignmentNode) node, context);
-        } else if (node instanceof SelectNode) {
-            return interpretSelect((SelectNode) node, context);
-        } else if (node instanceof BreakNode) {
-            return BREAK;
-        } else if (node instanceof ContinueNode) {
-            return CONTINUE;
-        } else if (node instanceof NativeCastNode) {
-            return interpretNativeCast((NativeCastNode) node, context);
-        } else if (node instanceof ConditionedReturnNode) {
-            return interpretConditionedReturn((ConditionedReturnNode) node, context);
-        } else if (node instanceof MemberFunctionCallNode) {
-            return interpretMemberFunctionCall((MemberFunctionCallNode) node, context);
-        } else if (node instanceof AssertNode) {
-            return interpretAssert((AssertNode) node, context);
-        } else if (node instanceof IsNode) {
-            return interpretIs((IsNode) node, context);
-        } else if (node instanceof EnumDeclarationNode) {
-            return interpretEnumDeclaration((EnumDeclarationNode) node, context);
-        } else if (node instanceof AnnotationDeclarationNode) {
-            return interpretAnnotationDeclaration((AnnotationDeclarationNode) node, context);
-        } else if (node instanceof AnnotationUseNode) {
-            return interpretAnnotationUse((AnnotationUseNode) node, context);
-        } else if (node instanceof AsyncBlockNode) {
-            return interpretAsyncBlock((AsyncBlockNode) node, context);
-        } else {
-            throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
-        }
-    }
+        if (node instanceof BlockNode) return interpretBlock((BlockNode) node, context);
+        else if (node instanceof VariableDeclarationNode) return interpretVariableDeclaration((VariableDeclarationNode) node, context);
+        else if (node instanceof BinaryExpressionNode) return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
+        else if (node instanceof DefaultNativeFunctionCallNode) return interpretDefaultNativeFunctionCall((DefaultNativeFunctionCallNode) node, context);
+        else if (node instanceof IntegerNode) return ((IntegerNode) node).getValue();
+        else if (node instanceof DecimalNode) return ((DecimalNode) node).getValue();
+        else if (node instanceof LiteralNode) return ((LiteralNode) node).getValue();
+        else if (node instanceof VariableReferenceNode) return interpretVariableReference((VariableReferenceNode) node, context);
+        else if (node instanceof FunctionCallNode) return interpretFunctionCall((FunctionCallNode) node, context);
+        else if (node instanceof ReturnNode) return interpretReturnNode((ReturnNode) node, context);
+        else if (node instanceof ClassInstantiationNode) return interpretClassInstantiation((ClassInstantiationNode) node, context);
+        else if (node instanceof FunctionDeclarationNode) return interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
+        else if (node instanceof ClassDeclarationNode) return interpretClassDeclaration((ClassDeclarationNode) node, context);
+        else if (node instanceof VariableReassignmentNode) return interpretVariableReassignment((VariableReassignmentNode) node, context);
+        else if (node instanceof ObjectFunctionCallNode) return interpretObjectFunctionCall((ObjectFunctionCallNode) node, context);
+        else if (node instanceof LocalVariableReferenceNode) return interpretLocalVariableReferenceNode((LocalVariableReferenceNode) node, context);
+        else if (node instanceof LocalFunctionCallNode) return interpretLocalFunctionCallNode((LocalFunctionCallNode) node, context);
+        else if (node instanceof ObjectVariableReferenceNode) return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
+        else if (node instanceof ObjectVariableReassignmentNode) return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
+        else if (node instanceof VoidNode) return VOID_RETURN;
+        else if (node instanceof IncludeNode) return interpretInclude((IncludeNode) node, context);
+        else if (node instanceof PackagedNativeFunctionCallNode) return interpretPackagedNativeFunctionCall((PackagedNativeFunctionCallNode) node, context);
+        else if (node instanceof ArrayNode) return interpretArray((ArrayNode) node, context);
+        else if (node instanceof IfNode) return interpretIf((IfNode) node, context);
+        else if (node instanceof NullNode) return null;
+        else if (node instanceof ForNode) return interpretFor((ForNode) node, context);
+        else if (node instanceof WhileNode) return interpretWhile((WhileNode) node, context);
+        else if (node instanceof BooleanNode) return ((BooleanNode) node).getValue();
+        else if (node instanceof ForeachNode) return interpretForeach((ForeachNode) node, context);
+        else if (node instanceof ReflectedNativeFunctionDeclaration) return interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) node, context);
+        else if (node instanceof NativeClassDeclarationNode) return interpretNativeClassDeclaration((NativeClassDeclarationNode) node, context);
+        else if (node instanceof LocalVariableReassignmentNode) return interpretLocalVariableReassignment((LocalVariableReassignmentNode) node, context);
+        else if (node instanceof SelectNode) return interpretSelect((SelectNode) node, context);
+        else if (node instanceof BreakNode) return BREAK;
+        else if (node instanceof ContinueNode) return CONTINUE;
+        else if (node instanceof NativeCastNode) return interpretNativeCast((NativeCastNode) node, context);
+        else if (node instanceof ConditionedReturnNode) return interpretConditionedReturn((ConditionedReturnNode) node, context);
+        else if (node instanceof MemberFunctionCallNode) return interpretMemberFunctionCall((MemberFunctionCallNode) node, context);
+        else if (node instanceof AssertNode) return interpretAssert((AssertNode) node, context);
+        else if (node instanceof IsNode) return interpretIs((IsNode) node, context);
+        else if (node instanceof EnumDeclarationNode) return interpretEnumDeclaration((EnumDeclarationNode) node, context);
+        else if (node instanceof AnnotationDeclarationNode) return interpretAnnotationDeclaration((AnnotationDeclarationNode) node, context);
+        else if (node instanceof AnnotationUseNode) return interpretAnnotationUse((AnnotationUseNode) node, context);
+        else if (node instanceof AsyncBlockNode) return interpretAsyncBlock((AsyncBlockNode) node, context);
+        else if (node instanceof RaiseNode) return interpretRaise((RaiseNode) node, context);
 
+        throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
+    }
     public Object interpretBlock(final BlockNode block, final Context context) {
         if (block == null || block.isEmpty()) {
             return VOID_OBJECT;
@@ -1947,6 +1902,18 @@ public class Interpreter {
             Register.throwException("Unexpected async thread name (" + rawName.toString() + "), expected string", node.getLine());
         }
         new Thread(() -> interpretBlock(node.getBlock(), context), rawName.toString()).start();
+        return VOID_OBJECT;
+    }
+
+    private Object interpretRaise(final RaiseNode node, final Context context) {
+        final Object result = interpretNode(node.getException(), context);
+
+        if (!(result instanceof String)) {
+            Register.throwException("Expected string in exception raising");
+            return null;
+        }
+
+        Register.throwException((String) result, node.getLine());
         return VOID_OBJECT;
     }
 

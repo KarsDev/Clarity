@@ -1,6 +1,1 @@
-class Test {
-    constructor(val) {
-        assert val is str
-        native.println(val)
-    }
-}
+raise "LOL"

@@ -49,6 +49,7 @@ public class ASTData {
         registerNode(BreakNode.class, 0x103);
         registerNode(ContinueNode.class, 0x104);
         registerNode(AsyncBlockNode.class, 0x105);
+        registerNode(RaiseNode.class, 0x106);
 
         // Expression (0x200)
         registerNode(BinaryExpressionNode.class, 0x200);

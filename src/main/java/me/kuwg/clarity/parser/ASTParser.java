@@ -154,6 +154,8 @@ public final class ASTParser {
                 return parseBoolDeclaration();
             case ASYNC:
                 return parseAsyncDeclaration();
+            case RAISE:
+                return parseRaiseDeclaration();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -1181,6 +1183,13 @@ public final class ASTParser {
 
         return new AsyncBlockNode(name, parseBlock()).setLine(line);
     }
+
+    private ASTNode parseRaiseDeclaration() {
+        final int line = consume().getLine(); // consume "async"
+        final ASTNode exception = parseExpression();
+        return new RaiseNode(exception).setLine(line);
+    }
+
 
 
 
