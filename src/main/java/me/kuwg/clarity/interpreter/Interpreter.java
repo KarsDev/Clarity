@@ -454,7 +454,9 @@ public class Interpreter {
     }
 
     private Object interpretVariableReference(final VariableReferenceNode node, final Context context) {
-        return context.getVariable(node.getName());
+        final Object result = context.getVariable(node.getName());
+        if (result instanceof VoidObject) Register.throwException("Referencing a non-existing variable: " + node.getName(), node.getLine());
+        return result;
     }
 
     private Object interpretFunctionCall(final FunctionCallNode node, Context context) {
@@ -558,7 +560,7 @@ public class Interpreter {
         context.setCurrentClassName(name);
 
         // Create a new context for the class instantiation
-        final Context classContext = new Context(context);
+        final Context classContext = new Context(context.parentContext());
 
         // Directly initialize the params list with the expected size if known
         final List<Object> params = new ArrayList<>(node.getParams().size());
