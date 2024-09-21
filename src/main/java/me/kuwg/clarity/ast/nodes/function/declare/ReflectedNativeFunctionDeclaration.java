@@ -13,9 +13,9 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
     private String typeDefault;
     private String fileName;
     private List<ParameterNode> params;
-    private boolean isStatic, isConst, isLocal;
+    private boolean isStatic, isConst, isLocal, isAsync;
 
-    public ReflectedNativeFunctionDeclaration(final String name, final String typeDefault, final String className, final List<ParameterNode> params, final boolean isStatic, final boolean isConst, final boolean isLocal) {
+    public ReflectedNativeFunctionDeclaration(final String name, final String typeDefault, final String className, final List<ParameterNode> params, final boolean isStatic, final boolean isConst, final boolean isLocal, final boolean isAsync) {
         this.name = name;
         this.typeDefault = typeDefault;
         this.fileName = className;
@@ -23,6 +23,7 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
         this.isStatic = isStatic;
         this.isConst = isConst;
         this.isLocal = isLocal;
+        this.isAsync = isAsync;
     }
 
     public ReflectedNativeFunctionDeclaration() {
@@ -56,6 +57,10 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
         return isLocal;
     }
 
+    public final boolean isAsync() {
+        return isAsync;
+    }
+
     @Override
     public void print(final StringBuilder sb, final String indent) {
         sb.append(indent).append("Reflected Native Declaration: ").append(name).append(typeDefault != null ? "(" + typeDefault + ")\n" : "\n");
@@ -68,6 +73,9 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
         }
         if (isLocal) {
             sb.append(indent).append("  Type: Local\n");
+        }
+        if (isAsync) {
+            sb.append(indent).append("  Type: Async\n");
         }
 
         sb.append(indent).append("  File: ").append(fileName);
@@ -91,6 +99,7 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
         out.writeBoolean(isStatic);
         out.writeBoolean(isConst);
         out.writeBoolean(isLocal);
+        out.writeBoolean(isAsync);
     }
 
     @Override
@@ -103,6 +112,7 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
         this.isStatic = in.readBoolean();
         this.isConst = in.readBoolean();
         this.isLocal = in.readBoolean();
+        this.isAsync = in.readBoolean();
     }
 
     @Override
@@ -115,6 +125,7 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
                 ", isStatic=" + isStatic +
                 ", isConst=" + isConst +
                 ", isLocal=" + isLocal +
+                ", isAsync=" + isAsync +
                 '}';
     }
 }

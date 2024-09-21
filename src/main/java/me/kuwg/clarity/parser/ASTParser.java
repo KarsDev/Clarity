@@ -40,7 +40,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static me.kuwg.clarity.token.TokenType.*;
@@ -71,6 +70,8 @@ public final class ASTParser {
                 node.addChild(include);
             }
         }
+
+        includes.clear();
 
         while (currentTokenIndex < tokens.size()) {
             final ASTNode result = parseExpression();
@@ -164,6 +165,7 @@ public final class ASTParser {
         boolean isConst = false;
         boolean isStatic = false;
         boolean isLocal = false;
+        boolean isAsync = false;
 
         while (true) {
             if (matchAndConsume(KEYWORD, "const") && !isConst) {
@@ -172,6 +174,8 @@ public final class ASTParser {
                 isStatic = true;
             } else if (matchAndConsume(KEYWORD, "local") && !isLocal) {
                 isLocal = true;
+            } else if (matchAndConsume(KEYWORD, "async") && !isAsync) {
+                isAsync = true;
             } else {
                 break;
             }
@@ -181,6 +185,7 @@ public final class ASTParser {
             if (isStatic) throw new RuntimeException("Static classes are not allowed, at line " + current().getLine());
             if (isLocal) throw new RuntimeException("Local classes are not allowed, at line " + current().getLine());
             if (isConst) undo();
+            if (isAsync) throw new RuntimeException("Async classes are not allowed, at line " + current().getLine());
             return parseClassDeclaration();
         }
 
@@ -188,6 +193,7 @@ public final class ASTParser {
             if (isStatic) throw new RuntimeException("Static enums are not allowed, at line " + current().getLine());
             if (isLocal) throw new RuntimeException("Local enums are not allowed, at line " + current().getLine());
             if (isConst) undo();
+            if (isAsync) throw new RuntimeException("Enum async are not allowed, at line " + current().getLine());
             return parseEnumDeclaration();
         }
 
@@ -195,6 +201,7 @@ public final class ASTParser {
             if (isStatic) undo();
             if (isLocal) undo();
             if (isConst) undo();
+            if (isAsync) throw new RuntimeException("Native async functions are not allowed, at line " + current().getLine());
             return parseFunctionDeclaration();
         }
 
@@ -202,6 +209,7 @@ public final class ASTParser {
             if (isStatic) undo();
             if (isLocal) undo();
             if (isConst) undo();
+            if (isAsync) undo();
             return parseNativeDeclaration();
         }
 
@@ -215,6 +223,7 @@ public final class ASTParser {
             if (isStatic) undo();
             if (isLocal) undo();
             if (isConst) undo();
+            if (isAsync) undo();
             return parseFunctionDeclaration().setLine(line);
         }
 
@@ -233,6 +242,7 @@ public final class ASTParser {
         boolean isConst = false;
         boolean isStatic = false;
         boolean isLocal = false;
+        boolean isAsync = false;
 
         while (true) {
             if (matchAndConsume(KEYWORD, "const") && !isConst) {
@@ -241,6 +251,8 @@ public final class ASTParser {
                 isStatic = true;
             } else if (matchAndConsume(KEYWORD, "local") && !isLocal) {
                 isLocal = true;
+            } else if (matchAndConsume(KEYWORD, "async") && !isAsync) {
+                isAsync = true;
             } else {
                 break;
             }
@@ -255,7 +267,7 @@ public final class ASTParser {
             final String typeDefault = parseScopedValue();
 
             final int line = current().getLine();
-            return new ReflectedNativeFunctionDeclaration(name, typeDefault, fileName, params, isStatic, isConst, isLocal).setLine(line);
+            return new ReflectedNativeFunctionDeclaration(name, typeDefault, fileName, params, isStatic, isConst, isLocal, isAsync).setLine(line);
         }
 
         matchAndConsume(KEYWORD, "fn");
@@ -273,7 +285,7 @@ public final class ASTParser {
             return new MainFunctionDeclarationNode(block).setLine(line);
         }
 
-        return new FunctionDeclarationNode(name, typeDefault, isStatic, isConst, isLocal, params, block).setLine(line);
+        return new FunctionDeclarationNode(name, typeDefault, isStatic, isConst, isLocal, isAsync, params, block).setLine(line);
     }
 
     private ASTNode parseNativeDeclaration() {
@@ -281,6 +293,7 @@ public final class ASTParser {
         boolean isConst = false;
         boolean isStatic = false;
         boolean isLocal = false;
+        boolean isAsync = false;
 
         while (true) {
             if (matchAndConsume(KEYWORD, "const") && !isConst) {
@@ -289,6 +302,8 @@ public final class ASTParser {
                 isStatic = true;
             } else if (matchAndConsume(KEYWORD, "local") && !isLocal) {
                 isLocal = true;
+            } else if (matchAndConsume(KEYWORD, "async") && !isAsync) {
+                isAsync = true;
             } else {
                 break;
             }
@@ -297,6 +312,8 @@ public final class ASTParser {
         consume(); // consume "native"
 
         if (match(KEYWORD, "class") || match(KEYWORD, "const")) {
+            if (isAsync) throw new RuntimeException("Async classes are not a thing, at line " + current().getLine());
+
             undo();
             return parseNativeClassDeclaration();
         }
@@ -305,6 +322,7 @@ public final class ASTParser {
             if (isStatic) undo();
             if (isLocal) undo();
             if (isConst) undo();
+            if (isAsync) undo();
 
             undo();
             return parseFunctionDeclaration();

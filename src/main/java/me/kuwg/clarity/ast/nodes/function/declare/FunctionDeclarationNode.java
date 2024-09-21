@@ -12,16 +12,17 @@ public class FunctionDeclarationNode extends ASTNode {
 
     protected String functionName;
     private String typeDefault;
-    private boolean isStatic, isConst, isLocal;
+    private boolean isStatic, isConst, isLocal, isAsync;
     protected List<ParameterNode> parameterNodes;
     protected BlockNode block;
 
-    public FunctionDeclarationNode(final String functionName, final String typeDefault, final boolean isStatic, final boolean isConst, final boolean isLocal, final List<ParameterNode> parameterNodes, final BlockNode block) {
+    public FunctionDeclarationNode(final String functionName, final String typeDefault, final boolean isStatic, final boolean isConst, final boolean isLocal, final boolean isAsync, final List<ParameterNode> parameterNodes, final BlockNode block) {
         this.functionName = functionName;
         this.typeDefault = typeDefault;
         this.isStatic = isStatic;
         this.isConst = isConst;
         this.isLocal = isLocal;
+        this.isAsync = isAsync;
         this.parameterNodes = parameterNodes;
         this.block = block;
     }
@@ -50,6 +51,10 @@ public class FunctionDeclarationNode extends ASTNode {
         return isLocal;
     }
 
+    public final boolean isAsync() {
+        return isAsync;
+    }
+
     public final List<ParameterNode> getParameterNodes() {
         return parameterNodes;
     }
@@ -71,6 +76,9 @@ public class FunctionDeclarationNode extends ASTNode {
         }
         if (isLocal) {
             sb.append(indent).append("  Type: Local\n");
+        }
+        if (isAsync) {
+            sb.append(indent).append("  Type: Async\n");
         }
 
         if (parameterNodes.isEmpty()) {
@@ -94,6 +102,7 @@ public class FunctionDeclarationNode extends ASTNode {
         out.writeBoolean(isStatic);
         out.writeBoolean(isConst);
         out.writeBoolean(isLocal);
+        out.writeBoolean(isAsync);
         out.writeNodeList(parameterNodes);
         out.writeNode(block);
     }
@@ -106,6 +115,7 @@ public class FunctionDeclarationNode extends ASTNode {
         this.isStatic = in.readBoolean();
         this.isConst = in.readBoolean();
         this.isLocal = in.readBoolean();
+        this.isAsync = in.readBoolean();
         this.parameterNodes = in.readNodeListNoCast();
         this.block = (BlockNode) in.readNode();
     }

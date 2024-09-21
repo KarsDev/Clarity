@@ -301,7 +301,7 @@ public class Interpreter {
                 declarationNode.getParameterNodes().forEach(param -> params.add(param.getName()));
 
                 if (declarationNode.isStatic()) {
-                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), declarationNode.getTypeDefault(), true, declarationNode.isConst(), declarationNode.isLocal(), params, declarationNode.getBlock()));
+                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), declarationNode.getTypeDefault(), true, declarationNode.isConst(), declarationNode.isLocal(), declarationNode.isAsync(), params, declarationNode.getBlock()));
                 }
             } else if (statement instanceof ReflectedNativeFunctionDeclaration) {
                 final Object o = interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) statement, context);
@@ -454,9 +454,7 @@ public class Interpreter {
     }
 
     private Object interpretVariableReference(final VariableReferenceNode node, final Context context) {
-        final Object result = context.getVariable(node.getName());
-        if (result instanceof VoidObject) Register.throwException("Referencing a non-existing variable: " + node.getName(), node.getLine());
-        return result;
+        return context.getVariable(node.getName());
     }
 
     private Object interpretFunctionCall(final FunctionCallNode node, Context context) {
@@ -510,6 +508,11 @@ public class Interpreter {
         }
 
         Register.register(new Register.RegisterElement(Register.RegisterElementType.FUNCALL, ((VariableReferenceNode) node.getCaller()).getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+
+        if (definition.isAsync()) {
+            new Thread(() -> interpretBlock(definition.getBlock(), functionContext), "async:" + functionName).start();
+            return VOID_OBJECT;
+        }
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
 
@@ -1416,7 +1419,7 @@ public class Interpreter {
 
         for (final ParameterNode param : node.getParams()) params.add(param.getName());
 
-        final FunctionDefinition function = new FunctionDefinition(node.getName(), node.getTypeDefault(), node.isStatic(), node.isConst(), node.isLocal(), params, block);
+        final FunctionDefinition function = new FunctionDefinition(node.getName(), node.getTypeDefault(), node.isStatic(), node.isConst(), node.isLocal(), node.isAsync(), params, block);
 
         if (node.isStatic()) {
             final ObjectType obj = context.getClass(node.getFileName());
@@ -1453,7 +1456,7 @@ public class Interpreter {
                 declarationNode.getParameterNodes().forEach(param -> params.add(param.getName()));
 
                 if (declarationNode.isStatic()) {
-                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), declarationNode.getTypeDefault(), true, declarationNode.isConst(), declarationNode.isLocal(), params, declarationNode.getBlock()));
+                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), declarationNode.getTypeDefault(), true, declarationNode.isConst(), declarationNode.isLocal(), declarationNode.isAsync(), params, declarationNode.getBlock()));
                 }
             } else if (statement instanceof ReflectedNativeFunctionDeclaration) {
                 final Object o = interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) statement, context);
