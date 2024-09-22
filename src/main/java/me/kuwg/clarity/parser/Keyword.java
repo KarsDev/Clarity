@@ -38,6 +38,8 @@ public enum Keyword {
     BOOL,
     ASYNC,
     RAISE,
+    TRY,
+    EXCEPT
 
     ;
 
@@ -77,6 +79,8 @@ public enum Keyword {
             case "bool": return BOOL;
             case "async": return ASYNC;
             case "raise": return RAISE;
+            case "try": return TRY;
+            case "except": return EXCEPT;
 
             default: throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
         }

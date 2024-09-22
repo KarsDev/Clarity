@@ -52,6 +52,10 @@ public class Interpreter {
     private final NativeMethodHandler nmh;
     private final Context general;
 
+    private boolean EXCEPT;
+    private String EXCEPT_MESSAGE;
+    private Integer EXCEPT_LINE;
+
     public Interpreter(final AST ast) {
         final ASTOptimizer optimizer = new ASTOptimizer(ast);
         this.ast = optimizer.optimize();
@@ -70,7 +74,7 @@ public class Interpreter {
         for (final ASTNode node : ast.getRoot()) {
             if (node instanceof MainFunctionDeclarationNode) {
                 if (main != null) {
-                    Register.throwException("Found multiple main functions, at line: " + main.getLine() + " and " + node.getLine());
+                    except("Found multiple main functions, at line: " + main.getLine() + " and " + node.getLine());
                 }
                 main = (MainFunctionDeclarationNode) node;
                 ast.getRoot().getChildren().remove(node);
@@ -94,7 +98,7 @@ public class Interpreter {
                 return (int) result;
             }
         } else {
-            if (interpretNode(ast.getRoot(), general) != VOID_OBJECT) Register.throwException("Unexpected return without main function");
+            if (interpretNode(ast.getRoot(), general) != VOID_OBJECT) except("Unexpected return without main function");
             return 0;
         }
 
@@ -125,6 +129,12 @@ public class Interpreter {
     }
 
     public Object interpretNode(final ASTNode node, final Context context) {
+
+        if (EXCEPT) {
+            if (EXCEPT_LINE != null) Register.throwException(EXCEPT_MESSAGE, EXCEPT_LINE);
+            else Register.throwException(EXCEPT_MESSAGE);
+        }
+
         if (node instanceof BlockNode) return interpretBlock((BlockNode) node, context);
         else if (node instanceof VariableDeclarationNode) return interpretVariableDeclaration((VariableDeclarationNode) node, context);
         else if (node instanceof BinaryExpressionNode) return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
@@ -170,6 +180,7 @@ public class Interpreter {
         else if (node instanceof AnnotationUseNode) return interpretAnnotationUse((AnnotationUseNode) node, context);
         else if (node instanceof AsyncBlockNode) return interpretAsyncBlock((AsyncBlockNode) node, context);
         else if (node instanceof RaiseNode) return interpretRaise((RaiseNode) node, context);
+        else if (node instanceof TryExceptBlock) return interpretTryExcept((TryExceptBlock) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -204,11 +215,11 @@ public class Interpreter {
             if (valueObj instanceof ReturnValue) valueObj = ((ReturnValue) valueObj).getValue();
 
             if (valueObj instanceof VoidObject) {
-                Register.throwException("Creating a void variable: " + node.getName());
+                except("Creating a void variable: " + node.getName());
             }
 
             if (checkTypes(node.getTypeDefault(), valueObj)) {
-                Register.throwException("Unexpected value in variable declaration: " + Interpreter.getAsCLRStr(valueObj) + ", expected " + node.getTypeDefault(), node.getLine());
+                except("Unexpected value in variable declaration: " + Interpreter.getAsCLRStr(valueObj) + ", expected " + node.getTypeDefault(), node.getLine());
             }
         }
 
@@ -233,12 +244,12 @@ public class Interpreter {
 
         if (node.getInheritedClass() != null) {
             if (!(type instanceof ClassDefinition)) {
-                Register.throwException("Inherited class not found: " + node.getInheritedClass(), node.getLine());
+                except("Inherited class not found: " + node.getInheritedClass(), node.getLine());
                 return null;
             } else {
                 inheritedClass = (ClassDefinition) type;
                 if (inheritedClass.isConstant()) {
-                    Register.throwException("Inheriting a const " + (inheritedClass.isNative() ? "native " : "") + "class: " + node.getInheritedClass(), node.getLine());
+                    except("Inheriting a const " + (inheritedClass.isNative() ? "native " : "") + "class: " + node.getInheritedClass(), node.getLine());
                 }
             }
         } else {
@@ -407,7 +418,7 @@ public class Interpreter {
         for (final ASTNode param : node.getParams()) {
             final Object added = interpretNode(param, context);
             if (added instanceof VoidObject) {
-                Register.throwException("Passing void as parameter");
+                except("Passing void as parameter");
             }
             params.add(added);
         }
@@ -418,7 +429,7 @@ public class Interpreter {
     private Object interpretVariableReference(final VariableReferenceNode node, final Context context) {
         final Object value = context.getVariable(node.getName());
         if (value instanceof VoidObject) {
-            Register.throwException("Referencing a non-defined variable: " + node.getName(), node.getLine());
+            except("Referencing a non-defined variable: " + node.getName(), node.getLine());
         }
         return value;
     }
@@ -468,7 +479,7 @@ public class Interpreter {
             final String name = definitionParams.get(i);
             final Object value = params.get(i);
             if (value instanceof VoidObject) {
-                Register.throwException("Passing void as parameter");
+                except("Passing void as parameter");
             }
             functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
         }
@@ -485,7 +496,7 @@ public class Interpreter {
         final String typeDefault = definition.getTypeDefault();
 
         if (checkTypes(typeDefault, result)) {
-            Register.throwException("Unexpected return: " + result.getClass().getSimpleName() + ", expected " + typeDefault);
+            except("Unexpected return: " + result.getClass().getSimpleName() + ", expected " + typeDefault);
         }
 
         context.setCurrentFunctionName(null);
@@ -538,7 +549,7 @@ public class Interpreter {
         for (final ASTNode sub : node.getParams()) {
             final Object added = interpretNode(sub, context);
             if (added instanceof VoidObject) {
-                Register.throwException("Passing void as parameter");
+                except("Passing void as parameter");
             }
             params.add(added);
         }
@@ -595,7 +606,7 @@ public class Interpreter {
         }
 
         if (matchingConstructor == null) {
-            Register.throwException("No matching constructor found for class " + cn + " with " + params.size() + " parameters.");
+            except("No matching constructor found for class " + cn + " with " + params.size() + " parameters.");
             return new ClassObject(null, null, null); // for notnull errors
         }
 
@@ -605,7 +616,7 @@ public class Interpreter {
 
         for (int i = 0; i < constructorParams.size(); i++) {
             if (params.get(i) instanceof VoidObject) {
-                Register.throwException("Passing void as parameter");
+                except("Passing void as parameter");
             }
             constructorContext.defineVariable(constructorParams.get(i), new VariableDefinition(constructorParams.get(i), null, params.get(i), false, false, false));
         }
@@ -621,7 +632,7 @@ public class Interpreter {
 
     private Object interpretVariableReassignment(final VariableReassignmentNode node, final Context context) {
         final Object result = interpretNode(node.getValue(), context);
-        if (result instanceof VoidObject) Register.throwException("Reassigning variable with void value: " + node.getName(), node.getLine());
+        if (result instanceof VoidObject) except("Reassigning variable with void value: " + node.getName(), node.getLine());
         context.setVariable(node.getName(), result);
         return VOID_OBJECT;
     }
@@ -924,7 +935,7 @@ public class Interpreter {
         for (final ASTNode param : node.getParams()) {
             final Object returned = interpretNode(param, context);
             if (returned == VOID_OBJECT) {
-                Register.throwException("Passing void as a parameter function");
+                except("Passing void as a parameter function");
                 return null;
             }
             params.add(returned);
@@ -1129,11 +1140,6 @@ public class Interpreter {
         }
 
         return objects;
-    }
-
-    public Object except(final String message, final int line) {
-        Register.throwException(message, line);
-        return VOID_OBJECT;
     }
 
     public static String getParams(final List<?> objects) {
@@ -1429,7 +1435,7 @@ public class Interpreter {
     private Object interpretLocalVariableReassignment(final LocalVariableReassignmentNode node, final Context context) {
         final Context localContext = context.parentContext();
         final Object result = interpretNode(node.getValue(), context);
-        if (result instanceof VoidObject) Register.throwException("Reassigning variable with void value: " + node.getName(), node.getLine());
+        if (result instanceof VoidObject) except("Reassigning variable with void value: " + node.getName(), node.getLine());
         localContext.setVariable(node.getName(), result);
         return VOID_OBJECT;
     }
@@ -1479,7 +1485,7 @@ public class Interpreter {
             case BOOL:
                 return castToBool(expression, node);
             default:
-                Register.throwException("Unknown cast: " + node.getType().name().toLowerCase(), node.getLine());
+                except("Unknown cast: " + node.getType().name().toLowerCase(), node.getLine());
                 return null;
         }
     }
@@ -1501,7 +1507,7 @@ public class Interpreter {
             return Arrays.toString((Object[]) expr);
         }
 
-        Register.throwException("Could not cast to string", node.getLine());
+        except("Could not cast to string", node.getLine());
         return null;
     }
 
@@ -1516,7 +1522,7 @@ public class Interpreter {
             return (Double) expression;
         }
 
-        Register.throwException("Could not cast to float", node.getLine());
+        except("Could not cast to float", node.getLine());
         return null;
     }
 
@@ -1531,7 +1537,7 @@ public class Interpreter {
             return (Long) expression;
         }
 
-        Register.throwException("Could not cast to int", node.getLine());
+        except("Could not cast to int", node.getLine());
         return null;
     }
 
@@ -1539,7 +1545,7 @@ public class Interpreter {
         try {
             return (Object[]) expression;
         } catch (final ClassCastException ignore) {
-            Register.throwException("Could not cast to arr", node.getLine());
+            except("Could not cast to arr", node.getLine());
             return null;
         }
     }
@@ -1563,7 +1569,7 @@ public class Interpreter {
             }
             return (boolean) expression;
         } catch (final ClassCastException ignore) {
-            Register.throwException("Could not cast to bool", node.getLine());
+            except("Could not cast to bool", node.getLine());
             return null;
         }
     }
@@ -1573,7 +1579,7 @@ public class Interpreter {
         try {
             return Double.parseDouble(expression);
         } catch (NumberFormatException e) {
-            Register.throwException("Could not cast to float", node.getLine());
+            except("Could not cast to float", node.getLine());
             return null;
         }
     }
@@ -1588,7 +1594,7 @@ public class Interpreter {
                 } catch (final NumberFormatException ignored) {
                 }
             }
-            Register.throwException("Could not cast to int", node.getLine());
+            except("Could not cast to int", node.getLine());
             return null;
         }
     }
@@ -1659,7 +1665,7 @@ public class Interpreter {
                         for (final EnumClassDefinition.EnumValue value : ecd.getValues()) {
                             if (value.getName().equals(valueOfLiteral)) return value;
                         }
-                        Register.throwException("Enum value not found by name " + valueOfLiteral);
+                        except("Enum value not found by name " + valueOfLiteral);
                     }
                     default: {
                         break;
@@ -1764,7 +1770,7 @@ public class Interpreter {
         for (final ASTNode param : node.getParams()) {
             final Object returned = interpretNode(param, context);
             if (returned == VOID_OBJECT) {
-                Register.throwException("Passing void as a parameter function");
+                except("Passing void as a parameter function");
                 return new ArrayList<>();
             }
             params.add(returned);
@@ -1798,7 +1804,7 @@ public class Interpreter {
         }
         if (!apply) {
             final Object o = interpretNode(node.getOrElse(), context);
-            if (!(o instanceof VoidObject)) Register.throwException(String.valueOf(o), node.getLine());
+            if (!(o instanceof VoidObject)) except(String.valueOf(o), node.getLine());
         }
         return VOID_OBJECT;
     }
@@ -1824,7 +1830,7 @@ public class Interpreter {
             case VOID:
                 return result instanceof VoidObject;
             default:
-                Register.throwException("Unknown 'is' type: " + node.getType().name().toLowerCase(), node.getLine());
+                except("Unknown 'is' type: " + node.getType().name().toLowerCase(), node.getLine());
                 return false;
         }
     }
@@ -1870,13 +1876,13 @@ public class Interpreter {
         final Object ret = VOID_OBJECT;
         final ObjectType rawDefinition = context.getAnnotation(node.getName());
         if (!(rawDefinition instanceof AnnotationDefinition)) {
-            Register.throwException("Annotation not found: " + node.getName());
+            except("Annotation not found: " + node.getName());
             return ret;
         }
 
         final AnnotationDefinition annotation = (AnnotationDefinition) rawDefinition;
         if (annotation.getAnnotationElements().size() != node.getValues().size()) {
-            Register.throwException("Not all required elements are declared in annotation: " + node.getName(), node.getLine());
+            except("Not all required elements are declared in annotation: " + node.getName(), node.getLine());
             return ret;
         }
         return ret;
@@ -1886,9 +1892,9 @@ public class Interpreter {
         final Object rawName = interpretNode(node.getName(), context);
 
         if (rawName instanceof VoidObject) {
-            Register.throwException("Unexpected async thread name (void)", node.getLine());
+            except("Unexpected async thread name (void)", node.getLine());
         } else if (!(rawName instanceof String)) {
-            Register.throwException("Unexpected async thread name (" + rawName.toString() + "), expected string", node.getLine());
+            except("Unexpected async thread name (" + rawName.toString() + "), expected string", node.getLine());
         }
         new Thread(() -> interpretBlock(node.getBlock(), context), rawName.toString()).start();
         return VOID_OBJECT;
@@ -1898,12 +1904,56 @@ public class Interpreter {
         final Object result = interpretNode(node.getException(), context);
 
         if (!(result instanceof String)) {
-            Register.throwException("Expected string in exception raising");
+            except("Expected string in exception raising");
             return null;
         }
 
-        Register.throwException((String) result, node.getLine());
+        except((String) result, node.getLine());
         return VOID_OBJECT;
     }
 
+    private Object interpretTryExcept(final TryExceptBlock node, final Context context) {
+        final Context tryContext = new Context(context);
+
+        final BlockNode tryBlock = node.getTryBlock();
+        if (tryBlock == null || tryBlock.isEmpty()) {
+            return VOID_OBJECT;
+        }
+
+        for (final ASTNode anode : tryBlock) {
+            final Object result = interpretNode(anode, tryContext);
+            if (result instanceof ReturnValue) {
+                return ((ReturnValue) result).getValue();
+            } else if (result instanceof BreakValue) {
+                return BREAK;
+            } else if (result instanceof ContinueValue) {
+                return CONTINUE;
+            }
+
+            if (EXCEPT) {
+                EXCEPT = false;
+                final BlockNode exceptBlock = node.getExceptBlock();
+                final Context exceptContext = new Context(context);
+                exceptContext.defineVariable(node.getExcepted(), new VariableDefinition(node.getExcepted(), "str", EXCEPT_MESSAGE, false, false, false));
+                interpretBlock(exceptBlock, exceptContext);
+            }
+        }
+        return VOID_OBJECT;
+    }
+
+
+
+
+    public Object except(final String message, final int line) {
+        EXCEPT = true;
+        EXCEPT_MESSAGE = message;
+        EXCEPT_LINE = line;
+        return VOID_OBJECT;
+    }
+
+    private void except(final String message) {
+        EXCEPT = true;
+        EXCEPT_MESSAGE = message;
+        EXCEPT_LINE = null;
+    }
 }

@@ -156,6 +156,8 @@ public final class ASTParser {
                 return parseAsyncDeclaration();
             case RAISE:
                 return parseRaiseDeclaration();
+            case TRY:
+                return parseTryDeclaration();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -1190,19 +1192,14 @@ public final class ASTParser {
         return new RaiseNode(exception).setLine(line);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    private ASTNode parseTryDeclaration() {
+        final int line = consume().getLine(); // consume "try"
+        final BlockNode tryBlock = parseBlock();
+        consume(KEYWORD, "except"); // consume "except" and parse its block
+        final String variable = match(VARIABLE) ? consume().getValue() : null;
+        final BlockNode exceptBlock = parseBlock();
+        return new TryExceptBlock(tryBlock, variable, exceptBlock).setLine(line);
+    }
 
 
 
