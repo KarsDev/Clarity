@@ -642,7 +642,6 @@ public final class ASTParser {
                 if (right instanceof VariableReferenceNode) {
                     final char v = token.getValue().charAt(0); // consume op
                     final VariableReferenceNode left = (VariableReferenceNode) right;
-                    System.out.println(new VariableReassignmentNode(left.getName(), new BinaryExpressionNode(left, String.valueOf(v), new IntegerNode(1))));
                     return new VariableReassignmentNode(left.getName(), new BinaryExpressionNode(left, String.valueOf(v), new IntegerNode(1)));
                 }
             }

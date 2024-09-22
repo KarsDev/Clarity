@@ -326,7 +326,7 @@ public class Interpreter {
         }
 
         except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " " + operator + " " + rightValue.getClass().getSimpleName(), node.getLine());
-        return null;
+        return VOID_OBJECT;
     }
 
     private Object handleNullComparison(final Object leftValue, final Object rightValue, final String operator, final int line) {
@@ -350,7 +350,7 @@ public class Interpreter {
                 return !leftValue.equals(rightValue);
         }
         except("Operator " + operator + " is not supported for string operands.", line);
-        return null;
+        return VOID_OBJECT;
     }
 
     private Object handleNumericOperation(final Number leftNumber, final Number rightNumber, final String operator, final int line) {
@@ -456,14 +456,14 @@ public class Interpreter {
 
             if (clazz == null) {
                 except("Calling a function that doesn't exist: " + functionName + getParams(params), node.getLine());
-                return null;
+                return VOID_OBJECT;
             }
             final FunctionDefinition rawStaticFun = ((ClassDefinition) clazz).getStaticFunction(functionName, node.getParams().size());
             if (rawStaticFun != null) {
                 definition = rawStaticFun;
             } else {
                 except("Calling a function that doesn't exist: " + functionName + getParams(params), node.getLine());
-                return null;
+                return VOID_OBJECT;
             }
         } else definition = (FunctionDefinition) type;
 
@@ -522,7 +522,7 @@ public class Interpreter {
         } else if (result instanceof Boolean) {
             match = typeDefault.equals("bool");
         } else {
-            throw new RuntimeException("unsupported return for type default: " + result.getClass().getSimpleName());
+            throw new RuntimeException("unsupported return for type default: " + (result != null ? result.getClass().getSimpleName() : null));
         }
         return !match;
     }
@@ -558,7 +558,7 @@ public class Interpreter {
         final ObjectType raw = context.getClass(name);
         if (raw == VOID_OBJECT) {
             except("Class not found: " + name, node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final ClassDefinition definition = (ClassDefinition) raw;
@@ -654,7 +654,7 @@ public class Interpreter {
             return handleStaticFunctionCall(node, context);
         } else {
             except("You can't call a function out of a " + caller.getClass().getSimpleName(), node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
     }
 
@@ -662,7 +662,7 @@ public class Interpreter {
         final ObjectType rawDefinition = context.getClass(node.getCaller());
         if (rawDefinition instanceof VoidObject) {
             except("Accessing a static function of a non-existent class: " + node.getCaller(), node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final ClassDefinition classDefinition = (ClassDefinition) rawDefinition;
@@ -674,11 +674,11 @@ public class Interpreter {
 
         if (definition == null) {
             except("Accessing a static function that does not exist: " + node.getCaller() + "#" + node.getCalled() + "(...)", node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
-        if (params == null) return null;
+        if (params == null) return VOID_OBJECT;
 
         final Context functionContext = new Context(context);
         defineFunctionParameters(functionContext, definition, params);
@@ -694,7 +694,7 @@ public class Interpreter {
         final ObjectType rawDefinition = context.getClass(((VariableReferenceNode) node.getCaller()).getName());
         if (rawDefinition instanceof VoidObject) {
             except("Accessing a static function of a non-existent class: " + node.getCaller(), node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final ClassDefinition classDefinition = (ClassDefinition) rawDefinition;
@@ -708,7 +708,7 @@ public class Interpreter {
 
         if (definition == null) {
             except("Accessing a static function that does not exist: " + node.getCaller() + "#" + node.getName() + "(...)", node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
@@ -718,7 +718,7 @@ public class Interpreter {
 
         if (definition.isLocal() && !classDefinition.getName().equals(preName)) {
             except("Accessing a local function: " + definition.getName(), node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         Register.register(new Register.RegisterElement(Register.RegisterElementType.STATICCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
@@ -731,7 +731,7 @@ public class Interpreter {
     private Object handleEnumValueFunctionCall(final MemberFunctionCallNode node, final EnumClassDefinition.EnumValue val) {
         if (!node.getParams().isEmpty()) {
             except("All enum value functions have no params.", node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
         switch (node.getName()) {
             case "value":
@@ -740,7 +740,7 @@ public class Interpreter {
                 return val.getName();
             default:
                 except("Illegal function in array context: " + node.getName(), node.getLine());
-                return null;
+                return VOID_OBJECT;
         }
     }
 
@@ -759,7 +759,7 @@ public class Interpreter {
             params = getFunctionParameters(node, context, -1);
             Register.register(new Register.RegisterElement(Register.RegisterElementType.ARRAYCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
         } else {
-            return null;
+            return VOID_OBJECT;
         }
 
         switch (fn) {
@@ -800,10 +800,10 @@ public class Interpreter {
                 break;
             default:
                 except("Illegal function in array context: " + fn + " with params " + params, raw.getLine());
-                return null;
+                return VOID_OBJECT;
         }
 
-        return null;
+        return VOID_OBJECT;
     }
 
     private Object handleStringFunctionCall(final ASTNode raw, final Context context, final String caller) {
@@ -821,7 +821,7 @@ public class Interpreter {
             params = getFunctionParameters(node, context, -1);
             Register.register(new Register.RegisterElement(Register.RegisterElementType.STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
         } else {
-            return null;
+            return VOID_OBJECT;
         }
 
         switch (fn) {
@@ -863,10 +863,10 @@ public class Interpreter {
                 break;
             default:
                 except("Illegal function in string context: " + fn + " with params " + params, raw.getLine());
-                return null;
+                return VOID_OBJECT;
         }
 
-        return null;
+        return VOID_OBJECT;
     }
 
 
@@ -884,14 +884,14 @@ public class Interpreter {
 
         if (rawDefinition == VOID_OBJECT) {
             except("Called a non-existent function: " + classObject.getName() + "#" + node.getCalled(), node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         FunctionDefinition definition = (FunctionDefinition) rawDefinition;
         final Context functionContext = new Context(classObject.getContext());
 
         final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
-        if (params == null) return null;
+        if (params == null) return VOID_OBJECT;
 
         defineFunctionParameters(functionContext, definition, params);
 
@@ -936,14 +936,14 @@ public class Interpreter {
             final Object returned = interpretNode(param, context);
             if (returned == VOID_OBJECT) {
                 except("Passing void as a parameter function");
-                return null;
+                return new ArrayList<>();
             }
             params.add(returned);
         }
 
         if (expectedSize != -1 && (params.size() > expectedSize || params.size() < expectedSize)) {
             except("Parameter size mismatch. Expected: " + expectedSize + ", Found: " + params.size(), node.getLine());
-            return null;
+            return new ArrayList<>();
         }
         return params;
     }
@@ -985,7 +985,7 @@ public class Interpreter {
 
         if (type == VOID_OBJECT) {
             except("Calling a local function that doesn't exist: " + functionName + getParams(params), node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final FunctionDefinition definition = (FunctionDefinition) type;
@@ -1024,7 +1024,7 @@ public class Interpreter {
 
             if (!(classDefinitionRaw instanceof ClassDefinition)) {
                 except("Accessing a static variable of a non-existent class: " + className, node.getLine());
-                return null;
+                return VOID_OBJECT;
             }
 
             final ClassDefinition classDefinition = (ClassDefinition) classDefinitionRaw;
@@ -1038,13 +1038,13 @@ public class Interpreter {
 
             if (staticVariable == null) {
                 except("Accessing a static variable that does not exist: " + className + "#" + calledObjectName, node.getLine());
-                return null;
+                return VOID_OBJECT;
             }
 
             if (staticVariable.isLocal()) {
                 if (!classDefinition.getName().equals(context.getCurrentClassName())) {
                     except("Accessing a local static variable: " + staticVariable.getName(), node.getLine());
-                    return null;
+                    return VOID_OBJECT;
                 }
             }
 
@@ -1053,14 +1053,14 @@ public class Interpreter {
 
         if (!(callerObject instanceof ClassObject)) {
             except("Expected Class Object, but found " + (callerObject != null ? callerObject.getClass().getSimpleName() : "null") + ", while getting " + calledObjectName, node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final ObjectType cvr = ((ClassObject) callerObject).getContext().getVariableDefinition(calledObjectName);
 
         if (cvr instanceof VoidObject) {
             except("Accessing an instance variable that does not exist: " + node.getCaller() + "." + calledObjectName, node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final VariableDefinition calledVariable = (VariableDefinition) cvr;
@@ -1068,7 +1068,7 @@ public class Interpreter {
         if (calledVariable.isLocal()) {
             if (!calledVariable.getName().equals(context.getCurrentClassName())) {
                 except("Accessing a local variable: " + calledVariable.getName(), node.getLine());
-                return null;
+                return VOID_OBJECT;
             }
         }
 
@@ -1080,7 +1080,7 @@ public class Interpreter {
 
         if (!(callerObjectRaw instanceof ClassObject)) {
             except("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object", node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final Object value = interpretNode(node.getValue(), context);
@@ -1279,11 +1279,11 @@ public class Interpreter {
 
         if (object == VOID_OBJECT) {
             except("Void type not allowed in foreach", node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
         if (object == null) {
             except("Null list in foreach", node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         Object[] arr;
@@ -1335,7 +1335,7 @@ public class Interpreter {
             return VOID_OBJECT;
         } else {
             except("Expected list, array, or integer in foreach, but got " + object.getClass().getSimpleName(), node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, null, false, false, false));
@@ -1486,7 +1486,7 @@ public class Interpreter {
                 return castToBool(expression, node);
             default:
                 except("Unknown cast: " + node.getType().name().toLowerCase(), node.getLine());
-                return null;
+                return VOID_OBJECT;
         }
     }
 
@@ -1508,7 +1508,7 @@ public class Interpreter {
         }
 
         except("Could not cast to string", node.getLine());
-        return null;
+        return "";
     }
 
     private Double castToFloat(final Object expression, final NativeCastNode node) {
@@ -1523,7 +1523,7 @@ public class Interpreter {
         }
 
         except("Could not cast to float", node.getLine());
-        return null;
+        return 0D;
     }
 
     private Long castToInt(final Object expression, final NativeCastNode node) {
@@ -1538,7 +1538,7 @@ public class Interpreter {
         }
 
         except("Could not cast to int", node.getLine());
-        return null;
+        return 0L;
     }
 
     private Object[] castToArr(final Object expression, final NativeCastNode node) {
@@ -1546,7 +1546,7 @@ public class Interpreter {
             return (Object[]) expression;
         } catch (final ClassCastException ignore) {
             except("Could not cast to arr", node.getLine());
-            return null;
+            return new Object[0];
         }
     }
 
@@ -1570,7 +1570,7 @@ public class Interpreter {
             return (boolean) expression;
         } catch (final ClassCastException ignore) {
             except("Could not cast to bool", node.getLine());
-            return null;
+            return false;
         }
     }
 
@@ -1580,13 +1580,13 @@ public class Interpreter {
             return Double.parseDouble(expression);
         } catch (NumberFormatException e) {
             except("Could not cast to float", node.getLine());
-            return null;
+            return 0D;
         }
     }
 
     private Long parseIntegerOrThrow(final String expression, final NativeCastNode node) {
         try {
-            return (long) Tokenizer.processNumber(expression);
+            return Tokenizer.processNumber(expression).longValue();
         } catch (final NumberFormatException e) {
             if (expression.contains(".")) {
                 try {
@@ -1595,7 +1595,7 @@ public class Interpreter {
                 }
             }
             except("Could not cast to int", node.getLine());
-            return null;
+            return 0L;
         }
     }
 
@@ -1613,11 +1613,11 @@ public class Interpreter {
                 apply = true;
             } else {
                 except("Conditioned return with int condition must be 0 or 1", node.getLine());
-                return null;
+                return VOID_OBJECT;
             }
         } else if (!(result instanceof Boolean)) {
             except("Conditioned return without a boolean condition", node.getLine());
-            return null;
+            return VOID_OBJECT;
         } else {
             apply = (boolean) result;
         }
@@ -1638,7 +1638,7 @@ public class Interpreter {
 
             if (!(rawClassDefinition instanceof ClassDefinition)) {
                 except("Class not found for static call: " + node.getName(), node.getLine());
-                return null;
+                return VOID_OBJECT;
             }
 
             final ClassDefinition classDefinition = (ClassDefinition) rawClassDefinition;
@@ -1681,7 +1681,7 @@ public class Interpreter {
 
             if (definition == null) {
                 except("Static function not found: " + classDefinition.getName() + "#" + node.getName(), node.getLine());
-                return null;
+                return VOID_OBJECT;
             }
 
             final Context functionContext = new Context(context);
@@ -1698,7 +1698,7 @@ public class Interpreter {
 
             if (definition.isLocal() && !classDefinition.getName().equals(preName)) {
                 except("Accessing a local function: " + definition.getName(), node.getLine());
-                return null;
+                return VOID_OBJECT;
             }
 
             final Object result = interpretBlock(definition.getBlock(), functionContext);
@@ -1718,7 +1718,7 @@ public class Interpreter {
             if (resultArray instanceof Object[] && ((Object[]) resultArray).length != ((Object[]) caller).length) {
                 if (!(node.getCaller() instanceof VariableReferenceNode)) {
                     except("Expected variable reference", node.getLine());
-                    return null;
+                    return VOID_OBJECT;
                 }
                 context.setVariable(((VariableReferenceNode) node.getCaller()).getName(), resultArray);
                 return VOID_OBJECT;
@@ -1728,7 +1728,7 @@ public class Interpreter {
             return handleStringFunctionCall(node, context, (String) caller);
         } else if (!(caller instanceof ClassObject)) {
             except("Expected class object caller", node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final ClassObject object = (ClassObject) caller;
@@ -1737,14 +1737,14 @@ public class Interpreter {
 
         if (!(rawDefinition instanceof FunctionDefinition)) {
             except("Instance function not found: " + objectName + "#" + node.getName(), node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final FunctionDefinition definition = (FunctionDefinition) rawDefinition;
 
         if (definition.isLocal() && !object.getName().equals(context.getCurrentClassName())) {
             except("Accessing a local function: " + definition.getName(), node.getLine());
-            return null;
+            return VOID_OBJECT;
         }
 
         final Context functionContext = new Context(object.getContext());
@@ -1794,11 +1794,11 @@ public class Interpreter {
                 apply = true;
             } else {
                 except("Assert condition with int must be 0 or 1", node.getLine());
-                return null;
+                return VOID_OBJECT;
             }
         } else if (!(result instanceof Boolean)) {
             except("Assert condition must have a boolean value or int (0 or 1)", node.getLine());
-            return null;
+            return VOID_OBJECT;
         } else {
             apply = (boolean) result;
         }
@@ -1905,7 +1905,7 @@ public class Interpreter {
 
         if (!(result instanceof String)) {
             except("Expected string in exception raising");
-            return null;
+            return VOID_OBJECT;
         }
 
         except((String) result, node.getLine());
@@ -1922,13 +1922,6 @@ public class Interpreter {
 
         for (final ASTNode anode : tryBlock) {
             final Object result = interpretNode(anode, tryContext);
-            if (result instanceof ReturnValue) {
-                return ((ReturnValue) result).getValue();
-            } else if (result instanceof BreakValue) {
-                return BREAK;
-            } else if (result instanceof ContinueValue) {
-                return CONTINUE;
-            }
 
             if (EXCEPT) {
                 EXCEPT = false;
@@ -1936,6 +1929,15 @@ public class Interpreter {
                 final Context exceptContext = new Context(context);
                 exceptContext.defineVariable(node.getExcepted(), new VariableDefinition(node.getExcepted(), "str", EXCEPT_MESSAGE, false, false, false));
                 interpretBlock(exceptBlock, exceptContext);
+                break;
+            }
+
+            if (result instanceof ReturnValue) {
+                return ((ReturnValue) result).getValue();
+            } else if (result instanceof BreakValue) {
+                return BREAK;
+            } else if (result instanceof ContinueValue) {
+                return CONTINUE;
             }
         }
         return VOID_OBJECT;
