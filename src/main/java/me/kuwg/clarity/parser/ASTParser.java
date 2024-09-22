@@ -630,7 +630,7 @@ public final class ASTParser {
                 return new BinaryExpressionNode(new BooleanNode(false), "==", right).setLine(line);
             case ".":
                 if (right instanceof IntegerNode) {
-                    final int integerValue = ((IntegerNode) right).getValue();
+                    final long integerValue = ((IntegerNode) right).getValue();
                     final int numberOfDigits = (int) Math.log10(integerValue) + 1;
                     final double divisor = Math.pow(10, numberOfDigits);
                     return new DecimalNode(integerValue / divisor);

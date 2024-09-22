@@ -7,9 +7,9 @@ import java.io.IOException;
 
 public class IntegerNode extends AbstractNumberNode {
 
-    private int value;
+    private long value;
 
-    public IntegerNode(final int value) {
+    public IntegerNode(final long value) {
         this.value = value;
     }
 
@@ -17,7 +17,7 @@ public class IntegerNode extends AbstractNumberNode {
         super();
     }
 
-    public final int getValue() {
+    public final long getValue() {
         return value;
     }
 
@@ -29,12 +29,12 @@ public class IntegerNode extends AbstractNumberNode {
 
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
-        out.writeInt(value);
+        out.writeLong(value);
     }
 
     @Override
     public void load0(final ASTInputStream in) throws IOException {
-        this.value = in.readInt();
+        this.value = in.readLong();
     }
 
     @Override

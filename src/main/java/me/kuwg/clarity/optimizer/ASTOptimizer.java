@@ -85,10 +85,10 @@ public class ASTOptimizer {
         final Number leftValue = (Number) parseValue(left);
         final Number rightValue = (Number) parseValue(right);
 
-        if (leftValue instanceof Integer && rightValue instanceof Integer) {
-            final int li = leftValue.intValue();
-            final int ri = rightValue.intValue();
-            int result;
+        if (leftValue instanceof Long && rightValue instanceof Long) {
+            final long li = leftValue.longValue();
+            final long ri = rightValue.longValue();
+            long result;
             switch (op) {
                 case "+":
                     result = li + ri;

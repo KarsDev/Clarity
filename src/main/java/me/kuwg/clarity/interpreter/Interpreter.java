@@ -346,7 +346,7 @@ public class Interpreter {
         if (leftNumber instanceof Double || leftNumber instanceof Float || rightNumber instanceof Double || rightNumber instanceof Float) {
             return evaluateDoubleOperation(leftNumber.doubleValue(), rightNumber.doubleValue(), operator, line);
         } else {
-            return evaluateIntegerOperation(leftNumber.intValue(), rightNumber.intValue(), operator, line);
+            return evaluateIntegerOperation(leftNumber.longValue(), rightNumber.longValue(), operator, line);
         }
     }
 
@@ -379,7 +379,7 @@ public class Interpreter {
         }
     }
 
-    private Object evaluateIntegerOperation(final int left, final int right, final String operator, final int line) {
+    private Object evaluateIntegerOperation(final long left, final long right, final String operator, final int line) {
         switch (operator) {
             case "+": return left + right;
             case "-": return left - right;
@@ -500,7 +500,7 @@ public class Interpreter {
             match = typeDefault.equals("void");
         } else if (result instanceof String) {
             match = typeDefault.equals("str");
-        } else if (result instanceof Integer) {
+        } else if (result instanceof Long) {
             match = typeDefault.equals("int");
         } else if (result instanceof Double) {
             match = typeDefault.equals("float");
@@ -511,7 +511,7 @@ public class Interpreter {
         } else if (result instanceof Boolean) {
             match = typeDefault.equals("bool");
         } else {
-            throw new RuntimeException("unsupported return for type default: " + result);
+            throw new RuntimeException("unsupported return for type default: " + result.getClass().getSimpleName());
         }
         return !match;
     }
@@ -1284,9 +1284,10 @@ public class Interpreter {
 
         if (object instanceof Object[]) {
             arr = (Object[]) object;
-        } else if (object instanceof Integer) {
-            final int range = (int) object;
-            int i = 0;
+        } else if (object instanceof Long) {
+            final long range = (long) object;
+            long i = 0;
+
             while (i < range){
                 forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, i, false, false, false));
                 final Object val = interpretBlock(node.getBlock(), forEachContext);
@@ -1299,13 +1300,7 @@ public class Interpreter {
                 if (val != VOID_OBJECT) {
                     return new ReturnValue(val);
                 }
-                final Object var = forEachContext.getVariable(node.getVariable());
-                if (!(var instanceof Integer)) {
-                    Register.throwException("Set variable " + node.getVariable() + " as unsupported type in for each, expected int");
-                    return VOID_OBJECT;
-                }
-
-                i = (int) var + 1;
+                i++;
 
                 forEachContext = new Context(context);
             }
@@ -1315,7 +1310,7 @@ public class Interpreter {
             final double range = (double) object;
             double i = 0;
             while (i < range) {
-                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, i, false, false, false));
+                forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, VOID_OBJECT, false, false, false));
                 final Object val = interpretBlock(node.getBlock(), forEachContext);
                 if (val == BREAK) {
                     break;
@@ -1326,13 +1321,7 @@ public class Interpreter {
                 if (val != VOID_OBJECT) {
                     return new ReturnValue(val);
                 }
-                final Object var = forEachContext.getVariable(node.getVariable());
-                if (var instanceof Double || var instanceof Integer) {
-                    i = (double) var + 1;
-                } else {
-                    Register.throwException("Set variable " + node.getVariable() + " as unsupported type in for each, expected int or double");
-                    return VOID_OBJECT;
-                }
+                i++;
                 forEachContext = new Context(context);
 
             }
@@ -1531,15 +1520,15 @@ public class Interpreter {
         return null;
     }
 
-    private Integer castToInt(final Object expression, final NativeCastNode node) {
+    private Long castToInt(final Object expression, final NativeCastNode node) {
         if (expression instanceof String) {
             return parseIntegerOrThrow((String) expression, node);
         }
         if (expression instanceof Double) {
-            return ((Double) expression).intValue();
+            return ((Double) expression).longValue();
         }
-        if (expression instanceof Integer) {
-            return (Integer) expression;
+        if (expression instanceof Long) {
+            return (Long) expression;
         }
 
         Register.throwException("Could not cast to int", node.getLine());
@@ -1589,13 +1578,13 @@ public class Interpreter {
         }
     }
 
-    private Integer parseIntegerOrThrow(final String expression, final NativeCastNode node) {
+    private Long parseIntegerOrThrow(final String expression, final NativeCastNode node) {
         try {
-            return (Integer) Tokenizer.processNumber(expression);
+            return (long) Tokenizer.processNumber(expression);
         } catch (final NumberFormatException e) {
             if (expression.contains(".")) {
                 try {
-                    return (Integer) Tokenizer.processNumber(expression.split("\\.")[0]);
+                    return (long) Tokenizer.processNumber(expression.split("\\.")[0]);
                 } catch (final NumberFormatException ignored) {
                 }
             }
