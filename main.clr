@@ -1,13 +1,1 @@
-var x
-while true {
-    try {
-        const str result = native.input("Write a number: ")
-        x = int(result)
-        break
-    } except {
-        native.err("Invalid number format.")
-        continue
-    }
-}
 
-native.println("You wrote " + x)
