@@ -32,25 +32,16 @@ public class NativeMethodHandler {
     private static final Map<String, ClarityNativeClass> nativeClasses = new HashMap<>();
 
     public NativeMethodHandler() {
-        initializeDefaultFunctions();
+        initializeDefaultLibrary();
         initializePackagedFunctions();
-        initializeNativeClasses();
     }
 
-    private void initializeDefaultFunctions() {
-        registerDefaultFunction(new PrintlnNative());
-        registerDefaultFunction(new InputNative());
-        registerDefaultFunction(new PrintNative());
-        registerDefaultFunction(new NowNative());
-        registerDefaultFunction(new NanoNative());
-        registerDefaultFunction(new ErrNative());
-        registerDefaultFunction(new ExecNative());
-        registerDefaultFunction(new SleepNative());
-        registerDefaultFunction(new TypeOfNative());
+    private void initializeDefaultLibrary() {
+        loadLibrary(new LocalClarityNativeLibrary());
     }
 
     private void initializePackagedFunctions() {
-        // can be accessed by anyone
+        // required accessor: none
         registerPackagedFunction(new CreateListNative());
         registerPackagedFunction(new ExceptNative());
 
@@ -67,22 +58,8 @@ public class NativeMethodHandler {
         registerPackagedFunction(new GetYearNative());
     }
 
-    private void initializeNativeClasses() {
-        registerNativeClass(new MathNativeClass());
-        registerNativeClass(new ReflectionsNativeClass());
-        registerNativeClass(new FileNativeClass());
-    }
-
-    private void registerDefaultFunction(final DefaultNativeFunction<?> function) {
-        defaultFunctions.put(function.getName(), function);
-    }
-
     private void registerPackagedFunction(final PackagedNativeFunction<?> function) {
         packagedFunctions.put(function.getFullyQualifiedName(), function);
-    }
-
-    private void registerNativeClass(final NativeClass clazz) {
-        nativeClasses.put(clazz.getName(), clazz);
     }
 
     public Object callDefault(final String name, final List<Object> params) {
@@ -96,8 +73,8 @@ public class NativeMethodHandler {
     }
 
     public Object callPackaged(final String pkg, final String name, final String callerClass, final List<Object> params) {
-        String key = pkg + "." + name;
-        PackagedNativeFunction<?> function = packagedFunctions.get(key);
+        final String key = pkg + "." + name;
+        final PackagedNativeFunction<?> function = packagedFunctions.get(key);
         if (function != null && function.applies(pkg, name, callerClass, params)) {
             return function.call(params);
         }
@@ -124,7 +101,7 @@ public class NativeMethodHandler {
     }
 
     private String objectsToClassesString(final List<Object> objects) {
-        StringBuilder s = new StringBuilder();
+        final StringBuilder s = new StringBuilder();
         for (int i = 0, objectsLength = objects.size(); i < objectsLength; i++) {
             if (i != 0) s.append(", ");
             s.append(objects.get(i).getClass().getSimpleName().toLowerCase());

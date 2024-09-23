@@ -1,7 +1,8 @@
 var x
 while true {
     try {
-        x = int(native.input("Write a number: "))
+        const str result = native.input("Write a number: ")
+        x = int(result)
         break
     } except {
         native.err("Invalid number format.")
