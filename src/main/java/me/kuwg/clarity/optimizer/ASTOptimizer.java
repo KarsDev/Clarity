@@ -1,5 +1,6 @@
 package me.kuwg.clarity.optimizer;
 
+import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
@@ -27,7 +28,7 @@ public class ASTOptimizer {
     }
 
     public final AST optimize() {
-        ast.getRoot().getChildren().replaceAll(this::optimizeNode);
+        if (Clarity.INFORMATION.getOption("optimize")) ast.getRoot().getChildren().replaceAll(this::optimizeNode);
         return ast;
     }
 

@@ -678,7 +678,6 @@ public class Interpreter {
         }
 
         final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
-        if (params == null) return VOID_OBJECT;
 
         final Context functionContext = new Context(context);
         defineFunctionParameters(functionContext, definition, params);
@@ -891,7 +890,6 @@ public class Interpreter {
         final Context functionContext = new Context(classObject.getContext());
 
         final List<Object> params = getFunctionParameters(node, context, definition.getParams().size());
-        if (params == null) return VOID_OBJECT;
 
         defineFunctionParameters(functionContext, definition, params);
 
@@ -1905,10 +1903,9 @@ public class Interpreter {
 
         if (!(result instanceof String)) {
             except("Expected string in exception raising");
-            return VOID_OBJECT;
+        } else {
+            except((String) result, node.getLine());
         }
-
-        except((String) result, node.getLine());
         return VOID_OBJECT;
     }
 

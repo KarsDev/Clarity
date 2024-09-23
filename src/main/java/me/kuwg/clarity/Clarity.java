@@ -4,6 +4,7 @@ import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.compiler.ASTData;
 import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
+import me.kuwg.clarity.info.ClarityRunningInformation;
 import me.kuwg.clarity.installer.modules.ClarityModuleInstaller;
 import me.kuwg.clarity.installer.sys.ClarityInstaller;
 import me.kuwg.clarity.installer.sys.OS;
@@ -24,9 +25,14 @@ public class Clarity {
 
     public static Interpreter INTERPRETER;
 
+    public static ClarityRunningInformation INFORMATION;
+
     public static final String USER_HOME = System.getProperty("user.home");
 
     public static void main(final String[] args) {
+
+        INFORMATION = new ClarityRunningInformation(args);
+
         new Thread("Clarity Main Thread") {
             @Override
             public void run() {
@@ -243,8 +249,8 @@ public class Clarity {
         System.out.println("  Nodes: " + ASTData.NODE_TO_ID.size());
         System.out.println("  Compression: GZIP");
         System.out.println("  Format:");
-        System.out.println("   Default: CLR");
-        System.out.println("   Compressed: CCLR");
+        System.out.println("    Default: CLR");
+        System.out.println("    Compressed: CCLR");
     }
 
     @SuppressWarnings("LoopConditionNotUpdatedInsideLoop")
