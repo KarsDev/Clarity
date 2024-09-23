@@ -4,6 +4,7 @@ import me.kuwg.clarity.library.cnc.ClarityNativeClass;
 import me.kuwg.clarity.library.cnf.ClarityNativeFunction;
 import me.kuwg.clarity.library.ClarityNativeLibrary;
 import me.kuwg.clarity.interpreter.context.Context;
+import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetDayNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetMonthNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetWeekDayNative;
@@ -114,7 +115,7 @@ public final class NativeMethodHandler {
         }
 
         Register.throwException("Default native function " + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
-        return null;
+        return VoidObject.VOID_OBJECT;
     }
 
     /**
@@ -137,7 +138,7 @@ public final class NativeMethodHandler {
         }
 
         Register.throwException("Packaged native function " + pkg + (pkg.endsWith(".") ? "" : ".") + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
-        return null;
+        return VoidObject.VOID_OBJECT;
     }
 
     /**
@@ -164,7 +165,7 @@ public final class NativeMethodHandler {
         }
 
         Register.throwException("Class native function " + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
-        return null;
+        return VoidObject.VOID_OBJECT;
     }
 
     /**
