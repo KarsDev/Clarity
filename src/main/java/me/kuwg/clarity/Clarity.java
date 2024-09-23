@@ -215,6 +215,7 @@ public class Clarity {
         } else {
             return args[2];
         }
+
     }
 
     private static String createOutputFileName(File file) {

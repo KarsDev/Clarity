@@ -7,10 +7,13 @@ import me.kuwg.clarity.ast.nodes.block.TryExceptBlock;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
+import me.kuwg.clarity.ast.nodes.statements.*;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.register.Register;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ASTOptimizer {
@@ -23,7 +26,7 @@ public class ASTOptimizer {
         this.commonSubexpressions = new HashMap<>();
     }
 
-    public AST optimize() {
+    public final AST optimize() {
         ast.getRoot().getChildren().replaceAll(this::optimizeNode);
         return ast;
     }
@@ -34,6 +37,12 @@ public class ASTOptimizer {
         if (node instanceof FunctionDeclarationNode) return optimizeFunctionDeclaration((FunctionDeclarationNode) node);
         if (node instanceof BlockNode) return optimizeBlock((BlockNode) node);
         if (node instanceof TryExceptBlock) return optimizeTryExcept((TryExceptBlock) node);
+        if (node instanceof WhileNode) return optimizeWhileNode((WhileNode) node);
+        if (node instanceof IfNode) return optimizeIfNode((IfNode) node);
+        if (node instanceof ForNode) return optimizeForNode((ForNode) node);
+        if (node instanceof SelectNode) return optimizeSelectNode((SelectNode) node);
+        if (node instanceof AssertNode) return optimizeAssertNode((AssertNode) node);
+
         return node;
     }
 
@@ -42,16 +51,13 @@ public class ASTOptimizer {
         final String op = node.getOperator();
         final ASTNode right = optimizeNode(node.getRight());
 
-        // Generate a unique key for the binary expression (e.g., "a + b")
-        String exprKey = generateExpressionKey(left, op, right);
+        final String exprKey = generateExpressionKey(left, op, right);
 
-        // Check if this expression has already been computed
         if (commonSubexpressions.containsKey(exprKey)) {
-            // Return the previously computed value (CSE reuse)
             return commonSubexpressions.get(exprKey);
         }
 
-        ASTNode optimizedNode;
+        final ASTNode optimizedNode;
         if (left instanceof AbstractNumberNode && right instanceof AbstractNumberNode) {
             optimizedNode = optimizeNumberOperation(left, op, right);
         } else if (left instanceof LiteralNode || right instanceof LiteralNode) {
@@ -68,7 +74,7 @@ public class ASTOptimizer {
         return optimizedNode;
     }
 
-    private String generateExpressionKey(ASTNode left, String op, ASTNode right) {
+    private String generateExpressionKey(final ASTNode left, final String op, final ASTNode right) {
         return left.toString() + " " + op + " " + right.toString();
     }
 
@@ -90,7 +96,7 @@ public class ASTOptimizer {
         if (leftValue instanceof Long && rightValue instanceof Long) {
             final long li = leftValue.longValue();
             final long ri = rightValue.longValue();
-            long result;
+            final long result;
             switch (op) {
                 case "+":
                     result = li + ri;
@@ -156,7 +162,7 @@ public class ASTOptimizer {
         } else {
             final double ld = leftValue.doubleValue();
             final double rd = rightValue.doubleValue();
-            int result;
+            final int result;
             switch (op) {
                 case "+":
                     result = (int) (ld + rd);
@@ -263,6 +269,56 @@ public class ASTOptimizer {
         node.getTryBlock().getChildren().replaceAll(this::optimizeNode);
         node.getExceptBlock().getChildren().replaceAll(this::optimizeNode);
         return node;
+    }
+
+    private ASTNode optimizeWhileNode(final WhileNode node) {
+        final ASTNode optimizedCondition = optimizeNode(node.getCondition());
+        final BlockNode optimizedBlock = (BlockNode) optimizeNode(node.getBlock());
+        return new WhileNode(optimizedCondition, optimizedBlock);
+    }
+
+    private ASTNode optimizeIfNode(final IfNode node) {
+        final ASTNode optimizedCondition = optimizeNode(node.getCondition());
+        final BlockNode optimizedIfBlock = (BlockNode) optimizeNode(node.getIfBlock());
+
+        final List<IfNode> optimizedElseIfs = new ArrayList<>();
+        for (final IfNode elseIf : node.getElseIfStatements()) {
+            optimizedElseIfs.add((IfNode) optimizeNode(elseIf));
+        }
+        final BlockNode optimizedElseBlock = node.getElseBlock() != null ? (BlockNode) optimizeNode(node.getElseBlock()) : null;
+
+        final IfNode optimizedIfNode = new IfNode(optimizedCondition, optimizedIfBlock);
+        optimizedElseIfs.forEach(optimizedIfNode::addElseIfStatement);
+        optimizedIfNode.setElseBlock(optimizedElseBlock);
+
+        return optimizedIfNode;
+    }
+
+    private ASTNode optimizeForNode(final ForNode node) {
+        final ASTNode optimizedDeclaration = optimizeNode(node.getDeclaration());
+        final ASTNode optimizedCondition = optimizeNode(node.getCondition());
+        final ASTNode optimizedIncrementation = optimizeNode(node.getIncrementation());
+        final BlockNode optimizedBlock = (BlockNode) optimizeNode(node.getBlock());
+        return new ForNode(optimizedDeclaration, optimizedCondition, optimizedIncrementation, optimizedBlock);
+    }
+
+    private ASTNode optimizeSelectNode(final SelectNode node) {
+        final ASTNode optimizedCondition = optimizeNode(node.getCondition());
+        final List<SelectNode.WhenNode> optimizedCases = new ArrayList<>();
+        for (final SelectNode.WhenNode whenNode : node.getCases()) {
+            final ASTNode optimizedWhenExpression = optimizeNode(whenNode.getWhenExpression());
+            final BlockNode optimizedBlock = (BlockNode) optimizeNode(whenNode.getBlock());
+            optimizedCases.add(new SelectNode.WhenNode(optimizedWhenExpression, optimizedBlock));
+        }
+        final BlockNode optimizedDefaultBlock = node.getDefaultBlock() != null ? (BlockNode) optimizeNode(node.getDefaultBlock()) : null;
+        return new SelectNode(optimizedCondition, optimizedCases, optimizedDefaultBlock);
+    }
+
+    private ASTNode optimizeAssertNode(final AssertNode node) {
+        final ASTNode optimizedCondition = optimizeNode(node.getCondition());
+        final ASTNode optimizedOrElse = node.getOrElse() != null ? optimizeNode(node.getOrElse()) : null;
+
+        return new AssertNode(optimizedCondition, optimizedOrElse);
     }
 
 }
