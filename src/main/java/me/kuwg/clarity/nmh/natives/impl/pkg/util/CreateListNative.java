@@ -1,10 +1,11 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.util;
 
-import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeFunction;
+import me.kuwg.clarity.nmh.natives.abstracts.AccessiblePackagedNativeFunction;
+import me.kuwg.clarity.nmh.natives.abstracts.PackagedNativeFunction;
 
 import java.util.List;
 
-public class CreateListNative extends PackagedNativeFunction<Object[]> {
+public class CreateListNative extends AccessiblePackagedNativeFunction<Object[]> {
     public CreateListNative() {
         super("list");
     }
@@ -17,10 +18,5 @@ public class CreateListNative extends PackagedNativeFunction<Object[]> {
     @Override
     protected boolean applies0(final List<Object> params) {
         return !params.isEmpty();
-    }
-
-    @Override
-    protected boolean canCall(final String className) {
-        return true;
     }
 }

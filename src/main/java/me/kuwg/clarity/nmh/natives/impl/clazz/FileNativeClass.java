@@ -1,7 +1,7 @@
 package me.kuwg.clarity.nmh.natives.impl.clazz;
 
 import me.kuwg.clarity.interpreter.context.Context;
-import me.kuwg.clarity.nmh.natives.aclass.NativeClass;
+import me.kuwg.clarity.nmh.natives.abstracts.NativeClass;
 import me.kuwg.clarity.register.Register;
 
 import java.io.File;

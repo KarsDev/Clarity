@@ -1,12 +1,13 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.error;
 
 import me.kuwg.clarity.library.objects.VoidObject;
+import me.kuwg.clarity.nmh.natives.abstracts.AccessiblePackagedNativeFunction;
 import me.kuwg.clarity.register.Register;
-import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeFunction;
+import me.kuwg.clarity.nmh.natives.abstracts.PackagedNativeFunction;
 
 import java.util.List;
 
-public class ExceptNative extends PackagedNativeFunction<VoidObject> {
+public class ExceptNative extends AccessiblePackagedNativeFunction<VoidObject> {
     public ExceptNative() {
         super("except");
     }
@@ -25,8 +26,4 @@ public class ExceptNative extends PackagedNativeFunction<VoidObject> {
                ((params.size() == 2 && (params.get(0) instanceof String || params.get(0) instanceof Number)) && params.get(1) instanceof Number);
     }
 
-    @Override
-    protected boolean canCall(final String className) {
-        return true;
-    }
 }

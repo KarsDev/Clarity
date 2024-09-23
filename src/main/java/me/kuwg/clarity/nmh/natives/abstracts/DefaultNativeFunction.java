@@ -1,4 +1,4 @@
-package me.kuwg.clarity.nmh.natives.aclass;
+package me.kuwg.clarity.nmh.natives.abstracts;
 
 public abstract class DefaultNativeFunction<R> extends NativeFunction<R> {
     protected DefaultNativeFunction(final String name) {

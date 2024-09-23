@@ -1,4 +1,4 @@
-package me.kuwg.clarity.nmh.natives.aclass;
+package me.kuwg.clarity.nmh.natives.abstracts;
 
 import java.util.List;
 

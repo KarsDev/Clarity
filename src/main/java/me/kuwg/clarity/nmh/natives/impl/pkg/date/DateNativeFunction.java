@@ -1,6 +1,6 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.date;
 
-import me.kuwg.clarity.nmh.natives.aclass.PackagedNativeFunction;
+import me.kuwg.clarity.nmh.natives.abstracts.PackagedNativeFunction;
 
 import java.util.List;
 

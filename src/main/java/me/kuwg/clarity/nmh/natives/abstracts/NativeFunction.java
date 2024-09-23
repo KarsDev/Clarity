@@ -1,4 +1,4 @@
-package me.kuwg.clarity.nmh.natives.aclass;
+package me.kuwg.clarity.nmh.natives.abstracts;
 
 import me.kuwg.clarity.library.cnf.ClarityNativeFunction;
 
