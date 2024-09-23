@@ -37,7 +37,7 @@ import java.util.Map;
  * class.
  * </p>
  */
-public class NativeMethodHandler {
+public final class NativeMethodHandler {
 
     private static final Map<String, ClarityNativeFunction<?>> defaultFunctions = new HashMap<>();
     private static final Map<String, PackagedNativeFunction<?>> packagedFunctions = new HashMap<>();
@@ -175,8 +175,8 @@ public class NativeMethodHandler {
      */
     private String objectsToClassesString(final List<Object> objects) {
         final StringBuilder s = new StringBuilder();
-        for (int i = 0, objectsLength = objects.size(); i < objectsLength; i++) {
-            if (i != 0) s.append(", ");
+        for (int i = 0; i < objects.size(); i++) {
+            if (i > 0) s.append(", ");
             s.append(objects.get(i).getClass().getSimpleName().toLowerCase());
         }
         return s.toString();
