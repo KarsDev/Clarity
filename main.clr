@@ -1,33 +1,7 @@
-include native random
+include native system
 
-fn main() {
-    const var rand = new Random()
-
-    const var max = 100
-
-    arr values = []
-
-    values.setSize(max)
-
-    int i = 0
-
-    while i < max {
-        values.set(i, rand.randInt(0, max))
-        i++
-    }
-    native.sort(values)
-    native.println("Count: " + max + "\n Values: " + printArr(values))
+async -> "async-thread-name (optional)" {
+    native.println("async running on " + System.currentThreadName())
 }
 
-fn printArr(values) {
-    assert values is arr
-
-    str val = "arr {"
-
-    for x : values {
-        val += "    " + x + "\n"
-    }
-    val += "}"
-
-    return val
-}
+native.println("sync running on " + System.currentThreadName())

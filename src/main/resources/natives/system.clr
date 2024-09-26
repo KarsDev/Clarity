@@ -148,7 +148,7 @@ const class System {
      # System.throw("An error occurred!")  // Throws an exception with the message "An error occurred!"
      #/
     static fn throw(error) {
-        native.error.except(error)
+        native.error.throw(error)
     }
 
     /##

@@ -14,7 +14,7 @@ import me.kuwg.clarity.nmh.natives.impl.pkg.system.CurrentThreadNameNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.LoadNativeLibraryNative;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.nmh.natives.abstracts.PackagedNativeFunction;
-import me.kuwg.clarity.nmh.natives.impl.pkg.error.ExceptNative;
+import me.kuwg.clarity.nmh.natives.impl.pkg.error.ThrowNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.ExitNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.util.CreateListNative;
 
@@ -74,7 +74,7 @@ public final class NativeMethodHandler {
     private void initializePackagedFunctions() {
         // required accessor: none
         registerPackagedFunction(new CreateListNative());
-        registerPackagedFunction(new ExceptNative());
+        registerPackagedFunction(new ThrowNative());
 
         // required accessor: System
         registerPackagedFunction(new ExitNative());

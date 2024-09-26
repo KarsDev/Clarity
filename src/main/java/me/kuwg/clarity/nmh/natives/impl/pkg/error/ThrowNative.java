@@ -3,13 +3,12 @@ package me.kuwg.clarity.nmh.natives.impl.pkg.error;
 import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.nmh.natives.abstracts.AccessiblePackagedNativeFunction;
 import me.kuwg.clarity.register.Register;
-import me.kuwg.clarity.nmh.natives.abstracts.PackagedNativeFunction;
 
 import java.util.List;
 
-public class ExceptNative extends AccessiblePackagedNativeFunction<VoidObject> {
-    public ExceptNative() {
-        super("except");
+public class ThrowNative extends AccessiblePackagedNativeFunction<VoidObject> {
+    public ThrowNative() {
+        super("throw");
     }
 
     @Override
