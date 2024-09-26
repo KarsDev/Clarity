@@ -1,5 +1,7 @@
 package me.kuwg.clarity.library.objects;
 
+import me.kuwg.clarity.register.Register;
+
 /**
  * An abstract class representing a special type of object in the Clarity language.
  * This class is used to denote void or non-returning values.
@@ -33,6 +35,7 @@ public abstract class VoidObject extends ObjectType {
      */
     @Override
     public String toString() {
+        Register.throwException("Printing void");
         return "VOID";
     }
 
@@ -53,6 +56,7 @@ public abstract class VoidObject extends ObjectType {
     private static class VoidImpl extends VoidObject {
         @Override
         public String toString() {
+            Register.throwException("Printing void");
             return "VOIDOBJECT";
         }
     }
@@ -64,6 +68,7 @@ public abstract class VoidObject extends ObjectType {
     public static class VoidReturn extends VoidImpl {
         @Override
         public String toString() {
+            Register.throwException("Printing void");
             return "VOIDRETURN";
         }
     }

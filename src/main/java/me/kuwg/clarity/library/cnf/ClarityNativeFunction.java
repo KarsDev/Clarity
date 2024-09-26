@@ -54,7 +54,7 @@ public abstract class ClarityNativeFunction<R> {
      *
      * @param name The name to check against the function's name.
      * @param params The parameters to validate.
-     * @return {@code true} if the function's name matches and it can be applied with the given parameters;
+     * @return {@code true} if the function's name matches, and it can be applied with the given parameters;
      *         {@code false} otherwise.
      */
     public boolean applies(final String name, final List<Object> params) {

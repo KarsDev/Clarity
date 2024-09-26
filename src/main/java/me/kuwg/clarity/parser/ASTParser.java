@@ -560,17 +560,21 @@ public final class ASTParser {
                 return node;
             }
             case DIVIDER: {
-                if (token.getValue().equals("(")) {
-                    ASTNode astNode = parseExpression();
-                    consume(DIVIDER, ")");
-                    while (match(OPERATOR)) {
-                        final String op = consume().getValue();
-                        ASTNode expression = parseExpression();
-                        astNode = new BinaryExpressionNode(astNode, op, expression);
-                    }
-                    return astNode;
-                } else if (token.getValue().equals("[")) {
-                    return parseArray(line);
+                switch (token.getValue()) {
+                    case "(":
+                        ASTNode astNode = parseExpression();
+                        consume(DIVIDER, ")");
+                        while (match(OPERATOR)) {
+                            final String op = consume().getValue();
+                            ASTNode expression = parseExpression();
+                            astNode = new BinaryExpressionNode(astNode, op, expression);
+                        }
+                        return astNode;
+                    case "[":
+                        return parseArray(line);
+                    case "{":
+                        undo();
+                        return parseBlock();
                 }
             }
             case KEYWORD: {
