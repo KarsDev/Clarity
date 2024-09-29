@@ -1,7 +1,3 @@
-include native system
+include native date
 
-async -> "async-thread-name (optional)" {
-    native.println("async running on " + System.currentThreadName())
-}
-
-native.println("sync running on " + System.currentThreadName())
+native.println(Date.now())

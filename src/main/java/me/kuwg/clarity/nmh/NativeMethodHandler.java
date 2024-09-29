@@ -5,10 +5,7 @@ import me.kuwg.clarity.library.cnf.ClarityNativeFunction;
 import me.kuwg.clarity.library.ClarityNativeLibrary;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.library.objects.VoidObject;
-import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetDayNative;
-import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetMonthNative;
-import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetWeekDayNative;
-import me.kuwg.clarity.nmh.natives.impl.pkg.date.GetYearNative;
+import me.kuwg.clarity.nmh.natives.impl.pkg.date.*;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.CheckNativeTypeNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.CurrentThreadNameNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.LoadNativeLibraryNative;
@@ -83,10 +80,7 @@ public final class NativeMethodHandler {
         registerPackagedFunction(new CurrentThreadNameNative());
 
         // required accessor: Date
-        registerPackagedFunction(new GetWeekDayNative());
-        registerPackagedFunction(new GetDayNative());
-        registerPackagedFunction(new GetMonthNative());
-        registerPackagedFunction(new GetYearNative());
+        registerPackagedFunction(new NowDateNative());
     }
 
     /**

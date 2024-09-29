@@ -727,6 +727,7 @@ public class Interpreter {
         if (!node.getParams().isEmpty()) {
             return except("All enum value functions have no params.", node.getLine());
         }
+
         switch (node.getName()) {
             case "value":
                 return val.getValue();

@@ -342,26 +342,6 @@ class Date {
      # var d = Date.now()    // Returns a Date object representing the current date.
      #/
     static fn now() {
-        return new Date(null, null, null, null).current()
-    }
-
-    /##
-     # Method: current
-     #
-     # Description:
-     # Retrieves the current date and returns a new Date object representing it.
-     #
-     # Returns:
-     # - A Date object initialized to the current date.
-     #
-     # Example:
-     # var d = d.current()    // Returns a Date object representing the current date.
-     #/
-    fn current() {
-        const var weekDay = Day.index(native.date.getWeekDay())
-        const var day = native.date.getDay()
-        const var month = Month.index(native.date.getMonth())
-        const var year = native.date.getYear()
-        return new Date(weekDay, day, month, new Year(year))
+        return native.date.now()
     }
 }

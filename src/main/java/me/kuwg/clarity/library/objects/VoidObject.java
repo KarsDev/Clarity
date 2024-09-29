@@ -35,7 +35,6 @@ public abstract class VoidObject extends ObjectType {
      */
     @Override
     public String toString() {
-        Register.throwException("Printing void");
         return "VOID";
     }
 
@@ -56,7 +55,6 @@ public abstract class VoidObject extends ObjectType {
     private static class VoidImpl extends VoidObject {
         @Override
         public String toString() {
-            Register.throwException("Printing void");
             return "VOIDOBJECT";
         }
     }
@@ -68,7 +66,6 @@ public abstract class VoidObject extends ObjectType {
     public static class VoidReturn extends VoidImpl {
         @Override
         public String toString() {
-            Register.throwException("Printing void");
             return "VOIDRETURN";
         }
     }
