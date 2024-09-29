@@ -182,6 +182,7 @@ public class Interpreter {
         else if (node instanceof AsyncBlockNode) return interpretAsyncBlock((AsyncBlockNode) node, context);
         else if (node instanceof RaiseNode) return interpretRaise((RaiseNode) node, context);
         else if (node instanceof TryExceptBlock) return interpretTryExcept((TryExceptBlock) node, context);
+        else if (node instanceof StaticBlockNode) return interpretStaticBlock((StaticBlockNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -284,6 +285,8 @@ public class Interpreter {
                     FunctionDefinition def = (FunctionDefinition) o;
                     definition.staticFunctions.add(def);
                 }
+            } else if (statement instanceof StaticBlockNode) {
+                interpretStaticBlock((StaticBlockNode) statement, context);
             }
         }
 
@@ -1899,6 +1902,23 @@ public class Interpreter {
                 return CONTINUE;
             }
         }
+        return VOID_OBJECT;
+    }
+
+    private Object interpretStaticBlock(final StaticBlockNode node, final Context context) {
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.STATICINIT, "static", node.getLine(), context.getCurrentClassName()));
+        if (node.isAsync()) {
+            new Thread(() -> {
+                if (!(interpretBlock(node.getBlock(), context) instanceof VoidObject)) {
+                    except("Return in static async block");
+                }
+            }, "<static-block>").start();
+        } else {
+            if (!(interpretBlock(node.getBlock(), context) instanceof VoidObject)) {
+                except("Return in static block");
+            }
+        }
+
         return VOID_OBJECT;
     }
 

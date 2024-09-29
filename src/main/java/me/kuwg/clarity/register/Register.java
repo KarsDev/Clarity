@@ -60,6 +60,7 @@ public final class Register {
         ARRAYCALL,
         LOCALCALL,
         STRINGCALL,
+        STATICINIT
     }
 
     public static class RegisterElement {

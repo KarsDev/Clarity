@@ -1,3 +1,0 @@
-include native date
-
-native.println(Date.now())

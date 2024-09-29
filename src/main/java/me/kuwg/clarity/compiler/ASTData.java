@@ -50,6 +50,7 @@ public class ASTData {
         registerNode(ContinueNode.class, 0x104);
         registerNode(AsyncBlockNode.class, 0x105);
         registerNode(RaiseNode.class, 0x106);
+        registerNode(StaticBlockNode.class, 0x107);
 
         // Expression (0x200)
         registerNode(BinaryExpressionNode.class, 0x200);

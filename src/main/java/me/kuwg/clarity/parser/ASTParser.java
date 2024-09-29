@@ -219,6 +219,10 @@ public final class ASTParser {
 
         final int line = current().getLine();
 
+        if (!isLocal && !isConst && match(DIVIDER, "{")) {
+            return new StaticBlockNode(parseBlock(), isAsync);
+        }
+
         final String typeDefault = consume().getValue();
 
         if (typeDefault.equals("fn")) {

@@ -25,9 +25,7 @@ public class BlockNode extends ASTNode implements Iterable<ASTNode> {
 
     @Override
     public String toString() {
-        return "BlockNode{" +
-                "children=" + children +
-                '}';
+        return "BlockNode{" + "children=" + children + '}';
     }
 
     @Override
