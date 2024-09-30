@@ -22,17 +22,12 @@ import java.util.List;
 public class Clarity {
 
     private static int EXIT_CODE = 0;
-
     public static Interpreter INTERPRETER;
-
     public static ClarityRunningInformation INFORMATION;
-
     public static final String USER_HOME = System.getProperty("user.home");
 
     public static void main(final String[] args) {
-
         INFORMATION = new ClarityRunningInformation(args);
-
         new Thread("Clarity Main Thread") {
             @Override
             public void run() {
@@ -45,7 +40,6 @@ public class Clarity {
             }
 
             void exec() throws IOException {
-
                 if (args.length == 0) {
                     printUsage();
                     return;
@@ -83,10 +77,7 @@ public class Clarity {
                     return;
                 }
 
-
-
                 final File file = new File(args[1]);
-
                 switch (args[0]) {
                     case "interpret":
                     case "test":
@@ -105,8 +96,11 @@ public class Clarity {
                         runCompiledFile(file);
                         break;
                     case "install":
-                        if (args.length == 2) System.out.println("Installing module: " + args[1]);
-                        else System.out.println("Installing modules...");
+                        if (args.length == 2) {
+                            System.out.println("Installing module: " + args[1]);
+                        } else {
+                            System.out.println("Installing modules...");
+                        }
                         installModule(args);
                         break;
                     case "filesize":
@@ -117,6 +111,7 @@ public class Clarity {
                         break;
                 }
             }
+
             boolean requireFile(final File file) {
                 if (!file.exists()) {
                     printFileNotFound(file);
@@ -125,7 +120,6 @@ public class Clarity {
                 return false;
             }
         }.start();
-
         await(() -> System.exit(EXIT_CODE));
     }
 
@@ -143,11 +137,17 @@ public class Clarity {
 
     private static void printUsage() {
         System.out.println("Usage:");
-        System.out.println("  interpret <source.clr>      - Interpret and run the source file");
-        System.out.println("  run <compiled.cclr>         - Interpret the compiled source file");
-        System.out.println("  compile <source.clr> [output.cclr] - Compile the source file to AST format");
-        System.out.println("  test <source.clr> - Compile the source file to clarity IR");
-        System.out.println("  test <source.clr> [output.cclr] - Interpret, run, and then compile the source file");
+        System.out.println("  interpret <source.clr>                     - Interpret and run the source file");
+        System.out.println("  run <compiled.cclr>                        - Interpret the compiled source file");
+        System.out.println("  compile <source.clr> [output.cclr]        - Compile the source file to AST format");
+        System.out.println("  test <source.clr>                          - Compile the source file to clarity IR");
+        System.out.println("  test <source.clr> [output.cclr]           - Interpret, run, and then compile the source file");
+        System.out.println("  install                                     - Install Clarity");
+        System.out.println("  install <module-name>                       - Install a specific module");
+        System.out.println("  os                                          - Display current operating system info");
+        System.out.println("  size                                        - Display size of the running JAR file");
+        System.out.println("  help | -help                                - Display this help message");
+        System.out.println("  ast                                         - Display AST information");
     }
 
     private static void printInputFileRequired() {
@@ -159,7 +159,7 @@ public class Clarity {
     }
 
     private static void installModule(final String[] args) {
-        final String[] modules = new String[args.length-1];
+        final String[] modules = new String[args.length - 1];
         System.arraycopy(args, 1, modules, 0, args.length - 1);
         ClarityModuleInstaller.installModules(modules);
     }
@@ -221,7 +221,6 @@ public class Clarity {
         } else {
             return args[2];
         }
-
     }
 
     private static String createOutputFileName(File file) {
