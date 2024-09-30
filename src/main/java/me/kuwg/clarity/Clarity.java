@@ -69,6 +69,9 @@ public class Clarity {
                         case "-help":
                             printUsage();
                             return;
+                        case "memory":
+                            printHeapSizeRecommendation();
+                            return;
                         case "ast":
                             printASTInfo();
                             return;
@@ -251,6 +254,38 @@ public class Clarity {
         System.out.println("    Default: CLR");
         System.out.println("    Compressed: CCLR");
     }
+
+    private static void printHeapSizeRecommendation() {
+        final long heapSize = Runtime.getRuntime().totalMemory();
+        final long heapMaxSize = Runtime.getRuntime().maxMemory();
+
+        final long currentHeapSize = (heapSize / (1024 * 1024));
+        final long maxHeapSize = (heapMaxSize / (1024 * 1024));
+
+        System.out.println("Heap size info:");
+        System.out.println("  Running with " + currentHeapSize + " MB");
+        System.out.println("  Max heap size is " + maxHeapSize + " MB");
+
+
+        final long recommendedHeapSize = 1024; // 1 GB
+        final long highHeapThreshold = 2048; // 2 GB
+        final long veryHighHeapThreshold = 4096; // 4 GB
+
+        if (currentHeapSize < recommendedHeapSize) {
+            System.out.println("Recommendation: Increase the heap size to at least " + recommendedHeapSize + " MB for better performance.");
+        } else if (currentHeapSize < highHeapThreshold) {
+            System.out.println("Current heap size is adequate for basic tasks, but may not handle larger workloads well.");
+        } else if (currentHeapSize < veryHighHeapThreshold) {
+            System.out.println("Current heap size is sufficient for most tasks. Performance should be good.");
+        } else {
+            System.out.println("Current heap size is very high. Make sure your application needs this much memory.");
+        }
+
+        if (maxHeapSize < recommendedHeapSize) {
+            System.out.println("Warning: Max heap size is less than the recommended " + recommendedHeapSize + " MB. Consider increasing it.");
+        }
+    }
+
 
     @SuppressWarnings("LoopConditionNotUpdatedInsideLoop")
     private static void await(final Runnable runnable) {
