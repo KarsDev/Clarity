@@ -141,7 +141,7 @@ class Random {
         return min + fraction * (max - min)
     }
 
-/##
+    /##
      # Method: randBool
      #
      # Description:

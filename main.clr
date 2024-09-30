@@ -1,14 +1,11 @@
 include native random
-include native map
 
-var rand = new Random()
-
-native.println(rand.randBool())
-
-const var map = new Map()
-
-for i : 1000 {
-    const str randStr = rand.randStr(3, "abc")
-    map.put(randStr, map.getOrDef(randStr, 0) + 1)
+str toPrint = ""
+for i : 20 {
+    var rand = new Random(696969) // always same seed
+    toPrint += rand.randInt(0, 10)
+    if i != 19 {
+        toPrint += ", "
+    }
 }
-native.println(map)
+native.println(toPrint)
