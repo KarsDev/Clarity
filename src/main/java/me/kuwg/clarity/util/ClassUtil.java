@@ -8,7 +8,6 @@ import me.kuwg.clarity.library.objects.types.ClassObject;
 import me.kuwg.clarity.library.objects.ObjectType;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static me.kuwg.clarity.Clarity.INTERPRETER;
 import static me.kuwg.clarity.library.objects.VoidObject.VOID_OBJECT;
@@ -30,12 +29,12 @@ public class ClassUtil {
      * </ul>
      *
      * @param className         The name of the class to be initialized.
-     * @param constructorParams The constructors' parameters to be passed to the class's constructor.
      * @param context           The context in which the class should be initialized, including variables and state.
+     * @param constructorParams The constructors' parameters to be passed to the class's constructor.
      * @return The initialized {@link ClassObject} instance.
      * @throws IllegalStateException If the class is not found or if a return statement is encountered in the class body.
      */
-    public static ClassObject initClass(final String className, final Object[] constructorParams, final Context context) {
+    public static ClassObject initClass(final String className, final Context context, final Object... constructorParams) {
         context.setCurrentClassName(className);
 
         final Context classContext = new Context(context);
