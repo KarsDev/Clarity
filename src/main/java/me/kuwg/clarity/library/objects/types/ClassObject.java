@@ -82,6 +82,7 @@ public class ClassObject {
      *
      * @return A string representation of the class. Either the result of the "print" function or
      *         a default formatted string "ClassObject@name".
+     * @throws me.kuwg.clarity.register.RegisterException when return is not str
      */
     @Override
     public String toString() {
@@ -93,7 +94,7 @@ public class ClassObject {
             // Interpret the function's block and retrieve the result.
             final Object ret = Clarity.INTERPRETER.interpretNode(((FunctionDefinition) type).getBlock(), context);
 
-            // If the interpreted result is a string, return it.
+            // If the interpreted result is a string, return it, else throw an exception.
             if (ret instanceof String) {
                 return (String) ret;
             } else {
