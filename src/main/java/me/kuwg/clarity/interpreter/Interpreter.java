@@ -1002,7 +1002,10 @@ public class Interpreter {
     }
 
     private Object interpretObjectVariableReference(final ObjectVariableReferenceNode node, final Context context) {
-        final Object callerObject = interpretNode(node.getCaller(), context);
+        final Object callerObject = node.getCaller() instanceof VariableReferenceNode ?
+                context.getVariable(((VariableReferenceNode) node.getCaller()).getName()) :
+                interpretNode(node.getCaller(), context);
+
         final String calledObjectName = node.getCalled();
 
         if (callerObject == VOID_OBJECT) {
