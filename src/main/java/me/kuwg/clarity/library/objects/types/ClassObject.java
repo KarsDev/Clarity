@@ -4,6 +4,7 @@ import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
+import me.kuwg.clarity.register.Register;
 
 /**
  * Represents a class object within the Clarity framework. A ClassObject encapsulates
@@ -95,6 +96,8 @@ public class ClassObject {
             // If the interpreted result is a string, return it.
             if (ret instanceof String) {
                 return (String) ret;
+            } else {
+                Register.throwException("Expected string type in print() function, obtained " + ret);
             }
         }
 
