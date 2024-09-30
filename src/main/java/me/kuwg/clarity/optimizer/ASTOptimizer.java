@@ -1,9 +1,11 @@
 package me.kuwg.clarity.optimizer;
 
+import jdk.nashorn.internal.ir.Block;
 import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.ast.nodes.block.StaticBlockNode;
 import me.kuwg.clarity.ast.nodes.block.TryExceptBlock;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
@@ -43,6 +45,7 @@ public class ASTOptimizer {
         if (node instanceof ForNode) return optimizeForNode((ForNode) node);
         if (node instanceof SelectNode) return optimizeSelectNode((SelectNode) node);
         if (node instanceof AssertNode) return optimizeAssertNode((AssertNode) node);
+        if (node instanceof StaticBlockNode) return optimizeStaticBlock((StaticBlockNode) node);
 
         return node;
     }
@@ -320,6 +323,12 @@ public class ASTOptimizer {
         final ASTNode optimizedOrElse = node.getOrElse() != null ? optimizeNode(node.getOrElse()) : null;
 
         return new AssertNode(optimizedCondition, optimizedOrElse);
+    }
+
+    private ASTNode optimizeStaticBlock(final StaticBlockNode node) {
+        final boolean isAsync = node.isAsync();
+        final BlockNode block = (BlockNode) optimizeBlock(node.getBlock());
+        return new StaticBlockNode(block, isAsync);
     }
 
 }
