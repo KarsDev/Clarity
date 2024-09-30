@@ -129,6 +129,9 @@ public class Interpreter {
         } else if (node instanceof AnnotationDeclarationNode) {
             interpretAnnotationDeclaration((AnnotationDeclarationNode) node, context);
             return true;
+        } else if (node instanceof StaticBlockNode) {
+            interpretStaticBlock((StaticBlockNode) node, context);
+            return true;
         } else {
             return false;
         }
