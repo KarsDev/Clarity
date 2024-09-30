@@ -1,4 +1,3 @@
-include native math
+var x = false ? 5 : 2
 
-var x = Math.toDegrees(5)
-native.println(Math.cos(x))
+native.println(x)

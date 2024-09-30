@@ -183,6 +183,7 @@ public class Interpreter {
         else if (node instanceof RaiseNode) return interpretRaise((RaiseNode) node, context);
         else if (node instanceof TryExceptBlock) return interpretTryExcept((TryExceptBlock) node, context);
         else if (node instanceof StaticBlockNode) return interpretStaticBlock((StaticBlockNode) node, context);
+        else if (node instanceof TernaryOperatorNode) return interpretTernaryOperator((TernaryOperatorNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -1923,6 +1924,11 @@ public class Interpreter {
         }
 
         return VOID_OBJECT;
+    }
+
+    private Object interpretTernaryOperator(final TernaryOperatorNode node, final Context context) {
+        // ternary for ternary, ironic, isn't it?
+        return checkCondition(node.getCondition(), context) ? interpretNode(node.getTrueBranch(), context) : interpretNode(node.getFalseBranch(), context);
     }
 
 
