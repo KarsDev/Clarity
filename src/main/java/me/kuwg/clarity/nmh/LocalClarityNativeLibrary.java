@@ -42,6 +42,7 @@ public class LocalClarityNativeLibrary implements ClarityNativeLibrary {
                 new TypeOfNative(),
                 new SortNative(),
                 new ArrayNative(),
+                new EvalNative(),
 
         };
     }

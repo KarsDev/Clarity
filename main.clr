@@ -1,3 +1,5 @@
-int x = false ? 5 : 2
-
-native.println(x)
+var x = native.eval("
+    native.println(\"LOL\")
+    return 1
+")
+native.println("exit with " + x)
