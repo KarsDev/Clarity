@@ -1,3 +1,5 @@
+include native deprecated
+
 /####################################################
  #  System Class
  #
@@ -66,6 +68,7 @@ const class System {
         native.system.exit(status)
     }
 
+
     /##
      # Method: checkNativeType
      #
@@ -86,6 +89,7 @@ const class System {
      # System.checkNativeType("int", 123)        // Returns: true
      # System.checkNativeType("bool", "text")    // Returns: false
      #/
+    @deprecated // Use 'is' implementation (x is y)
     static fn checkNativeType(type, obj) {
         return native.system.checkNativeType(type, obj)
     }
@@ -195,27 +199,5 @@ const class System {
      #/
     static fn loadNativeLibrary(lib) {
         native.system.loadNativeLibrary(lib)
-    }
-
-    /##
-     # Method: currentThreadName
-     #
-     # Description:
-     # Retrieves the name of the currently executing thread. This can be useful for
-     # debugging purposes, logging, or identifying the active thread in multi-threaded
-     # environments.
-     #
-     # Returns:
-     # - A string representing the name of the current thread.
-     #
-     # Example:
-     # let threadName = System.currentThreadName();  // Returns: "Clarity Main Thread" (or another thread name).
-     #
-     # Notes:
-     # - The thread name is assigned by the system or runtime and can vary based on
-     #   the environment and thread configuration.
-     #/
-    static fn currentThreadName() {
-        return native.system.currentThreadName()
     }
 }
