@@ -141,6 +141,73 @@ class Random {
         return min + fraction * (max - min)
     }
 
+/##
+     # Method: randBool
+     #
+     # Description:
+     # Generates a random boolean value (true or false).
+     #
+     # Returns:
+     # - A random boolean value.
+     #
+     # Example:
+     # randGen.randBool()    // Returns: true or false randomly.
+     #/
+    fn randBool() {
+        return randInt(0, 2) == 1
+    }
+
+    /##
+     # Method: randStr
+     #
+     # Description:
+     # Generates a random string of a given maximum length using a default alphabet (A-Z, a-z, 0-9).
+     #
+     # Parameters:
+     # - maxlen: The maximum length of the generated string.
+     #
+     # Returns:
+     # - A random string of up to maxlen characters using a default alphabet.
+     #
+     # Example:
+     # randGen.randStr(10)    // Returns: A random string with up to 10 characters.
+     #/
+    fn randStr(maxlen) {
+        var defaultAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        return randStr(maxlen, defaultAlphabet)
+    }
+
+    /##
+     # Method: randStr
+     #
+     # Description:
+     # Generates a random string of a given maximum length using a specified alphabet.
+     #
+     # Parameters:
+     # - maxlen: The maximum length of the generated string.
+     # - alphabet: A string containing the set of characters to choose from.
+     #
+     # Returns:
+     # - A random string of up to maxlen characters from the provided alphabet.
+     #
+     # Example:
+     # randGen.randStr(5, "abc")    // Returns: A random string with up to 5 characters chosen from "abc".
+     #/
+    fn randStr(maxlen, alphabet) {
+        assert maxlen > 0 else "Maxlen must be greater than 0."
+        var result = ""
+        const var alphabetLength = alphabet.length()
+
+        const arr alphabetArray = alphabet.split("")
+
+        for var i = 0, i < maxlen, i++ {
+            var randomIndex = randInt(0, alphabetLength)
+            result += alphabetArray.at(randomIndex)
+        }
+
+        return result
+    }
+
     /##
      # Method: updateSeed
      #
@@ -151,13 +218,7 @@ class Random {
      # Example:
      # The updateSeed method is called internally and does not need to be explicitly called by the user.
      #/
-    fn updateSeed() {
+    local fn updateSeed() {
         local.seed = (local.seed * MULT + native.now() ^^ native.nano()) & MASK
-        for ,, {
-            if local.seed % 3 == 0 {
-                break
-            }
-            updateSeed()
-        }
     }
 }

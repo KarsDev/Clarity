@@ -402,7 +402,7 @@ public class Interpreter {
             case "-": return left - right;
             case "*": return left * right;
             case "/": return (right == 0) ? except("Division by zero", line) : left / right;
-            case "%": return left % right;
+            case "%": return (right == 0) ? except("Modulo by zero", line) : left % right;
             case "^": return Math.pow(left, right) % 1 == 0 ? (long) Math.pow(left, right) : Math.pow(left, right);
             case "<": return left < right;
             case ">": return left > right;
@@ -765,7 +765,7 @@ public class Interpreter {
             case "at":
                 if (params.size() == 1 && params.get(0) instanceof Long) {
                     try {
-                        return array[(int) params.get(0)];
+                        return array[((Number) params.get(0)).intValue()];
                     } catch (ArrayIndexOutOfBoundsException ex) {
                         return except("Array out of bounds: " + params.get(0), raw.getLine());
                     }
@@ -775,9 +775,9 @@ public class Interpreter {
                     return array.length;
                 }
             case "set":
-                if (params.size() == 2 && params.get(0) instanceof Long) {
+                if (params.size() == 2 && (params.get(0) instanceof Long || params.get(0) instanceof Integer)) {
                     try {
-                        array[((Long) params.get(0)).intValue()] = params.get(1);
+                        array[((Number) params.get(0)).intValue()] = params.get(1);
                     } catch (IndexOutOfBoundsException e) {
                         return except("Array index out of bounds: " + params.get(0), raw.getLine());
                     }
@@ -794,7 +794,7 @@ public class Interpreter {
                     return newArray;
                 }
             default:
-                return except("Illegal function in array context: " + fn + " with params " + params, raw.getLine());
+                return except("Illegal function in array context: " + fn + " with params " + getParams(params), raw.getLine());
         }
     }
 
@@ -853,10 +853,14 @@ public class Interpreter {
                     return caller.split((String) params.get(0));
                 }
                 break;
-            default:
-                return except("Illegal function in string context: " + fn + " with params " + params, raw.getLine());
+            case "length":
+                if (params.isEmpty()) {
+                    return caller.length();
+                }
+                break;
         }
 
+        Register.throwException("Illegal function in string context: " + fn + " with params " + getParams(params), raw.getLine());
         return VOID_OBJECT;
     }
 
@@ -1140,7 +1144,7 @@ public class Interpreter {
         if (o == null) {
             return "null";
         }
-        if (o instanceof Long) return "int";
+        if (o instanceof Long || o instanceof Integer) return "int";
         else if (o instanceof Double) return "float";
         else if (o instanceof Object[]) return "arr";
         else if (o instanceof String) return "str";
@@ -1935,6 +1939,11 @@ public class Interpreter {
 
 
     public Object except(final String message, final int line) {
+        if (EXCEPT) {
+            if (EXCEPT_LINE != null) Register.throwException(EXCEPT_MESSAGE, EXCEPT_LINE);
+            else Register.throwException(EXCEPT_MESSAGE);
+        }
+
         EXCEPT = true;
         EXCEPT_MESSAGE = message;
         EXCEPT_LINE = line;
@@ -1942,6 +1951,11 @@ public class Interpreter {
     }
 
     private Object except(final String message) {
+        if (EXCEPT) {
+            if (EXCEPT_LINE != null) Register.throwException(EXCEPT_MESSAGE, EXCEPT_LINE);
+            else Register.throwException(EXCEPT_MESSAGE);
+        }
+
         EXCEPT = true;
         EXCEPT_MESSAGE = message;
         EXCEPT_LINE = null;

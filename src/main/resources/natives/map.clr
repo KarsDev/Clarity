@@ -70,6 +70,30 @@ class Map {
     }
 
     /##
+     # Function: getOrDef
+     #
+     # Description:
+     # Retrieves the value associated with the specified key. If the key does not exist, it returns the default value.
+     #
+     # Parameters:
+     # - key: The key whose associated value is to be returned.
+     # - defaultValue: The value to return if the key is not found in the map.
+     #
+     # Returns:
+     # - The value associated with the specified key, or the default value if the key does not exist.
+     #
+     # Example:
+     # var value = map.getOrDef("key1", 200)  // Returns 200 if "key1" does not exist in the map.
+     #/
+    fn getOrDef(key, defaultValue) {
+        const var index = indexOfKey(key)
+        if index != -1 {
+            return values.at(index)
+        }
+        return defaultValue
+    }
+
+    /##
      # Function: remove
      #
      # Description:

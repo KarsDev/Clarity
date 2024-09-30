@@ -1,5 +1,14 @@
-var x = native.eval("
-    native.println(\"LOL\")
-    return 1
-")
-native.println("exit with " + x)
+include native random
+include native map
+
+var rand = new Random()
+
+native.println(rand.randBool())
+
+const var map = new Map()
+
+for i : 1000 {
+    const str randStr = rand.randStr(3, "abc")
+    map.put(randStr, map.getOrDef(randStr, 0) + 1)
+}
+native.println(map)
