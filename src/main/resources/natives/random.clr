@@ -1,18 +1,111 @@
+/####################################################
+ #  Random Class
+ #
+ #  Overview:
+ #  The Random class provides a mechanism for generating pseudo-random integers and floating-point numbers
+ #  within a specified range. It allows for the creation of reproducible random sequences via seed control
+ #  or true randomness by utilizing system time as the seed.
+ #
+ #  Important:
+ #  - This class generates pseudo-random numbers based on an internal seed value.
+ #  - Users can specify a seed for reproducibility or allow the system to initialize the seed automatically.
+ #
+ #  Example Usage:
+ #  var randGen = new Random(42)           // Initializes a Random instance with a seed of 42
+ #  randGen.randInt(0, 10)                 // Returns: A random integer between 0 and 10
+ #  randGen.randFloat(0.0, 1.0)            // Returns: A random float between 0.0 and 1.0
+ #
+ #  Notes:
+ #  This class is not related to the Math class but can be used to generate random numbers for 
+ #  statistical sampling, gaming, or simulations.
+ ####################################################/
 class Random {
 
+    /##
+     # Constant: MULT
+     #
+     # Description:
+     # A multiplier constant used in the internal seed update algorithm to generate pseudo-random numbers.
+     #
+     # Value:
+     # - MULT = 412629635
+     #/
     const static var MULT = 412629635
+
+    /##
+     # Constant: MASK
+     #
+     # Description:
+     # A mask constant used to limit the seed to a specific range of values.
+     #
+     # Value:
+     # - MASK = 343597383
+     #/
     const static var MASK = 343597383
 
+    /##
+     # Variable: seed
+     #
+     # Description:
+     # The internal state or seed used to generate pseudo-random numbers.
+     #
+     # Usage:
+     # The seed is updated with each random number generation, ensuring the next result appears random.
+     # It can either be initialized by the user or derived from the system time.
+     #/
     var seed
 
+    /##
+     # Constructor: Random
+     #
+     # Description:
+     # Initializes the Random instance with a specific seed. This allows the user to generate
+     # reproducible sequences of random numbers based on the same seed.
+     #
+     # Parameters:
+     # - seed: An integer value used to initialize the random number generator.
+     #
+     # Example:
+     # var randGen = new Random(1234)    // Creates a Random instance with a seed of 1234.
+     #/
     constructor(seed) {
         local.seed = seed
     }
 
+    /##
+     # Constructor: Random (no parameters)
+     #
+     # Description:
+     # Initializes the Random instance with a seed derived from the system's current time and nanoseconds.
+     # This ensures the generation of non-reproducible random sequences.
+     #
+     # Example:
+     # var randGen = new Random()    // Creates a Random instance with a time-based seed.
+     #/
     constructor() {
         local.seed = native.nano() | native.now()
     }
 
+    /##
+     # Method: randInt
+     #
+     # Description:
+     # Generates a random integer within a specified range [min, max). The result is inclusive of the minimum
+     # value and exclusive of the maximum value.
+     #
+     # Parameters:
+     # - min: The lower bound (inclusive) of the random integer range.
+     # - max: The upper bound (exclusive) of the random integer range.
+     #
+     # Returns:
+     # - A random integer between min (inclusive) and max (exclusive).
+     #
+     # Example:
+     # randGen.randInt(1, 10)    // Returns: A random integer between 1 and 9.
+     #
+     # Throws:
+     # - AssertionError: If min is not less than max.
+     #/
     fn randInt(min, max) {
         assert min < max else "Max must be greater than min."
         updateSeed()
@@ -21,6 +114,26 @@ class Random {
         return value
     }
 
+    /##
+     # Method: randFloat
+     #
+     # Description:
+     # Generates a random floating-point number within a specified range [min, max). The result
+     # is inclusive of the minimum value and exclusive of the maximum value.
+     #
+     # Parameters:
+     # - min: The lower bound (inclusive) of the random float range.
+     # - max: The upper bound (exclusive) of the random float range.
+     #
+     # Returns:
+     # - A random float between min (inclusive) and max (exclusive).
+     #
+     # Example:
+     # randGen.randFloat(0.0, 1.0)    // Returns: A random float between 0.0 and 1.0.
+     #
+     # Throws:
+     # - AssertionError: If min is not less than max.
+     #/
     fn randFloat(min, max) {
         assert min < max else "Max must be greater than min."
         updateSeed()
@@ -28,6 +141,16 @@ class Random {
         return min + fraction * (max - min)
     }
 
+    /##
+     # Method: updateSeed
+     #
+     # Description:
+     # Updates the internal seed using a combination of the previous seed, the system's current time, and
+     # nanoseconds. This ensures that subsequent random numbers are influenced by real-time events.
+     #
+     # Example:
+     # The updateSeed method is called internally and does not need to be explicitly called by the user.
+     #/
     fn updateSeed() {
         local.seed = (local.seed * MULT + native.now() ^^ native.nano()) & MASK
         for ,, {
