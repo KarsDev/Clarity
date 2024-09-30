@@ -80,7 +80,9 @@ public class Interpreter {
                 main = (MainFunctionDeclarationNode) node;
                 ast.getRoot().getChildren().remove(node);
             } else {
-                preInterpret(node, ast.getRoot(), general);
+                if (preInterpret(node, ast.getRoot(), general)) {
+                    ast.getRoot().getChildren().remove(node);
+                }
             }
         }
 
@@ -105,27 +107,30 @@ public class Interpreter {
 
     }
 
-    private void preInterpret(final ASTNode node, final BlockNode block, final Context context) {
+    private boolean preInterpret(final ASTNode node, final BlockNode block, final Context context) {
         if (node instanceof FunctionDeclarationNode) {
             interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
-            block.getChildren().remove(node);
+            return true;
         } else if (node instanceof ClassDeclarationNode) {
             final ClassDeclarationNode cdn = (ClassDeclarationNode) node;
             if (context.getClass(cdn.getName()) == VOID_OBJECT) interpretClassDeclaration(cdn, context);
-            block.getChildren().remove(node);
+            return true;
         } else if (node instanceof EnumDeclarationNode) {
             final EnumDeclarationNode cdn = (EnumDeclarationNode) node;
             if (context.getClass(cdn.getName()) == VOID_OBJECT) interpretEnumDeclaration(cdn, context);
-            block.getChildren().remove(node);
+            return true;
         } else if (node instanceof IncludeNode) {
             interpretInclude((IncludeNode) node, context);
-            block.getChildren().remove(node);
+            return true;
         } else if (node instanceof ReflectedNativeFunctionDeclaration) {
             final ReflectedNativeFunctionDeclaration reflected = (ReflectedNativeFunctionDeclaration) node;
             if (reflected.isStatic()) interpretReflectedNativeFunctionDeclaration(reflected, context);
+            return true;
         } else if (node instanceof AnnotationDeclarationNode) {
             interpretAnnotationDeclaration((AnnotationDeclarationNode) node, context);
-            block.getChildren().remove(node);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -156,7 +161,6 @@ public class Interpreter {
         else if (node instanceof ObjectVariableReferenceNode) return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
         else if (node instanceof ObjectVariableReassignmentNode) return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
         else if (node instanceof VoidNode) return VOID_RETURN;
-        else if (node instanceof IncludeNode) return interpretInclude((IncludeNode) node, context);
         else if (node instanceof PackagedNativeFunctionCallNode) return interpretPackagedNativeFunctionCall((PackagedNativeFunctionCallNode) node, context);
         else if (node instanceof ArrayNode) return interpretArray((ArrayNode) node, context);
         else if (node instanceof IfNode) return interpretIf((IfNode) node, context);
@@ -1080,17 +1084,20 @@ public class Interpreter {
     }
 
 
-    private Object interpretInclude(final IncludeNode node, final Context context) {
+    private void interpretInclude(final IncludeNode node, final Context context) {
         if (node.isNative()) context.getNatives().add(node.getName());
 
         for (final ASTNode astnode : node.getIncluded()) {
+            if (preInterpret(astnode, node.getIncluded(), context)) {
+                node.getIncluded().getChildren().remove(astnode);
+                continue;
+            }
             final Object result = interpretNode(astnode, context);
-            preInterpret(astnode, node.getIncluded(), context);
+
             if (result instanceof ReturnValue) {
-                return ((ReturnValue) result).getValue();
+                return;
             }
         }
-        return VOID_OBJECT;
     }
 
     private Object interpretPackagedNativeFunctionCall(final PackagedNativeFunctionCallNode node, final Context context) {
