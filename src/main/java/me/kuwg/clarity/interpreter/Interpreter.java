@@ -1910,7 +1910,7 @@ public class Interpreter {
     }
 
     private Object interpretStaticBlock(final StaticBlockNode node, final Context context) {
-        Register.register(new Register.RegisterElement(Register.RegisterElementType.STATICINIT, "static", node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.STATICINIT, "<static-block>", node.getLine(), context.getCurrentClassName()));
         if (node.isAsync()) {
             new Thread(() -> {
                 if (!(interpretBlock(node.getBlock(), context) instanceof VoidObject)) {
