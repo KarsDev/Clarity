@@ -1,6 +1,5 @@
 package me.kuwg.clarity.optimizer;
 
-import jdk.nashorn.internal.ir.Block;
 import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
@@ -259,29 +258,29 @@ public class ASTOptimizer {
         return null;
     }
 
-    private ASTNode optimizeFunctionDeclaration(final FunctionDeclarationNode node) {
+    private FunctionDeclarationNode optimizeFunctionDeclaration(final FunctionDeclarationNode node) {
         node.getBlock().getChildren().replaceAll(this::optimizeNode);
         return node;
     }
 
-    private ASTNode optimizeBlock(final BlockNode node) {
+    private BlockNode optimizeBlock(final BlockNode node) {
         node.getChildren().replaceAll(this::optimizeNode);
         return node;
     }
 
-    private ASTNode optimizeTryExcept(final TryExceptBlock node) {
+    private TryExceptBlock optimizeTryExcept(final TryExceptBlock node) {
         node.getTryBlock().getChildren().replaceAll(this::optimizeNode);
         node.getExceptBlock().getChildren().replaceAll(this::optimizeNode);
         return node;
     }
 
-    private ASTNode optimizeWhileNode(final WhileNode node) {
+    private WhileNode optimizeWhileNode(final WhileNode node) {
         final ASTNode optimizedCondition = optimizeNode(node.getCondition());
         final BlockNode optimizedBlock = (BlockNode) optimizeNode(node.getBlock());
         return new WhileNode(optimizedCondition, optimizedBlock);
     }
 
-    private ASTNode optimizeIfNode(final IfNode node) {
+    private IfNode optimizeIfNode(final IfNode node) {
         final ASTNode optimizedCondition = optimizeNode(node.getCondition());
         final BlockNode optimizedIfBlock = (BlockNode) optimizeNode(node.getIfBlock());
 
@@ -298,7 +297,7 @@ public class ASTOptimizer {
         return optimizedIfNode;
     }
 
-    private ASTNode optimizeForNode(final ForNode node) {
+    private ForNode optimizeForNode(final ForNode node) {
         final ASTNode optimizedDeclaration = optimizeNode(node.getDeclaration());
         final ASTNode optimizedCondition = optimizeNode(node.getCondition());
         final ASTNode optimizedIncrementation = optimizeNode(node.getIncrementation());
@@ -306,7 +305,7 @@ public class ASTOptimizer {
         return new ForNode(optimizedDeclaration, optimizedCondition, optimizedIncrementation, optimizedBlock);
     }
 
-    private ASTNode optimizeSelectNode(final SelectNode node) {
+    private SelectNode optimizeSelectNode(final SelectNode node) {
         final ASTNode optimizedCondition = optimizeNode(node.getCondition());
         final List<SelectNode.WhenNode> optimizedCases = new ArrayList<>();
         for (final SelectNode.WhenNode whenNode : node.getCases()) {
@@ -318,17 +317,16 @@ public class ASTOptimizer {
         return new SelectNode(optimizedCondition, optimizedCases, optimizedDefaultBlock);
     }
 
-    private ASTNode optimizeAssertNode(final AssertNode node) {
+    private AssertNode optimizeAssertNode(final AssertNode node) {
         final ASTNode optimizedCondition = optimizeNode(node.getCondition());
         final ASTNode optimizedOrElse = node.getOrElse() != null ? optimizeNode(node.getOrElse()) : null;
 
         return new AssertNode(optimizedCondition, optimizedOrElse);
     }
 
-    private ASTNode optimizeStaticBlock(final StaticBlockNode node) {
-        final boolean isAsync = node.isAsync();
-        final BlockNode block = (BlockNode) optimizeBlock(node.getBlock());
-        return new StaticBlockNode(block, isAsync);
+    private StaticBlockNode optimizeStaticBlock(final StaticBlockNode node) {
+        node.getBlock().getChildren().replaceAll(this::optimizeNode);
+        return node;
     }
 
 }
