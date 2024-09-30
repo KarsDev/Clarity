@@ -107,6 +107,7 @@ public class ASTData {
         registerNode(ForNode.class, 0x902);
         registerNode(AssertNode.class, 0x902);
         registerNode(ForeachNode.class, 0x903);
+        registerNode(IsNode.class, 0x904);
     }
 
     private static void registerNode(Class<? extends ASTNodeCompiler> clazz, int id) {
