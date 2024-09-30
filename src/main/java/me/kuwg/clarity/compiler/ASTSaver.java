@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.zip.GZIPOutputStream;
 
+/**
+ * @author hi12167pies
+ */
 public class ASTSaver {
     private final AST ast;
 

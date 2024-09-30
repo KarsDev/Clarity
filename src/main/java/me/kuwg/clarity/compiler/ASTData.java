@@ -29,6 +29,9 @@ import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author hi12167pies, NotKuwg
+ */
 public class ASTData {
     // Data for VarInt and VarLong
     public static final int SEGMENT_BITS = 0x7F;

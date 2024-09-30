@@ -10,6 +10,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * @author hi12167pies
+ */
 public class ASTLoader {
     private final Path path;
 

@@ -13,6 +13,9 @@ import java.util.List;
 import static me.kuwg.clarity.compiler.ASTData.CONTINUE_BIT;
 import static me.kuwg.clarity.compiler.ASTData.SEGMENT_BITS;
 
+/**
+ * @author hi12167pies
+ */
 public class ASTOutputStream extends DataOutputStream {
 
     public ASTOutputStream(OutputStream outputStream) {
