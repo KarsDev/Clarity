@@ -328,7 +328,7 @@ public class Interpreter {
         }
 
         if (leftValue instanceof Boolean && rightValue instanceof Long) {
-            return evaluateBooleanOperation((Boolean) leftValue, (int) rightValue == 1, operator, node.getLine());
+            return evaluateBooleanOperation((Boolean) leftValue, (long) rightValue == 1, operator, node.getLine());
         }
 
         except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " " + operator + " " + rightValue.getClass().getSimpleName(), node.getLine());
@@ -403,7 +403,7 @@ public class Interpreter {
             case "*": return left * right;
             case "/": return (right == 0) ? except("Division by zero", line) : left / right;
             case "%": return left % right;
-            case "^": return Math.pow(left, right) % 1 == 0 ? (int)Math.pow(left, right) : Math.pow(left, right);
+            case "^": return Math.pow(left, right) % 1 == 0 ? (long) Math.pow(left, right) : Math.pow(left, right);
             case "<": return left < right;
             case ">": return left > right;
             case "<=": return left <= right;
@@ -1182,7 +1182,7 @@ public class Interpreter {
         final Object rawConditionValue = interpretNode(expr, context);
         final boolean condition;
         if (rawConditionValue instanceof Long || rawConditionValue instanceof Byte) {
-            final int num = (int) rawConditionValue;
+            final long num = (long) rawConditionValue;
             if (num == 0) {
                 condition = false;
             } else if (num == 1) {
@@ -1533,7 +1533,7 @@ public class Interpreter {
     private Boolean castToBool(final Object expression, final NativeCastNode node) {
         try {
             if (expression instanceof Long) {
-                final int val = (int) expression;
+                final long val = (long) expression;
                 if (val == 0) {
                     return false;
                 } else if (val == 1) {
