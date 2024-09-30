@@ -14,7 +14,6 @@ public abstract class ASTNode implements ASTNodeCompiler {
     private int line;
 
     public final int getLine() {
-//        if (line == 0) throw new UnsupportedOperationException("Unsupported line: 0, in class " + getClass().getSimpleName());
         return line;
     }
 
