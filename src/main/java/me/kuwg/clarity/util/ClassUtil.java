@@ -1,5 +1,6 @@
 package me.kuwg.clarity.util;
 
+import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.EnumClassDefinition;
@@ -76,7 +77,7 @@ public class ClassUtil {
     /**
      * Initializes a class by its name and constructor parameters using a general context.
      *
-     * <p>This is a simplified overload of {@link #initClass(String, Object[], Context)} that uses the general context
+     * <p>This is a simplified overload of {@link #initClass(String, Context, Object...)} that uses the general context
      * from the interpreter.</p>
      *
      * @param className         The name of the class to be initialized.
@@ -84,7 +85,7 @@ public class ClassUtil {
      * @return The initialized {@link ClassObject} instance.
      */
     public static ClassObject initClass(final String className, final Object... constructorParams) {
-        return initClass(className, constructorParams, INTERPRETER.general());
+        return initClass(className, INTERPRETER.general(), constructorParams);
     }
 
     /**
