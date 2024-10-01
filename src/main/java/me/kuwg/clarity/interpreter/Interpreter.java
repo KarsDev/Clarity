@@ -647,7 +647,7 @@ public class Interpreter {
         final Object result = interpretNode(node.getValue(), context);
         if (result instanceof VoidObject) return except("Reassigning variable with void value: " + node.getName(), node.getLine());
         context.setVariable(node.getName(), result);
-        return VOID_OBJECT;
+        return result;
     }
 
     private Object interpretObjectFunctionCall(final ObjectFunctionCallNode node, final Context context) {
