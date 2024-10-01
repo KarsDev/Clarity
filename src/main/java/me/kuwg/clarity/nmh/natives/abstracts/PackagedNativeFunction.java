@@ -1,28 +1,9 @@
 package me.kuwg.clarity.nmh.natives.abstracts;
 
-import java.util.List;
+import me.kuwg.clarity.library.natives.ClarityPackagedNativeFunction;
 
-public abstract class PackagedNativeFunction<R> extends NativeFunction<R> {
-
-    private final String pkg;
-
+public abstract class PackagedNativeFunction<R> extends ClarityPackagedNativeFunction<R> {
     protected PackagedNativeFunction(final String name) {
         super(name);
-        this.pkg = getClass().getPackage().getName().substring(37);
-    }
-
-    protected abstract boolean canCall(final String className);
-
-    public final boolean applies(final String pkg, final String name, final String callerClass, final List<Object> params) {
-        return pkg.equals(this.pkg) && applies(name, params) && canCall(callerClass);
-    }
-
-    @Override
-    public boolean applies(final String name, final List<Object> params) {
-        return super.applies(name, params);
-    }
-
-    public final String getFullyQualifiedName() {
-        return this.pkg + "." + getName();
     }
 }

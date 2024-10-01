@@ -1,4 +1,4 @@
-package me.kuwg.clarity.library.cnf;
+package me.kuwg.clarity.library.natives;
 
 import me.kuwg.clarity.library.objects.VoidObject;
 

@@ -1,6 +1,6 @@
 package me.kuwg.clarity.nmh.natives.abstracts;
 
-import me.kuwg.clarity.library.cnc.ClarityNativeClass;
+import me.kuwg.clarity.library.natives.ClarityNativeClass;
 
 public abstract class NativeClass extends ClarityNativeClass {
 

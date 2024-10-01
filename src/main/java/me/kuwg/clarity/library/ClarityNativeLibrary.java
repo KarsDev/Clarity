@@ -1,7 +1,8 @@
 package me.kuwg.clarity.library;
 
-import me.kuwg.clarity.library.cnc.ClarityNativeClass;
-import me.kuwg.clarity.library.cnf.ClarityNativeFunction;
+import me.kuwg.clarity.library.natives.ClarityNativeClass;
+import me.kuwg.clarity.library.natives.ClarityNativeFunction;
+import me.kuwg.clarity.library.natives.ClarityPackagedNativeFunction;
 
 /**
  * An interface representing a library of native functions and classes in the Clarity language.
@@ -54,5 +55,25 @@ public interface ClarityNativeLibrary {
      */
     default ClarityNativeClass[] getLibraryNativeClasses() {
         return new ClarityNativeClass[0]; // Return an empty array by default
+    }
+
+    /**
+     * Retrieves an array of packaged native functions provided by this library.
+     * <p>
+     * Each {@link ClarityPackagedNativeFunction} in the returned array represents a function that
+     * belongs to a specific package and can be called from the Clarity interpreter. These functions
+     * are grouped by their package for better organization and are often used in specialized contexts.
+     * </p>
+     * <p>
+     * Implementations of this method should return an array containing all available packaged native
+     * functions. If no packaged functions are available, an empty array will be returned to indicate
+     * the absence of packaged native functions without causing an exception.
+     * </p>
+     *
+     * @return An array of {@link ClarityPackagedNativeFunction} objects representing the packaged
+     *         native functions available in this library. If no functions are available, an empty array will be returned.
+     */
+    default ClarityPackagedNativeFunction<?>[] getPackagedNativeFunctions() {
+        return new ClarityPackagedNativeFunction<?>[0]; // Return an empty array by default
     }
 }

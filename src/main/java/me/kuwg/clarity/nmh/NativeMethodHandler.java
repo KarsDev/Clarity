@@ -1,9 +1,10 @@
 package me.kuwg.clarity.nmh;
 
-import me.kuwg.clarity.library.cnc.ClarityNativeClass;
-import me.kuwg.clarity.library.cnf.ClarityNativeFunction;
+import me.kuwg.clarity.library.natives.ClarityNativeClass;
+import me.kuwg.clarity.library.natives.ClarityNativeFunction;
 import me.kuwg.clarity.library.ClarityNativeLibrary;
 import me.kuwg.clarity.interpreter.context.Context;
+import me.kuwg.clarity.library.natives.ClarityPackagedNativeFunction;
 import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.nmh.natives.impl.pkg.date.*;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.CheckNativeTypeNative;
@@ -190,6 +191,10 @@ public final class NativeMethodHandler {
 
         for (final ClarityNativeClass clazz : lib.getLibraryNativeClasses()) {
             nativeClasses.put(clazz.getName(), clazz);
+        }
+
+        for (final ClarityPackagedNativeFunction<?> function : lib.getPackagedNativeFunctions()) {
+            defaultFunctions.put(function.getName(), function);
         }
     }
 }
