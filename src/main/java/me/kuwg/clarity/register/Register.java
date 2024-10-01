@@ -124,7 +124,7 @@ public final class Register {
     /**
      * Raises a {@link RegisterException} to indicate an error in the register.
      */
-    private static void raise() {
+    static void raise() {
         throw new RegisterException();
     }
 
