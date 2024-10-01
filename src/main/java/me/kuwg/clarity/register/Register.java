@@ -19,14 +19,15 @@ public final class Register {
         raise();
     }
 
-    public static void throwException(final String message, final int line) {
-        throwException(message, String.valueOf(line));
-    }
-
     public static void throwException(final String message) {
         error(message);
         printRegister();
         exit();
+        raise();
+    }
+
+    public static void throwException(final String message, final int line) {
+        throwException(message, String.valueOf(line));
     }
 
     private static void error(final String message) {
