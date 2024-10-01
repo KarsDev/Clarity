@@ -31,7 +31,6 @@ public class LoadNativeLibraryNative extends SystemNativeFunction<Integer> {
             final File jarFile = new File(LIBRARIES,  path + ".jar");
 
             if (!jarFile.exists()) {
-                Register.throwException("Native lib not found: " + jarFile.getAbsolutePath());
                 return 4;
             }
 
@@ -41,7 +40,7 @@ public class LoadNativeLibraryNative extends SystemNativeFunction<Integer> {
             final String classPath = readLibOption(classLoader, jarFile);
 
             if (classPath == null) {
-                Register.throwException("Class path not found in library.lib.");
+                Register.throwException("Class path not found in \"library.lib\".");
                 return 3;
             }
 

@@ -1,12 +1,11 @@
 package me.kuwg.clarity.util;
 
-import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.EnumClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
-import me.kuwg.clarity.library.objects.types.ClassObject;
 import me.kuwg.clarity.library.objects.ObjectType;
+import me.kuwg.clarity.library.objects.types.ClassObject;
 
 import java.util.Arrays;
 
@@ -16,7 +15,14 @@ import static me.kuwg.clarity.library.objects.VoidObject.VOID_OBJECT;
 /**
  * Utility class for initializing and constructing class objects in the Clarity interpreter.
  */
-public class ClassUtil {
+public final class ClassUtil {
+
+    /**
+     * Not instantiable.
+     */
+    private ClassUtil() throws RuntimeException {
+        throw new RuntimeException("You can't instantiate this class!");
+    }
 
     /**
      * Initializes a class by its name, passing the provided constructor parameters and context.
@@ -98,9 +104,9 @@ public class ClassUtil {
      *     <li>Returns the corresponding enum value by name.</li>
      * </ul>
      *
-     * @param className      The name of the enum class.
-     * @param enumValueName  The name of the enum value to retrieve.
-     * @param context        The context from which to retrieve the enum class definition.
+     * @param className     The name of the enum class.
+     * @param enumValueName The name of the enum value to retrieve.
+     * @param context       The context from which to retrieve the enum class definition.
      * @return The {@link EnumClassDefinition.EnumValue} corresponding to the given enum value name.
      * @throws IllegalStateException If the provided class is not an enum or if the class is not found.
      */
@@ -120,8 +126,8 @@ public class ClassUtil {
      * <p>This is a simplified overload of {@link #getEnumValue(String, String, Context)} that uses the general context
      * from the interpreter.</p>
      *
-     * @param className      The name of the enum class.
-     * @param enumValueName  The name of the enum value to retrieve.
+     * @param className     The name of the enum class.
+     * @param enumValueName The name of the enum value to retrieve.
      * @return The {@link EnumClassDefinition.EnumValue} corresponding to the given enum value name.
      * @throws IllegalStateException If the provided class is not an enum or if the class is not found.
      */

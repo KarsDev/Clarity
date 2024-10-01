@@ -197,7 +197,7 @@ const class System {
      # - Successful loading of the library does not guarantee that all native functions will
      #   be accessible or work as expected. Further checks or error handling might be required.
      #/
-    static fn loadNativeLibrary(lib) {
-        native.system.loadNativeLibrary(lib)
+    static fn loadNativeLibrary(lib) -> int{
+        return native.system.loadNativeLibrary(lib)
     }
 }
