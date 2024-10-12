@@ -35,10 +35,12 @@ import me.kuwg.clarity.token.TokenType;
 import me.kuwg.clarity.token.Tokenizer;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,11 +66,13 @@ public final class ASTParser {
 
         // parse includes
         while (matchAndConsume(KEYWORD, "include")) {
-            final IncludeNode include = parseInclude();
-            if (includes.stream().noneMatch(included -> included.getName().equals(include.getName()))) {
-                includes.add(include);
-                node.addChild(include);
-            }
+            final List<IncludeNode> includes = parseInclude();
+            includes.forEach(include -> {
+                if (includes.stream().noneMatch(included -> included.getName().equals(include.getName()))) {
+                    includes.add(include);
+                    node.addChild(include);
+                }
+            });
         }
 
         includes.clear();
@@ -815,7 +819,7 @@ public final class ASTParser {
         return new VoidNode().setLine(line);
     }
 
-    private IncludeNode parseInclude() {
+    private List<IncludeNode> parseInclude() {
         IncludeNode included;
 
         include:
@@ -829,6 +833,72 @@ public final class ASTParser {
             final int line = current().getLine();
 
             final String path = parseIncludePath(isCompiled);
+
+            if (path.endsWith("*")) {
+
+                if (path.length() == 1) {
+                    if (!isNative) {
+                        throw new UnsupportedOperationException("Including all files is NOT a good idea!" + current().getLine());
+                    }
+
+                    final List<IncludeNode> includes = new ArrayList<>();
+
+                    try {
+                        final URL nativeDirURL = getClass().getClassLoader().getResource("natives");
+                        if (nativeDirURL == null) {
+                            throw new IOException("Native resources folder not found");
+                        }
+
+                        final File nativeDir = new File(nativeDirURL.toURI());
+                        final File[] files = nativeDir.listFiles();
+
+
+
+                        if (files != null) {
+                            for (File file : files) {
+                                if (file.isFile()) {
+                                    final String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                                    final List<Token> tokens = Tokenizer.tokenize(content);
+                                    final ASTParser parser = new ASTParser(ORIGINAL, file.getName(), tokens);
+                                    final AST ast = parser.parse();
+
+                                    includes.add(new IncludeNode(file.getName(), ast.getRoot(), true).setLine(line));
+                                }
+                            }
+                        }
+
+                        return includes;
+                    } catch (final Exception e) {
+                        throw new RuntimeException("Failed to load native files", e);
+                    }
+                }
+
+                try {
+                    final String pathSub = path.substring(0, path.length() - 3); // remove last 3 chars (dot, t/f, *)
+
+                    final boolean compile = path.indexOf(path.length() - 2) == 't';
+
+                    final File dir = new File(pathSub);
+
+                    final File[] files = dir.listFiles();
+
+                    assert files != null : "Expected directory at line " + current().getLine();
+
+                    for (final File file : files) {
+                        final String fn = file.getName();
+                        if (file.isFile() && (fn.substring(fn.lastIndexOf('.' + 1)).equals("cclr") == compile)) {
+                            final String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
+                            final List<Token> tokens = Tokenizer.tokenize(content);
+                            final ASTParser parser = new ASTParser(ORIGINAL, file.getName(), tokens);
+                            final AST ast = parser.parse();
+
+                            includes.add(new IncludeNode(file.getName(), ast.getRoot(), true).setLine(line));
+                        }
+                    }
+                } catch (final Exception e) {
+                    throw new RuntimeException("Failed to load files", e);
+                }
+            }
 
             if (isCompiled) {
                 final File file;
@@ -890,7 +960,7 @@ public final class ASTParser {
             included = new IncludeNode(path, ast.getRoot(), false).setLine(line);
         }
 
-        return included;
+        return Collections.singletonList(included);
     }
 
     private String parseIncludePath(final boolean compiled) {
@@ -899,9 +969,15 @@ public final class ASTParser {
         }
         StringBuilder path = new StringBuilder();
 
+        if (matchAndConsume(OPERATOR, "*")) return "*";
+
         path.append(consume(VARIABLE).getValue());
 
         while (matchAndConsume(OPERATOR, ".")) {
+            if (matchAndConsume(OPERATOR, "*")) {
+                path.append(compiled ? "t" : "f").append("*");
+                return path.toString();
+            }
             path.append("\\").append(consume(VARIABLE).getValue());
         }
 
