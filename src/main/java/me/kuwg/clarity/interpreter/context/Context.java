@@ -104,15 +104,22 @@ public class Context {
     }
 
     public ObjectType getFunction(final String name, final int paramsSize) {
-        final List<FunctionDefinition> definitions = functions.get(name);
-        if (definitions != null) {
-            for (final FunctionDefinition d : definitions) {
-                if (paramsSize == d.getParams().size()) {
-                    return d;
+        try {
+            final List<FunctionDefinition> definitions = functions.get(name);
+            if (definitions != null) {
+                for (final FunctionDefinition d : definitions) {
+                    if (paramsSize == d.getParams().size()) {
+                        return d;
+                    }
                 }
             }
+            return parentContext != null ? parentContext.getFunction(name, paramsSize) : VOID_OBJECT;
+        } catch (final VirtualMachineError ignore) {
+            System.err.print("(Self Calling?) function error: " + name + " with " + paramsSize + " params.\n");
+            Runtime.getRuntime().exit(666);
+            throw new RuntimeException();
         }
-        return parentContext != null ? parentContext.getFunction(name, paramsSize) : VOID_OBJECT;
+
     }
 
     public void defineClass(final String name, final ClassDefinition definition) {

@@ -907,6 +907,10 @@ public class Interpreter {
 
         final Context lambdaContext = new Context(context);
 
+        if (params.size() != caller.getParams().size()) {
+            except("Expected " + caller.getParams().size() + " params but found " + params.size(), raw.getLine());
+        }
+
         for (int i = 0; i < params.size(); i++) {
             final Object obj = params.get(i);
             final ParameterNode param = caller.getParams().get(i);

@@ -1,2 +1,5 @@
-var x = lambda(x) -> native.println(x)
-x("Hello World")
+fn exeLambda(lambda x) {
+    x(x)
+}
+
+exeLambda((x) -> native.println("Executing lambda: " + x(x)))

@@ -1340,7 +1340,7 @@ public final class ASTParser {
 
 
     private boolean checkLambda() {
-        return matchAndConsume(DIVIDER, ")") || match(VARIABLE) && lookahead().is(DIVIDER, ",") || match(VARIABLE) || lookahead().is(KEYWORD, "lambda") && lookahead(3).is(OPERATOR, "->");
+        return match(DIVIDER, ")") || match(VARIABLE) && lookahead().is(DIVIDER, ",") || match(VARIABLE) || lookahead().is(KEYWORD, "lambda") && lookahead(3).is(OPERATOR, "->");
     }
 
 
