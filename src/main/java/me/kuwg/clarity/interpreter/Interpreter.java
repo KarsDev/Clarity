@@ -62,7 +62,6 @@ public class Interpreter {
         this.ast = optimizer.optimize();
         this.nmh = new NativeMethodHandler();
         this.general = new Context();
-        System.out.println(this.ast);
     }
 
     public Context general() {
@@ -472,6 +471,10 @@ public class Interpreter {
             final ObjectType clazz = context.getClass(context.getCurrentClassName());
 
             if (clazz == null) {
+                final Object maybeLambda = context.getVariable(functionName);
+                if (maybeLambda instanceof LambdaObject) {
+                    return handleLambdaFunctionCall(node, context, (LambdaObject) maybeLambda);
+                }
                 return except("Calling a function that doesn't exist: " + functionName + getParams(params), node.getLine());
             }
             final FunctionDefinition rawStaticFun = ((ClassDefinition) clazz).getStaticFunction(functionName, node.getParams().size());
@@ -877,22 +880,25 @@ public class Interpreter {
     }
 
     private Object handleLambdaFunctionCall(final ASTNode raw, final Context context, final LambdaObject caller) {
-        String fn;
-        List<Object> params;
+        final String fn;
+        final List<Object> params;
 
         if (raw instanceof ObjectFunctionCallNode) {
             ObjectFunctionCallNode node = (ObjectFunctionCallNode) raw;
             fn = node.getCalled();
             params = getFunctionParameters(node, context, -1);
-            Register.register(new Register.RegisterElement(Register.RegisterElementType.STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
         } else if (raw instanceof MemberFunctionCallNode) {
             MemberFunctionCallNode node = (MemberFunctionCallNode) raw;
             fn = node.getName();
             params = getFunctionParameters(node, context, -1);
-            Register.register(new Register.RegisterElement(Register.RegisterElementType.LAMBDACALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+        } else if (raw instanceof FunctionCallNode) {
+            fn = "run";
+            params = getFunctionParameters((FunctionCallNode) raw, context, -1);
         } else {
             return VOID_OBJECT;
         }
+
+        Register.register(new Register.RegisterElement(Register.RegisterElementType.LAMBDACALL, fn + getParams(params), raw.getLine(), context.getCurrentClassName()));
 
         if (!fn.equals("run")) {
             Register.throwException("Illegal function in lambda context: " + fn + " with params " + getParams(params), raw.getLine());
@@ -1802,6 +1808,24 @@ public class Interpreter {
     }
 
     private List<Object> getFunctionParameters(final MemberFunctionCallNode node, final Context context, int expectedSize) {
+        final List<Object> params = new ArrayList<>();
+        for (final ASTNode param : node.getParams()) {
+            final Object returned = interpretNode(param, context);
+            if (returned == VOID_OBJECT) {
+                except("Passing void as a parameter function");
+                return new ArrayList<>();
+            }
+            params.add(returned);
+        }
+
+        if (expectedSize != -1 && (params.size() > expectedSize || params.size() < expectedSize)) {
+            except("Parameter size mismatch. Expected: " + expectedSize + ", Found: " + params.size(), node.getLine());
+            return new ArrayList<>();
+        }
+        return params;
+    }
+
+    private List<Object> getFunctionParameters(final FunctionCallNode node, final Context context, int expectedSize) {
         final List<Object> params = new ArrayList<>();
         for (final ASTNode param : node.getParams()) {
             final Object returned = interpretNode(param, context);

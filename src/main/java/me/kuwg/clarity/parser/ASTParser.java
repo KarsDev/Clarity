@@ -163,6 +163,8 @@ public final class ASTParser {
                 return parseRaiseDeclaration();
             case TRY:
                 return parseTryDeclaration();
+            case LAMBDA:
+                return parseLambdaDeclaration();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -590,28 +592,9 @@ public final class ASTParser {
             case DIVIDER: {
                 switch (token.getValue()) {
                     case "(":
-                        if (matchAndConsume(DIVIDER, ")")) {
-                            consume(OPERATOR, "->");
-                            return new LambdaBlockNode(new ArrayList<>(), parseBlock()).setLine(line);
-                        }
-                        if (match(VARIABLE) && lookahead().is(DIVIDER, ",")) {
-                            List<ParameterNode> nodes = new ArrayList<>();
-                            do {
-                                final Token cur = consume();
-                                nodes.add(new ParameterNode(cur.getValue(), matchAndConsume(KEYWORD, "lambda")).setLine(cur.getLine()));
-                            } while (matchAndConsume(DIVIDER, ","));
-                            consume(DIVIDER, ")");
-                            consume(OPERATOR, "->");
-                            return new LambdaBlockNode(nodes, parseBlock()).setLine(line);
-                        }
-
-                        if (match(VARIABLE) || lookahead().is(KEYWORD, "lambda") && lookahead(3).is(OPERATOR, "->")) {
-                            List<ParameterNode> nodes = new ArrayList<>();
-                            final Token cur = consume();
-                            nodes.add(new ParameterNode(cur.getValue(), matchAndConsume(KEYWORD, "lambda")).setLine(cur.getLine()));
-                            consume(DIVIDER, ")");
-                            consume(OPERATOR, "->");
-                            return new LambdaBlockNode(nodes, parseBlock()).setLine(line);
+                        if (checkLambda()) {
+                            undo();
+                            return parseLambdaDeclaration();
                         }
 
                         ASTNode astNode = parseExpression();
@@ -1339,11 +1322,31 @@ public final class ASTParser {
         return new TryExceptBlock(tryBlock, variable, exceptBlock).setLine(line);
     }
 
+    private ASTNode parseLambdaDeclaration() {
+        final int line = matchIfConsume(KEYWORD, "lambda").getLine(); // consume "lambda"
+        final List<ParameterNode> params = parseParameters();
+        consume(OPERATOR, "->");
+        final BlockNode block = parseBlock();
+        return new LambdaBlockNode(params, block).setLine(line);
+    }
 
 
 
 
 
+
+
+
+
+
+    private boolean checkLambda() {
+        return matchAndConsume(DIVIDER, ")") || match(VARIABLE) && lookahead().is(DIVIDER, ",") || match(VARIABLE) || lookahead().is(KEYWORD, "lambda") && lookahead(3).is(OPERATOR, "->");
+    }
+
+
+    private Token matchIfConsume(final TokenType type, final String value) {
+        return match(type, value) ? consume() : current();
+    }
 
     private boolean matchAndConsume(final TokenType type) {
         final boolean match = match(type);
