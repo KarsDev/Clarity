@@ -66,13 +66,14 @@ public final class ASTParser {
 
         // parse includes
         while (matchAndConsume(KEYWORD, "include")) {
-            final List<IncludeNode> includes = parseInclude();
-            includes.forEach(include -> {
-                if (includes.stream().noneMatch(included -> included.getName().equals(include.getName()))) {
-                    includes.add(include);
-                    node.addChild(include);
+            final List<IncludeNode> localIncludes = parseInclude();
+
+            for (final IncludeNode localInclude : localIncludes) {
+                if (includes.stream().noneMatch(included -> included.getName().equals(localInclude.getName()))) {
+                    includes.add(localInclude);
+                    node.addChild(localInclude);
                 }
-            });
+            }
         }
 
         includes.clear();
@@ -589,14 +590,40 @@ public final class ASTParser {
             case DIVIDER: {
                 switch (token.getValue()) {
                     case "(":
+                        if (matchAndConsume(DIVIDER, ")")) {
+                            consume(OPERATOR, "->");
+                            return new LambdaBlockNode(new ArrayList<>(), parseBlock()).setLine(line);
+                        }
+                        if (match(VARIABLE) && lookahead().is(DIVIDER, ",")) {
+                            List<ParameterNode> nodes = new ArrayList<>();
+                            do {
+                                final Token cur = consume();
+                                nodes.add(new ParameterNode(cur.getValue(), matchAndConsume(KEYWORD, "lambda")).setLine(cur.getLine()));
+                            } while (matchAndConsume(DIVIDER, ","));
+                            consume(DIVIDER, ")");
+                            consume(OPERATOR, "->");
+                            return new LambdaBlockNode(nodes, parseBlock()).setLine(line);
+                        }
+
+                        if (match(VARIABLE) || lookahead().is(KEYWORD, "lambda") && lookahead(3).is(OPERATOR, "->")) {
+                            List<ParameterNode> nodes = new ArrayList<>();
+                            final Token cur = consume();
+                            nodes.add(new ParameterNode(cur.getValue(), matchAndConsume(KEYWORD, "lambda")).setLine(cur.getLine()));
+                            consume(DIVIDER, ")");
+                            consume(OPERATOR, "->");
+                            return new LambdaBlockNode(nodes, parseBlock()).setLine(line);
+                        }
+
                         ASTNode astNode = parseExpression();
+
                         consume(DIVIDER, ")");
+
                         while (match(OPERATOR)) {
                             final String op = consume().getValue();
                             ASTNode expression = parseExpression();
                             astNode = new BinaryExpressionNode(astNode, op, expression);
                         }
-                        return astNode;
+                        return astNode.setLine(line);
                     case "[":
                         return parseArray(line);
                     case "{":
@@ -1172,10 +1199,11 @@ public final class ASTParser {
 
         consume(DIVIDER, "(");
 
-        if (match(VARIABLE)) {
+        if (!match(DIVIDER)) {
             do {
-                Token token = consume(VARIABLE); // Consume the parameter variable
-                params.add(new ParameterNode(token.getValue()).setLine(token.getLine()));
+                final boolean lambda = matchAndConsume(KEYWORD, "lambda");
+                final Token token = consume(VARIABLE); // Consume the parameter variable
+                params.add(new ParameterNode(token.getValue(), lambda).setLine(token.getLine()));
 
                 if (match(DIVIDER, ",")) {
                     consume(); // Consume the comma separator

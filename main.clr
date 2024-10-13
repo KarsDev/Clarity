@@ -1,3 +1,36 @@
-include native *
+class Listener {
 
-Math.sqrt(5)
+    bool hasClicked
+    int clicked
+
+    constructor() {
+        hasClicked = false
+        clicked = -1
+    }
+
+    fn onClick(lambda x) {
+        async -> "Lambda Click Async Thread" {
+            while true {
+                if local.hasClicked {
+                    assert clicked != -1
+                    x.run(clicked)
+                    hasClicked = false
+                    clicked = -1
+                }
+            }
+        }
+    }
+
+    fn click(button) {
+        local.hasClicked = true
+        local.clicked = button
+    }
+}
+fn main() {
+    var listener = new Listener()
+    listener.onClick((x) -> {
+        native.println("Button clicked: " + x)
+    })
+
+    listener.click(2)
+}

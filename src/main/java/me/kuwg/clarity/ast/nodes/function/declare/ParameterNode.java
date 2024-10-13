@@ -8,9 +8,11 @@ import java.io.IOException;
 
 public class ParameterNode extends ASTNode {
     private String name;
+    private boolean isLambda;
 
-    public ParameterNode(final String name) {
+    public ParameterNode(final String name, final boolean isLambda) {
         this.name = name;
+        this.isLambda = isLambda;
     }
 
     public ParameterNode() {
@@ -21,25 +23,32 @@ public class ParameterNode extends ASTNode {
         return name;
     }
 
+    public final boolean isLambda() {
+        return isLambda;
+    }
+
     @Override
     public String toString() {
         return "ParameterNode{" +
-                "name='" + name + '\'' +
+                "isLambda=" + isLambda +
+                ", name='" + name + '\'' +
                 '}';
     }
 
     @Override
     public void print(final StringBuilder sb, final String indent) {
-        sb.append(indent).append("Parameter: ").append(name).append("\n");
+        sb.append(indent).append("Parameter: ").append(name).append(isLambda ? "(lambda)" : " (default)").append("\n");
     }
 
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
+        out.writeBoolean(isLambda);
     }
 
     @Override
     public void load0(final ASTInputStream in) throws IOException {
         this.name = in.readString();
+        this.isLambda = in.readBoolean();
     }
 }

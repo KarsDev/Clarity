@@ -32,6 +32,7 @@ import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.*;
+import me.kuwg.clarity.library.objects.types.LambdaObject;
 import me.kuwg.clarity.optimizer.ASTOptimizer;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.library.objects.types.ClassObject;
@@ -61,6 +62,7 @@ public class Interpreter {
         this.ast = optimizer.optimize();
         this.nmh = new NativeMethodHandler();
         this.general = new Context();
+        System.out.println(this.ast);
     }
 
     public Context general() {
@@ -191,6 +193,7 @@ public class Interpreter {
         else if (node instanceof TryExceptBlock) return interpretTryExcept((TryExceptBlock) node, context);
         else if (node instanceof StaticBlockNode) return interpretStaticBlock((StaticBlockNode) node, context);
         else if (node instanceof TernaryOperatorNode) return interpretTernaryOperator((TernaryOperatorNode) node, context);
+        else if (node instanceof LambdaBlockNode) return interpretLambdaBlock((LambdaBlockNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -665,6 +668,8 @@ public class Interpreter {
             return handleInstanceMethodCall(node, context, (ClassObject) caller);
         } else if (caller instanceof VoidObject) {
             return handleStaticFunctionCall(node, context);
+        } else if (caller instanceof LambdaObject) {
+            return handleLambdaFunctionCall(node, context, (LambdaObject) caller);
         } else {
             return except("You can't call a function out of a " + caller.getClass().getSimpleName(), node.getLine());
         }
@@ -870,6 +875,46 @@ public class Interpreter {
         Register.throwException("Illegal function in string context: " + fn + " with params " + getParams(params), raw.getLine());
         return VOID_OBJECT;
     }
+
+    private Object handleLambdaFunctionCall(final ASTNode raw, final Context context, final LambdaObject caller) {
+        String fn;
+        List<Object> params;
+
+        if (raw instanceof ObjectFunctionCallNode) {
+            ObjectFunctionCallNode node = (ObjectFunctionCallNode) raw;
+            fn = node.getCalled();
+            params = getFunctionParameters(node, context, -1);
+            Register.register(new Register.RegisterElement(Register.RegisterElementType.STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+        } else if (raw instanceof MemberFunctionCallNode) {
+            MemberFunctionCallNode node = (MemberFunctionCallNode) raw;
+            fn = node.getName();
+            params = getFunctionParameters(node, context, -1);
+            Register.register(new Register.RegisterElement(Register.RegisterElementType.LAMBDACALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+        } else {
+            return VOID_OBJECT;
+        }
+
+        if (!fn.equals("run")) {
+            Register.throwException("Illegal function in lambda context: " + fn + " with params " + getParams(params), raw.getLine());
+            return VOID_OBJECT;
+        }
+
+        final Context lambdaContext = new Context(context);
+
+        for (int i = 0; i < params.size(); i++) {
+            final Object obj = params.get(i);
+            final ParameterNode param = caller.getParams().get(i);
+            if (param.isLambda() && !(obj instanceof LambdaBlockNode)) {
+                except("Expected lambda but found " + getParams(Collections.singletonList(params.get(i))), raw.getLine());
+                return VOID_OBJECT;
+            }
+            lambdaContext.defineVariable(param.getName(), new VariableDefinition(param.getName(), null, obj, false, false, false));
+        }
+
+        return interpretBlock(caller.getBlock(), lambdaContext);
+    }
+
+
 
 
     private Object handleInstanceMethodCall(final ObjectFunctionCallNode node, final Context context, final ClassObject classObject) {
@@ -1159,6 +1204,7 @@ public class Interpreter {
         else if (o instanceof Object[]) return "arr";
         else if (o instanceof String) return "str";
         else if (o instanceof VoidObject) return "void";
+        else if (o instanceof LambdaObject) return "lambda";
         else return o.getClass().getSimpleName().toLowerCase();
     }
 
@@ -1714,8 +1760,10 @@ public class Interpreter {
             return resultArray;
         } else if (caller instanceof String) {
             return handleStringFunctionCall(node, context, (String) caller);
+        } else if (caller instanceof LambdaObject) {
+            return handleLambdaFunctionCall(node, context, (LambdaObject) caller);
         } else if (!(caller instanceof ClassObject)) {
-            return except("Expected class object caller", node.getLine());
+            return except("You can't call a function out of a " + caller.getClass().getSimpleName(), node.getLine());
         }
 
         final ClassObject object = (ClassObject) caller;
@@ -1725,6 +1773,7 @@ public class Interpreter {
         final ObjectType rawDefinition = object.getContext().getFunction(node.getName(), node.getParams().size());
 
         if (!(rawDefinition instanceof FunctionDefinition)) {
+            System.out.println(object.getContext());
             return except("Instance function not found: " + objectName + "#" + node.getName() + getParams(getFunctionParameters(node, context, node.getParams().size())), node.getLine());
         }
 
@@ -1943,6 +1992,10 @@ public class Interpreter {
     private Object interpretTernaryOperator(final TernaryOperatorNode node, final Context context) {
         // ternary for ternary, ironic, isn't it?
         return checkCondition(node.getCondition(), context) ? interpretNode(node.getTrueBranch(), context) : interpretNode(node.getFalseBranch(), context);
+    }
+
+    private Object interpretLambdaBlock(final LambdaBlockNode node, final Context context) {
+        return new LambdaObject(node.getParams(), node.getBlock(), context);
     }
 
 

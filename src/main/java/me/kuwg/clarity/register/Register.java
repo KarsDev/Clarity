@@ -140,7 +140,8 @@ public final class Register {
         ARRAYCALL,   // Array function call
         LOCALCALL,   // Local function call
         STRINGCALL,  // String function call
-        STATICINIT   // Static initialization
+        STATICINIT,  // Static initialization
+        LAMBDACALL,  // Lambda function call
     }
 
     /**
@@ -237,6 +238,9 @@ public final class Register {
                 }
                 case STRINGCALL: {
                     return "string function " + getParam() + formatClass() + formatLine();
+                }
+                case LAMBDACALL: {
+                    return "lambda function " + getParam() + formatLine() + formatLine();
                 }
                 default: {
                     throwException("Unsupported register element type: " + getType());

@@ -39,7 +39,8 @@ public enum Keyword {
     ASYNC,
     RAISE,
     TRY,
-    EXCEPT
+    EXCEPT,
+    LAMBDA,
 
     ;
 
@@ -81,6 +82,7 @@ public enum Keyword {
             case "raise": return RAISE;
             case "try": return TRY;
             case "except": return EXCEPT;
+            case "lambda": return LAMBDA;
 
             default: throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
         }
