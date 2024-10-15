@@ -1872,29 +1872,7 @@ public class Interpreter {
     }
 
     private boolean interpretIs(final IsNode node, final Context context) {
-        final Object result = interpretNode(node.getExpression(), context);
-
-        switch (node.getType()) {
-            case STR:
-                return result instanceof String;
-            case FLOAT:
-                return result instanceof Double;
-            case INT:
-                return result instanceof Long;
-            case ARR:
-                return result instanceof Object[];
-            case CLASS:
-                if (!(result instanceof ClassObject)) return false;
-                ClassObject object = (ClassObject) result;
-                return object.isInstance(node.getType().getValue());
-            case BOOL:
-                return result instanceof Boolean;
-            case VOID:
-                return result instanceof VoidObject;
-            default:
-                except("Unknown 'is' type: " + node.getType().name().toLowerCase(), node.getLine());
-                return false;
-        }
+        return node.getType().is(interpretNode(node.getExpression(), context));
     }
 
     private Object interpretEnumDeclaration(final EnumDeclarationNode node, final Context context) {

@@ -1,5 +1,6 @@
-fn exeLambda(lambda x) {
-    x(x)
+fn exeLambda(val) {
+    assert val is lambda
+    val.run()
 }
 
-exeLambda((x) -> native.println("Executing lambda: " + x(x)))
+exeLambda(() -> native.println("Executing lambda described in params"))
