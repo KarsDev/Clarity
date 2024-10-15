@@ -1,14 +1,60 @@
 package me.kuwg.clarity.ast.nodes.clazz.cast;
 
+import me.kuwg.clarity.library.objects.VoidObject;
+import me.kuwg.clarity.library.objects.types.ClassObject;
+import me.kuwg.clarity.library.objects.types.LambdaObject;
+
 public enum CastType {
-    STR(null),
-    FLOAT(null),
-    INT(null),
-    ARR(null),
-    CLASS(""),
-    BOOL(null),
-    VOID(null),
-    ;
+    STR(null) {
+        @Override
+        public boolean is(Object object) {
+            return object instanceof String;
+        }
+    },
+    FLOAT(null) {
+        @Override
+        public boolean is(Object object) {
+            return object instanceof Double;
+        }
+    },
+    INT(null) {
+        @Override
+        public boolean is(Object object) {
+            return object instanceof Long;
+        }
+    },
+    ARR(null) {
+        @Override
+        public boolean is(Object object) {
+            return object instanceof Object[];
+        }
+    },
+    CLASS("") {
+        @Override
+        public boolean is(Object object) {
+            if (!(object instanceof ClassObject)) return false;
+            ClassObject classObject = (ClassObject) object;
+            return classObject.isInstance(this.getValue());
+        }
+    },
+    BOOL(null) {
+        @Override
+        public boolean is(Object object) {
+            return object instanceof Boolean;
+        }
+    },
+    VOID(null) {
+        @Override
+        public boolean is(Object object) {
+            return object instanceof VoidObject;
+        }
+    },
+    LAMBDA(null) {
+        @Override
+        public boolean is(Object object) {
+            return object instanceof LambdaObject; // Assuming LambdaObject is a type in your code
+        }
+    };
 
     private String value;
 
@@ -47,10 +93,15 @@ public enum CastType {
             case "void":
                 return VOID;
 
+            case "lambda":
+                return LAMBDA;
+
             default:
                 return null;
         }
     }
 
     public static final CastType[] VALUES = values();
+
+    public abstract boolean is(Object object);
 }
