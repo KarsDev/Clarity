@@ -318,6 +318,7 @@ public class Interpreter {
     private Object interpretBinaryExpressionNode(final BinaryExpressionNode node, final Context context) {
         final Object leftValue = interpretNode(node.getLeft(), context);
         final Object rightValue = interpretNode(node.getRight(), context);
+
         final String operator = node.getOperator();
 
         if (leftValue == null || rightValue == null) {

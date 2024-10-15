@@ -69,8 +69,8 @@ const native class Math {
      # Math.abs(-5)    // Returns: 5
      #/
     static fn abs(x) {
-        if x < 0 return -x
-        else return x
+        return x when x > 0
+        return -x
     }
 
     /##

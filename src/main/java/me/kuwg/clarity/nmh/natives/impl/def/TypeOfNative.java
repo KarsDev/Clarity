@@ -2,6 +2,7 @@ package me.kuwg.clarity.nmh.natives.impl.def;
 
 import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.library.objects.types.ClassObject;
+import me.kuwg.clarity.library.objects.types.LambdaObject;
 import me.kuwg.clarity.nmh.natives.abstracts.DefaultNativeFunction;
 import me.kuwg.clarity.register.Register;
 
@@ -21,7 +22,7 @@ public class TypeOfNative extends DefaultNativeFunction<String> {
             return "void";
         } else if (result instanceof String) {
             return "str";
-        } else if (result instanceof Integer) {
+        } else if (result instanceof Long) {
             return "int";
         } else if (result instanceof Double) {
             return "float";
@@ -31,6 +32,8 @@ public class TypeOfNative extends DefaultNativeFunction<String> {
             return "arr";
         } else if (result instanceof Boolean) {
             return "bool";
+        } else if (result instanceof LambdaObject) {
+            return "lambda";
         }
         Register.throwException("Unknown type: " + result);
         return null;

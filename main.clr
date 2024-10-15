@@ -1,6 +1,7 @@
-fn exeLambda(val) {
-    assert val is lambda
-    val.run()
-}
+include native math
 
-exeLambda(() -> native.println("Executing lambda described in params"))
+var x = 5
+var y = -5
+var absX = Math.abs(x)
+var absY = Math.abs(y)
+native.println(absX + " - " + absY)

@@ -592,7 +592,7 @@ public final class ASTParser {
             case DIVIDER: {
                 switch (token.getValue()) {
                     case "(":
-                        if (checkLambda()) {
+                        if (match(KEYWORD, "lambda")) {
                             undo();
                             return parseLambdaDeclaration();
                         }
@@ -1337,11 +1337,6 @@ public final class ASTParser {
 
 
 
-
-
-    private boolean checkLambda() {
-        return match(DIVIDER, ")") || match(VARIABLE) && lookahead().is(DIVIDER, ",") || match(VARIABLE) || lookahead().is(KEYWORD, "lambda") && lookahead(3).is(OPERATOR, "->");
-    }
 
 
     private Token matchIfConsume(final TokenType type, final String value) {
