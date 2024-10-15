@@ -68,32 +68,6 @@ const class System {
         native.system.exit(status)
     }
 
-
-    /##
-     # Method: checkNativeType
-     #
-     # Description:
-     # Checks if the provided object is of a specified native type. This method is useful
-     # for verifying that a given object or variable conforms to a particular type definition
-     # expected by the system or runtime environment.
-     #
-     # Parameters:
-     # - type: A string representing the name of the type to check against (e.g., "String", "Number").
-     # - obj: The object or variable to be checked for its type.
-     #
-     # Returns:
-     # - A boolean value: `true` if the object matches the specified type, `false` otherwise.
-     #
-     # Example:
-     # System.checkNativeType("str", "Hello")    // Returns: true
-     # System.checkNativeType("int", 123)        // Returns: true
-     # System.checkNativeType("bool", "text")    // Returns: false
-     #/
-    @deprecated // Use 'is' implementation (x is y)
-    static fn checkNativeType(type, obj) {
-        return native.system.checkNativeType(type, obj)
-    }
-
     /##
      # Method: print
      #
