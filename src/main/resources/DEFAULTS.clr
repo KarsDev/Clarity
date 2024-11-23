@@ -1,0 +1,139 @@
+/#
+ * Prints the given text to the console with a newline.
+ *
+ * @param text the text to be printed
+ * @return void
+ * @example println("Hello, World!"); // Output: Hello, World! (with a newline)
+ #/
+fn println(text) -> void {
+    native.println(text)
+}
+
+/#
+ * Prints the given text to the console without a newline.
+ *
+ * @param text the text to be printed
+ * @return void
+ * @example print("Hello, World!"); // Output: Hello, World! (without a newline)
+ #/
+fn print(text) -> void {
+    native.print(text)
+}
+
+/#
+ * Creates and returns a new array of the specified length.
+ *
+ * @param length the desired length of the array
+ * @return arr a new array of the specified length
+ * @example let arr = array(5); // Creates an array with 5 elements
+ #/
+fn array(length) -> arr {
+    return native.array(length)
+}
+
+/#
+ * Prints an error message to the console.
+ *
+ * @param text the error message to be printed
+ * @return void
+ * @example err("Something went wrong!"); // Outputs an error message
+ #/
+fn err(text) -> void {
+    native.err(text)
+}
+
+/#
+ * Evaluates Clarity code in the virtual machine and returns the exit code.
+ *
+ * @param code the Clarity code to evaluate
+ * @return int the exit code from the evaluation
+ * @example eval("println('Hello!')"); // Executes the code and returns the exit code
+ #/
+fn eval(code) {
+    return native.eval(code)
+}
+
+/#
+ * Executes a command in the system shell.
+ *
+ * @param cmd the command to be executed (e.g., Windows cmd or Linux/Mac sh)
+ * @return int the exit code of the executed command
+ * @example exec("ls"); // Lists files in Linux/Mac, or exec("dir") for Windows
+ #/
+fn exec(cmd) {
+    return native.exec(cmd)
+}
+
+/#
+ * Prints a message to the console without a newline, then waits for and returns user input.
+ *
+ * @param text the message to display before accepting input
+ * @return str the user's input
+ * @example let inputValue = input("Enter your name: "); // Displays a prompt and returns input
+ #/
+fn input(text) -> str {
+    return native.input(text)
+}
+
+/#
+ * Waits for and returns user input without displaying any message.
+ *
+ * @return str the user's input
+ * @example let inputValue = input(); // Returns input entered by the user
+ #/
+fn input() -> str {
+    return native.input()
+}
+
+/#
+ * Returns the time difference in nanoseconds from when the virtual machine started.
+ *
+ * @return int the time difference in nanoseconds
+ * @example let nanos = nano(); // Returns elapsed time since VM start in nanoseconds
+ #/
+fn nano() -> int {
+    return native.nano()
+}
+
+/#
+ * Returns the time difference in milliseconds from when the virtual machine started.
+ *
+ * @return int the time difference in milliseconds
+ * @example let millis = now(); // Returns elapsed time since VM start in milliseconds
+ #/
+fn now() -> int {
+    return native.now()
+}
+
+/#
+ * Pauses the program execution for the specified duration in milliseconds.
+ *
+ * @param time the duration to sleep in milliseconds
+ * @return void
+ * @example sleep(1000); // Pauses execution for 1 second
+ #/
+fn sleep(time) -> void {
+    native.sleep(time)
+}
+
+/#
+ * Sorts the specified array in place.
+ *
+ * @param array the array to be sorted
+ * @return void
+ * @example sort(arr); // Sorts the given array
+ #/
+fn sort(array) -> void {
+    native.sort(array)
+}
+
+/#
+ * Returns the string representation of the type of the given object.
+ *
+ * @param obj the object whose type is to be determined
+ * @return str the type of the object as a string
+ * @example let typeName = typeof(123); // Returns "int"
+ #/
+fn typeof(obj) -> str {
+    return native.typeof(obj)
+}

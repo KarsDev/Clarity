@@ -22,6 +22,6 @@ public class SleepNative extends DefaultNativeFunction<VoidObject> {
 
     @Override
     protected boolean applies0(final List<Object> list) {
-        return list.size() == 1 && list.get(0) instanceof Integer;
+        return list.size() == 1 && list.get(0) instanceof Long;
     }
 }

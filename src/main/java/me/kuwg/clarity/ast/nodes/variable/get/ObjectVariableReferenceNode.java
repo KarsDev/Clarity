@@ -29,7 +29,7 @@ public class ObjectVariableReferenceNode extends ASTNode {
 
     @Override
     public void print(final StringBuilder sb, final String indent) {
-        sb.append(indent).append("ObjectVariableReferenceNode: ").append(caller).append(".").append(called).append("(");
+        sb.append(indent).append("ObjectVariableReferenceNode: ").append(caller).append(" -> ").append(called).append("\n");
     }
 
     @Override

@@ -1,7 +1,1 @@
-include native math
-
-var x = 5
-var y = -5
-var absX = Math.abs(x)
-var absY = Math.abs(y)
-native.println(absX + " - " + absY)
+println("Hello World")

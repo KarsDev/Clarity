@@ -50,6 +50,30 @@ public final class ASTParser {
 
     private static final List<IncludeNode> includes = new ArrayList<>();
 
+    static {
+        try {
+            final String file = File.separator + "DEFAULTS.clr";
+            final InputStream defaultStream = ASTParser.class.getClassLoader().getResourceAsStream(file);
+            if (defaultStream == null) {
+                throw new IOException("Default resource file not found: '" + file + "'");
+            }
+
+            String content;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(defaultStream, StandardCharsets.UTF_8))) {
+                content = reader.lines().collect(Collectors.joining("\n"));
+            }
+
+            final List<Token> defaultTokens = Tokenizer.tokenize(content);
+            final ASTParser defaultParser = new ASTParser("defaults", file, defaultTokens);
+            final AST defaultAst = defaultParser.parse();
+
+            IncludeNode defaultNode = new IncludeNode("DEFAULTS.clr", defaultAst.getRoot(), false);
+            includes.add(defaultNode);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to include DEFAULTS.clr", e);
+        }
+    }
+
     private final String ORIGINAL;
     private final String fileName;
     private final List<Token> tokens;
