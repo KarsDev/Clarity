@@ -22,7 +22,8 @@ public class Privileges {
             "System",
             "Math",
             "Reflections",
-            "Class"
+            "Class",
+            "DEFAULTS"
     );
 
     /**
