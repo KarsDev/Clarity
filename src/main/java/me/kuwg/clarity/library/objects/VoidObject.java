@@ -1,7 +1,5 @@
 package me.kuwg.clarity.library.objects;
 
-import me.kuwg.clarity.register.Register;
-
 /**
  * An abstract class representing a special type of object in the Clarity language.
  * This class is used to denote void or non-returning values.
