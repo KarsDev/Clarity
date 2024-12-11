@@ -3,7 +3,6 @@ package me.kuwg.clarity.parser;
 import me.kuwg.clarity.token.Token;
 
 public enum Keyword {
-
     CLASS,
     VAR,
     CONSTRUCTOR,

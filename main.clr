@@ -1,1 +1,3 @@
-println("Hello World")
+fn main() {
+    raise "Hello World!"
+}

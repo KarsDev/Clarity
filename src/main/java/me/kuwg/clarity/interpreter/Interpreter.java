@@ -93,13 +93,15 @@ public class Interpreter {
 
             final Object result = interpretNode(main.getBlock(), new Context(general));
 
+            except(""); // if any exception is raised then except, else don't do anything
+
             if (result == VOID_OBJECT || result == VOID_RETURN || result == null) {
                 return 0;
             } else if (!(result instanceof Long)) {
                 System.err.println("[WARNING] Main function does not return an integer");
                 return 1;
             } else {
-                return (int) result;
+                return ((Long) result).intValue();
             }
         } else {
             if (interpretNode(ast.getRoot(), general) != VOID_OBJECT) except("Unexpected return without main function");
@@ -108,7 +110,7 @@ public class Interpreter {
 
     }
 
-    private boolean preInterpret(final ASTNode node, final BlockNode block, final Context context) {
+    private boolean preInterpret(final ASTNode node, final BlockNode ignoredBlock, final Context context) {
         if (node instanceof FunctionDeclarationNode) {
             interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
             return true;
