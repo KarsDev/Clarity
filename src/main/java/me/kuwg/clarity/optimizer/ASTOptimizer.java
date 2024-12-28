@@ -239,6 +239,8 @@ public class ASTOptimizer {
                 return new BooleanNode(left.getValue() != right.getValue());
             case "^":
                 return new BooleanNode(left.getValue() ^ right.getValue());
+            case "||":
+                return new BooleanNode(left.getValue() || right.getValue());
         }
         Register.throwException("Operator " + op + " is not supported for boolean operands.", left.getLine());
         return null;

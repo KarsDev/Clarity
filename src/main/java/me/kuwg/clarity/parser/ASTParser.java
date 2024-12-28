@@ -23,6 +23,7 @@ import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.variable.assign.LocalVariableReassignmentNode;
+import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
@@ -501,6 +502,9 @@ public final class ASTParser {
                             }
                             consume(DIVIDER, ")");
                             node = new MemberFunctionCallNode(node, name, params).setLine(line);
+                        } else if (matchAndConsume(OPERATOR, "=")) {
+                            final VariableReferenceNode vrn = (VariableReferenceNode) node;
+                            return new ObjectVariableReassignmentNode(vrn.getName(), name, parseExpression());
                         } else {
                             node = new ObjectVariableReferenceNode(node, name).setLine(current().getLine());
                         }

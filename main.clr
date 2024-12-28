@@ -1,3 +1,7 @@
-fn main() {
-    raise "Hello World!"
+class IDK {
+    static var x = "x value 1"
 }
+
+native.println(IDK.x)
+IDK.x = "x value 2"
+native.println(IDK.x)

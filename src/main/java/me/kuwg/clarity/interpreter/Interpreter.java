@@ -146,7 +146,6 @@ public class Interpreter {
             if (EXCEPT_LINE != null) Register.throwException(EXCEPT_MESSAGE, EXCEPT_LINE);
             else Register.throwException(EXCEPT_MESSAGE);
         }
-
         if (node instanceof BlockNode) return interpretBlock((BlockNode) node, context);
         else if (node instanceof VariableDeclarationNode) return interpretVariableDeclaration((VariableDeclarationNode) node, context);
         else if (node instanceof BinaryExpressionNode) return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
@@ -876,6 +875,16 @@ public class Interpreter {
                     return caller.length();
                 }
                 break;
+            case "lower":
+                if (params.isEmpty()) {
+                    return caller.toLowerCase();
+                }
+                break;
+            case "upper":
+                if (params.isEmpty()) {
+                    return caller.toUpperCase();
+                }
+                break;
         }
 
         Register.throwException("Illegal function in string context: " + fn + " with params " + getParams(params), raw.getLine());
@@ -1132,6 +1141,22 @@ public class Interpreter {
     private Object interpretObjectVariableReassignment(final ObjectVariableReassignmentNode node, final Context context) {
         final Object callerObjectRaw = context.getVariable(node.getCaller());
 
+        if (callerObjectRaw instanceof VoidObject) {
+            final ObjectType type = context.getClass(node.getCaller());
+            if (type instanceof ClassDefinition) {
+                final ClassDefinition obj = (ClassDefinition) type;
+                final VariableDefinition variable = obj.staticVariables.get(node.getCalled());
+                if (variable == null) {
+                    return except("Reassigning a variable that does not exist: " + node.getCalled() + " in class " + node.getCaller(), node.getLine());
+                }
+                final Object value = interpretNode(node.getValue(), context);
+
+                if (value == VOID_OBJECT) return except("Cannot assign void to a variable.", node.getLine());
+                variable.setValue(value);
+                return VOID_OBJECT;
+            }
+        }
+
         if (!(callerObjectRaw instanceof ClassObject)) {
             return except("Getting variable of " + callerObjectRaw.getClass().getSimpleName() + ", expected Class Object", node.getLine());
         }
@@ -1297,8 +1322,8 @@ public class Interpreter {
 
 
 
-            if (node.getIncrementation() != null && interpretNode(node.getIncrementation(), BLOCK_CONTEXT) != VOID_OBJECT)
-                return except("for incrementation must be void return", node.getLine());
+            interpretNode(node.getIncrementation(), BLOCK_CONTEXT);
+
             BLOCK_CONTEXT = new Context(FOR_CONTEXT);
         }
 
