@@ -11,7 +11,7 @@ import java.util.zip.GZIPOutputStream;
 /**
  * @author hi12167pies
  */
-public class ASTSaver {
+public final class ASTSaver {
     private final AST ast;
 
     public ASTSaver(final AST ast) {

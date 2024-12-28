@@ -1,8 +1,8 @@
 package me.kuwg.clarity.compiler.stream;
 
 import me.kuwg.clarity.ast.ASTNode;
-import me.kuwg.clarity.compiler.ASTNodeCompiler;
 import me.kuwg.clarity.compiler.ASTData;
+import me.kuwg.clarity.compiler.ASTNodeCompiler;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import static me.kuwg.clarity.compiler.ASTData.SEGMENT_BITS;
 /**
  * @author hi12167pies
  */
-public class ASTOutputStream extends DataOutputStream {
+public final class ASTOutputStream extends DataOutputStream {
 
     public ASTOutputStream(OutputStream outputStream) {
         super(outputStream);

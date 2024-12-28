@@ -4,8 +4,8 @@ import me.kuwg.clarity.Clarity;
 
 import java.io.*;
 
-public class LinuxClarityInstaller extends ClarityInstaller {
-    protected LinuxClarityInstaller(final String path) throws Exception {
+public final class LinuxClarityInstaller extends ClarityInstaller {
+    LinuxClarityInstaller(final String path) throws Exception {
         super(path);
     }
 

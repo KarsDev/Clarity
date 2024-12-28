@@ -18,7 +18,7 @@ import static me.kuwg.clarity.library.objects.VoidObject.VOID_OBJECT;
 /**
  * Utility class for handling lambda function calls in the Clarity interpreter.
  */
-public class LambdaUtil {
+public final class LambdaUtil {
 
     /**
      * Calls a lambda function with the provided parameters and context.

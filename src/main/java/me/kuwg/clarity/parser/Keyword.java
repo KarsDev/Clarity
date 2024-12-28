@@ -2,6 +2,9 @@ package me.kuwg.clarity.parser;
 
 import me.kuwg.clarity.token.Token;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum Keyword {
     CLASS,
     VAR,
@@ -43,52 +46,24 @@ public enum Keyword {
 
     ;
 
-    public static Keyword keyword(final Token token) {
-        switch (token.getValue()) {
-            case "class": return CLASS;
-            case "var": return VAR;
-            case "constructor": return CONSTRUCTOR;
-            case "local": return LOCAL;
-            case "fn": return FN;
-            case "native": return NATIVE;
-            case "if": return IF;
-            case "else": return ELSE;
-            case "return": return RETURN;
-            case "new": return NEW;
-            case "void": return VOID;
-            case "include": return INCLUDE;
-            case "static": return STATIC;
-            case "const": return CONST;
-            case "compiled": return COMPILED;
-            case "null": return NULL;
-            case "for": return FOR;
-            case "while": return WHILE;
-            case "select": return SELECT;
-            case "when": return WHEN;
-            case "default": return DEFAULT;
-            case "break": return BREAK;
-            case "continue": return CONTINUE;
-            case "float": return FLOAT;
-            case "int": return INT;
-            case "inherits": return INHERITS;
-            case "assert": return ASSERT;
-            case "is": return IS;
-            case "arr": return ARR;
-            case "str": return STR;
-            case "enum": return ENUM;
-            case "bool": return BOOL;
-            case "async": return ASYNC;
-            case "raise": return RAISE;
-            case "try": return TRY;
-            case "except": return EXCEPT;
-            case "lambda": return LAMBDA;
+    private static final Map<String, Keyword> KEYWORD_MAP = new HashMap<>();
 
-            default: throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
+    static {
+        for (final Keyword keyword : Keyword.values()) {
+            KEYWORD_MAP.put(keyword.toString(), keyword);
         }
+    }
+
+    public static Keyword keyword(final Token token) {
+        final Keyword keyword = KEYWORD_MAP.get(token.getValue().toLowerCase());
+        if (keyword == null) {
+            throw new UnsupportedOperationException("Unsupported keyword: " + token.getValue() + " at line " + token.getLine());
+        }
+        return keyword;
     }
 
     @Override
     public String toString() {
-        return super.toString().toLowerCase();
+        return name().toLowerCase();
     }
 }

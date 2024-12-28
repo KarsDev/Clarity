@@ -1,7 +1,5 @@
 package me.kuwg.clarity.interpreter;
 
-import me.kuwg.clarity.library.objects.ObjectType;
-import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.*;
@@ -32,22 +30,24 @@ import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.*;
+import me.kuwg.clarity.library.objects.ObjectType;
+import me.kuwg.clarity.library.objects.VoidObject;
+import me.kuwg.clarity.library.objects.types.ClassObject;
 import me.kuwg.clarity.library.objects.types.LambdaObject;
+import me.kuwg.clarity.library.privilege.Privileges;
+import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.optimizer.ASTOptimizer;
 import me.kuwg.clarity.register.Register;
-import me.kuwg.clarity.library.objects.types.ClassObject;
-import me.kuwg.clarity.nmh.NativeMethodHandler;
-import me.kuwg.clarity.library.privilege.Privileges;
 import me.kuwg.clarity.token.Tokenizer;
 
 import java.util.*;
 
-import static me.kuwg.clarity.library.objects.VoidObject.VOID_OBJECT;
-import static me.kuwg.clarity.library.objects.VoidObject.VOID_RETURN;
 import static me.kuwg.clarity.interpreter.definition.BreakValue.BREAK;
 import static me.kuwg.clarity.interpreter.definition.ContinueValue.CONTINUE;
+import static me.kuwg.clarity.library.objects.VoidObject.VOID_OBJECT;
+import static me.kuwg.clarity.library.objects.VoidObject.VOID_RETURN;
 
-public class Interpreter {
+public final class Interpreter {
 
     private final AST ast;
     private final NativeMethodHandler nmh;

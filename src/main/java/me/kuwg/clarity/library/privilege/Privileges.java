@@ -11,7 +11,7 @@ import java.util.List;
  * cannot be used in contexts where they are not allowed. If a class name is deemed privileged,
  * an exception is thrown.
  */
-public class Privileges {
+public final class Privileges {
 
     /**
      * A list of privileged class names that are restricted and cannot be used.

@@ -1,7 +1,7 @@
 package me.kuwg.clarity.interpreter.definition;
 
-import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationDeclarationNode;
+import me.kuwg.clarity.library.objects.ObjectType;
 
 import java.util.List;
 
@@ -26,23 +26,5 @@ public class AnnotationDefinition extends ObjectType {
     @Override
     public String toString() {
         return "Annotation@" + name;
-    }
-
-    public static class AnnotationValue {
-        private final String name;
-        private final Object value;
-
-        public AnnotationValue(final String name, final Object value) {
-            this.name = name;
-            this.value = value;
-        }
-
-        public final String getName() {
-            return name;
-        }
-
-        public final Object getValue() {
-            return value;
-        }
     }
 }

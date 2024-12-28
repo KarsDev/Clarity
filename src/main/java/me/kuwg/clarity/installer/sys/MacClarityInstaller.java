@@ -4,8 +4,8 @@ import me.kuwg.clarity.Clarity;
 
 import java.io.*;
 
-public class MacClarityInstaller extends ClarityInstaller {
-    protected MacClarityInstaller(final String path) throws Exception {
+public final class MacClarityInstaller extends ClarityInstaller {
+    MacClarityInstaller(final String path) throws Exception {
         super(path);
     }
 

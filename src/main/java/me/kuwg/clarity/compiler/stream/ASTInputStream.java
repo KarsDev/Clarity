@@ -1,8 +1,8 @@
 package me.kuwg.clarity.compiler.stream;
 
 import me.kuwg.clarity.ast.ASTNode;
-import me.kuwg.clarity.compiler.ASTNodeCompiler;
 import me.kuwg.clarity.compiler.ASTData;
+import me.kuwg.clarity.compiler.ASTNodeCompiler;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import static me.kuwg.clarity.compiler.ASTData.SEGMENT_BITS;
 /**
  * @author hi12167pies
  */
-public class ASTInputStream extends DataInputStream {
+public final class ASTInputStream extends DataInputStream {
     public ASTInputStream(InputStream inputStream) {
         super(inputStream);
     }

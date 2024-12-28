@@ -12,7 +12,7 @@ import java.util.List;
  * and the execution context in which the lambda is defined. This is used to represent
  * lambda functions or closures in a dynamic interpreter environment.
  */
-public class LambdaObject {
+public final class LambdaObject {
 
     /**
      * The list of parameters for the lambda. Each parameter is represented as a {@link ParameterNode}.

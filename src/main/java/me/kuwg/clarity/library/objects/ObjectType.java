@@ -4,7 +4,7 @@ package me.kuwg.clarity.library.objects;
  * A class representing a type of object in the Clarity language.
  * This class is used to identify and describe the type of object.
  */
-public class ObjectType {
+public abstract class ObjectType {
 
     /**
      * Returns a string representation of this object type.

@@ -14,13 +14,13 @@ import me.kuwg.clarity.nmh.natives.impl.def.*;
  * {@link ClarityNativeLibrary} interface, encapsulating various utility functions and
  * classes that can be utilized within the interpreter.
  */
-public class LocalClarityNativeLibrary implements ClarityNativeLibrary {
+public final class LocalClarityNativeLibrary implements ClarityNativeLibrary {
 
     /**
      * Constructs a new instance of {@code LocalClarityNativeLibrary}.
      * The constructor is protected to restrict instantiation from outside the package.
      */
-    protected LocalClarityNativeLibrary() {
+    LocalClarityNativeLibrary() {
     }
 
     /**

@@ -1,6 +1,5 @@
 package me.kuwg.clarity.interpreter.context;
 
-import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.interpreter.Interpreter;
@@ -8,13 +7,17 @@ import me.kuwg.clarity.interpreter.definition.AnnotationDefinition;
 import me.kuwg.clarity.interpreter.definition.ClassDefinition;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
 import me.kuwg.clarity.interpreter.definition.VariableDefinition;
+import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.register.Register;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static me.kuwg.clarity.library.objects.VoidObject.VOID_OBJECT;
 
-public class Context {
+public final class Context {
 
     private final Map<String, ObjectType> variables = new HashMap<>();
     private final Map<String, List<FunctionDefinition>> functions = new HashMap<>();

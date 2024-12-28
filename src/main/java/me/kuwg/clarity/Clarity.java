@@ -19,12 +19,15 @@ import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.util.List;
 
-public class Clarity {
+public final class Clarity {
 
-    private static int EXIT_CODE = 0;
+    public static final String USER_HOME = System.getProperty("user.home");
     public static Interpreter INTERPRETER;
     public static ClarityRunningInformation INFORMATION;
-    public static final String USER_HOME = System.getProperty("user.home");
+    private static int EXIT_CODE = 0;
+
+    private Clarity() {
+    }
 
     public static void main(final String[] args) {
         INFORMATION = new ClarityRunningInformation(args);

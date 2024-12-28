@@ -1,7 +1,8 @@
-class IDK {
-    static var x = "x value 1"
+for i : [1, 2, 3] {
+    native.println(i)
 }
 
-native.println(IDK.x)
-IDK.x = "x value 2"
-native.println(IDK.x)
+// for
+for var i = 1, i <= 100, i = i + 1 {
+    native.println("Iteration: " + i)
+}

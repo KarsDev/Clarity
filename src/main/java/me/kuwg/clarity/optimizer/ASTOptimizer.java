@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ASTOptimizer {
+public final class ASTOptimizer {
     private final AST ast;
 
     private final Map<String, ASTNode> commonSubexpressions;
@@ -28,7 +28,7 @@ public class ASTOptimizer {
         this.commonSubexpressions = new HashMap<>();
     }
 
-    public final AST optimize() {
+    public AST optimize() {
         if (Clarity.INFORMATION.getOption("optimize")) ast.getRoot().getChildren().replaceAll(this::optimizeNode);
         return ast;
     }

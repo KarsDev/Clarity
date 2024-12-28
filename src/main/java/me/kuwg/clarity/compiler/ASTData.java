@@ -32,7 +32,7 @@ import java.util.Map;
 /**
  * @author hi12167pies, NotKuwg
  */
-public class ASTData {
+public final class ASTData {
     // Data for VarInt and VarLong
     public static final int SEGMENT_BITS = 0x7F;
     public static final int CONTINUE_BIT = 0x80;

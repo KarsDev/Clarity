@@ -1,9 +1,10 @@
 package me.kuwg.clarity.installer.sys;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
-public class WindowsClarityInstaller extends ClarityInstaller {
-    protected WindowsClarityInstaller(final String path) throws Exception {
+public final class WindowsClarityInstaller extends ClarityInstaller {
+    WindowsClarityInstaller(final String path) throws Exception {
         super(path);
     }
 

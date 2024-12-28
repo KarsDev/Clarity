@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
  * Tokenizer class responsible for parsing a source string into a list of tokens.
  * The class uses a predefined set of token types to identify valid tokens.
  */
-public class Tokenizer {
+public final class Tokenizer {
 
     /**
      * Tokenizes the given source string into a list of {@link Token} objects.

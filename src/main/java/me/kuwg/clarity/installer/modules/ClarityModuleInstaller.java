@@ -4,15 +4,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import me.kuwg.clarity.Clarity;
+import me.kuwg.clarity.register.Register;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import me.kuwg.clarity.Clarity;
-import me.kuwg.clarity.register.Register;
-
-public class ClarityModuleInstaller {
+public final class ClarityModuleInstaller {
 
     private static final String BASE_URL = "https://clarity.pies.cf";
 

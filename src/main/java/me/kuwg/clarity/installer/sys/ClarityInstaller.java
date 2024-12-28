@@ -8,7 +8,12 @@ public abstract class ClarityInstaller {
 
     protected final String path;
 
-    protected ClarityInstaller(final String path) throws IOException, InterruptedException {
+    protected ClarityInstaller(final String path) throws IOException, InterruptedException, RuntimeException {
+        // Simulating sealed
+        if (this instanceof LinuxClarityInstaller || this instanceof MacClarityInstaller || this instanceof WindowsClarityInstaller) {
+            throw new UnsupportedOperationException("The only installers supported are:\n\t- Linux\n\t- Mac\n\t- Windows ");
+        }
+
         this.path = path;
         cloneJar();
         install();

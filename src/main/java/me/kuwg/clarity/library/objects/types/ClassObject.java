@@ -1,9 +1,9 @@
 package me.kuwg.clarity.library.objects.types;
 
 import me.kuwg.clarity.Clarity;
-import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
+import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.register.Register;
 
 /**
@@ -13,7 +13,7 @@ import me.kuwg.clarity.register.Register;
  * string representation logic via the `toString` method. This class is used to simulate
  * and manipulate object-oriented class behavior in a dynamic interpreter environment.
  */
-public class ClassObject {
+public final class ClassObject {
 
     /**
      * The name of the class this object represents.

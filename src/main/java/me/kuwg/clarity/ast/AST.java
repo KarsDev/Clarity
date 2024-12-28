@@ -6,7 +6,7 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
 
-public class AST extends ASTNode {
+public final class AST extends ASTNode {
 
     private final BlockNode root;
 
@@ -15,7 +15,7 @@ public class AST extends ASTNode {
         this.root = root;
     }
 
-    public final BlockNode getRoot() {
+    public BlockNode getRoot() {
         return root;
     }
 
@@ -36,7 +36,7 @@ public class AST extends ASTNode {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
         print(sb, "");
         return sb.toString();
     }

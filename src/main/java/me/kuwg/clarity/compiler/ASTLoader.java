@@ -13,7 +13,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * @author hi12167pies
  */
-public class ASTLoader {
+public final class ASTLoader {
     private final Path path;
 
     public ASTLoader(final File file) {
