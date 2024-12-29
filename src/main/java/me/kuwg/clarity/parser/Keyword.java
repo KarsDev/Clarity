@@ -43,6 +43,7 @@ public enum Keyword {
     TRY,
     EXCEPT,
     LAMBDA,
+    DELETE,
 
     ;
 

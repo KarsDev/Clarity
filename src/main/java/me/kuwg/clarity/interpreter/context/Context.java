@@ -75,6 +75,12 @@ public final class Context {
         variableDefinition.setValue(value);
     }
 
+    public void deleteVariable(final String name) {
+        if (variables.remove(name) == null) {
+            Register.throwException("Attempted to delete non-existent variable: " + name);
+        }
+    }
+
     public void defineFunction(final String name, final FunctionDefinition definition) {
 
         final String currentClass = getCurrentClassName();
@@ -123,6 +129,20 @@ public final class Context {
             throw new RuntimeException();
         }
 
+    }
+
+    public void deleteFunction(final String name, final int paramsSize) {
+        final List<FunctionDefinition> definitions = functions.get(name);
+        if (definitions != null) {
+            boolean removed = definitions.removeIf(d -> d.getParams().size() == paramsSize);
+            if (!removed) {
+                Register.throwException("Attempted to delete non-existent function: " + name + " with " + paramsSize + " parameters.");
+            } else if (definitions.isEmpty()) {
+                functions.remove(name);
+            }
+        } else {
+            Register.throwException("Attempted to delete non-existent function: " + name);
+        }
     }
 
     public void defineClass(final String name, final ClassDefinition definition) {

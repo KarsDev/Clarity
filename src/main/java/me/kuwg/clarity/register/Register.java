@@ -142,6 +142,8 @@ public final class Register {
         STRINGCALL,  // String function call
         STATICINIT,  // Static initialization
         LAMBDACALL,  // Lambda function call
+        VARDEL,      // Variable deletion
+        FUNDEL,      // Function deletion
     }
 
     /**
@@ -239,8 +241,17 @@ public final class Register {
                 case STRINGCALL: {
                     return "string function " + getParam() + formatClass() + formatLine();
                 }
+                case STATICINIT: {
+                    return "static initialization: " + getParam() + formatClass() + formatLine();
+                }
                 case LAMBDACALL: {
                     return "lambda function " + getParam() + formatLine() + formatLine();
+                }
+                case VARDEL: {
+                    return "variable delete " + getParam() + formatClass() + formatLine();
+                }
+                case FUNDEL: {
+                    return "function delete " + getParam() + formatClass() + formatLine();
                 }
                 default: {
                     throwException("Unsupported register element type: " + getType());

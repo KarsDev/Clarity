@@ -12,16 +12,19 @@ import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationUseNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
-import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
-import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
-import me.kuwg.clarity.ast.nodes.statements.*;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
-import me.kuwg.clarity.ast.nodes.function.call.*;
+import me.kuwg.clarity.ast.nodes.function.call.DefaultNativeFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.function.call.FunctionCallNode;
+import me.kuwg.clarity.ast.nodes.function.call.LocalFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.function.call.PackagedNativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
+import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
+import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.statements.*;
 import me.kuwg.clarity.ast.nodes.variable.assign.LocalVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.ObjectVariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.assign.VariableDeclarationNode;
@@ -190,6 +193,8 @@ public final class ASTParser {
                 return parseTryDeclaration();
             case LAMBDA:
                 return parseLambdaDeclaration();
+            case DELETE:
+                return parseDeleteDeclaration();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -676,7 +681,7 @@ public final class ASTParser {
         throw new UnsupportedOperationException("Unsupported expression token: " + token.getValue() + " (type=" + token.getType() + ") at line " + token.getLine());
     }
 
-    private ASTNode parseNumber(Token token) {
+    private AbstractNumberNode parseNumber(Token token) {
         final int line = token.getLine();
         final String value = token.getValue();
         try {
@@ -1358,14 +1363,37 @@ public final class ASTParser {
         return new LambdaBlockNode(params, block).setLine(line);
     }
 
+    private ASTNode parseDeleteDeclaration() {
+        final int line = consume(KEYWORD, "delete").getLine(); // "consume "delete"
 
+        final String name = consume(VARIABLE).getValue();
 
+        if (matchAndConsume(DIVIDER, "(")) {
+            final ASTNode params = parseExpression();
+            consume(DIVIDER, ")");
+            return new DeleteFunctionNode(name, params).setLine(line);
+        }
 
+        return new DeleteVariableNode(name).setLine(line);
+    }
 
-
-
-
-
+    /*
+    *
+    *
+    *
+    *
+    *
+    *
+    *
+    *
+    *
+    *
+    *
+    *
+    *
+    *
+    *
+     */
 
     private Token matchIfConsume(final TokenType type, final String value) {
         return match(type, value) ? consume() : current();

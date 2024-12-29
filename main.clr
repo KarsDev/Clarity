@@ -1,0 +1,7 @@
+fn println(top) {
+    native.println(top)
+}
+
+println("lol")
+delete println(2)
+println("lol")
