@@ -27,6 +27,7 @@ public final class Clarity {
     private static int EXIT_CODE = 0;
 
     private Clarity() {
+        throw new RuntimeException();
     }
 
     public static void main(final String[] args) {
@@ -43,6 +44,17 @@ public final class Clarity {
             }
 
             void exec() throws IOException {
+                if (INFORMATION.getOption("startinfo")) {
+                    long startTime = ManagementFactory.getRuntimeMXBean().getStartTime();
+                    long currentTime = System.currentTimeMillis();
+                    long uptime = ManagementFactory.getRuntimeMXBean().getUptime();
+                    System.out.println("Startup Time Information:");
+                    System.out.println("  JVM Start Time: " + startTime);
+                    System.out.println("  Current Time: " + currentTime);
+                    System.out.println("  JVM Uptime: " + uptime + " ms");
+                    System.out.println();
+                }
+
                 if (args.length == 0) {
                     printUsage();
                     return;
@@ -51,15 +63,18 @@ public final class Clarity {
                 if (args.length == 1) {
                     switch (args[0].toLowerCase()) {
                         case "install":
+                            verboseLog("Verbose: Starting installation process.");
                             System.out.println("Installing...");
                             installClarity();
                             return;
                         case "os":
+                            verboseLog("Verbose: Fetching OS information.");
                             System.out.println("Current OS: " + OS.CURRENT_OPERATING_SYSTEM_NAME);
                             System.out.println("Detected OS type: " + OS.CURRENT_OS);
                             System.out.println();
                             return;
                         case "size":
+                            verboseLog("Verbose: Calculating JAR file size.");
                             final File jarFile = new File(ManagementFactory.getRuntimeMXBean().getClassPath().split(File.pathSeparator)[0]);
                             if (jarFile.exists()) {
                                 long jarFileSize = jarFile.length();
@@ -70,15 +85,19 @@ public final class Clarity {
                             return;
                         case "help":
                         case "-help":
+                            verboseLog("Verbose: Displaying usage information.");
                             printUsage();
                             return;
                         case "memory":
+                            verboseLog("Verbose: Printing heap size recommendations.");
                             printHeapSizeRecommendation();
                             return;
                         case "ast":
+                            verboseLog("Verbose: Printing AST information.");
                             printASTInfo();
                             return;
                     }
+                    verboseLog("Verbose: Input file required for the given command.");
                     printInputFileRequired();
                     return;
                 }
@@ -87,34 +106,47 @@ public final class Clarity {
                 switch (args[0]) {
                     case "interpret":
                     case "test":
+                        verboseLog("Verbose: Checking if file exists for interpretation or testing.");
                         if (requireFile(file)) return;
                         System.out.println("Interpreting and running the file: " + file.getName());
                         runOrInterpretFile(file);
                         break;
                     case "compile":
+                        verboseLog("Verbose: Checking if file exists for compilation.");
                         if (requireFile(file)) return;
                         System.out.println("Compiling the file: " + file.getName());
                         compileFile(args, file);
                         break;
                     case "run":
+                        verboseLog("Verbose: Checking if file exists for running.");
                         if (requireFile(file)) return;
                         System.out.println("Running the compiled file: " + file.getName());
                         runCompiledFile(file);
                         break;
                     case "install":
                         if (args.length == 2) {
+                            verboseLog("Verbose: Installing specific module: " + args[1]);
                             System.out.println("Installing module: " + args[1]);
                         } else {
+                            verboseLog("Verbose: Installing all modules.");
                             System.out.println("Installing modules...");
                         }
                         installModule(args);
                         break;
                     case "filesize":
+                        verboseLog("Verbose: Calculating file size for: " + file.getName());
                         System.out.println(file.getName() + "'s size: " + file.length() + " bytes");
                         break;
                     default:
+                        verboseLog("Verbose: Invalid command. Displaying usage information.");
                         printUsage();
                         break;
+                }
+            }
+
+            private void verboseLog(String message) {
+                if (INFORMATION.getOption("verbose")) {
+                    System.out.println(message);
                 }
             }
 
