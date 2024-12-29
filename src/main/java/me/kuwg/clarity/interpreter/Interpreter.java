@@ -36,7 +36,6 @@ import me.kuwg.clarity.library.objects.types.ClassObject;
 import me.kuwg.clarity.library.objects.types.LambdaObject;
 import me.kuwg.clarity.library.privilege.Privileges;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
-import me.kuwg.clarity.optimizer.ASTOptimizer;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.token.Tokenizer;
 
@@ -58,8 +57,8 @@ public final class Interpreter {
     private Integer EXCEPT_LINE;
 
     public Interpreter(final AST ast) {
-        final ASTOptimizer optimizer = new ASTOptimizer(ast);
-        this.ast = optimizer.optimize();
+        // optimization is useless
+        this.ast = ast;
         this.nmh = new NativeMethodHandler();
         this.general = new Context();
     }
@@ -86,6 +85,7 @@ public final class Interpreter {
                 }
             }
         }
+        final int ret;
 
         if (main != null) {
 
@@ -93,21 +93,24 @@ public final class Interpreter {
 
             final Object result = interpretNode(main.getBlock(), new Context(general));
 
-            except(""); // if any exception is raised then except, else don't do anything
 
             if (result == VOID_OBJECT || result == VOID_RETURN || result == null) {
-                return 0;
+                ret = 0;
             } else if (!(result instanceof Long)) {
                 System.err.println("[WARNING] Main function does not return an integer");
-                return 1;
+                ret = 1;
             } else {
-                return ((Long) result).intValue();
+                ret = ((Long) result).intValue();
             }
         } else {
-            if (interpretNode(ast.getRoot(), general) != VOID_OBJECT) except("Unexpected return without main function");
-            return 0;
+            if (interpretNode(ast.getRoot(), general) != VOID_OBJECT)
+                except("Unexpected return without main function");
+            ret = 1;
         }
 
+        except(""); // if any exception is raised then except, else don't do anything
+
+        return ret;
     }
 
     private boolean preInterpret(final ASTNode node, final BlockNode ignoredBlock, final Context context) {
@@ -1800,6 +1803,8 @@ public final class Interpreter {
             return handleStringFunctionCall(node, context, (String) caller);
         } else if (caller instanceof LambdaObject) {
             return handleLambdaFunctionCall(node, context, (LambdaObject) caller);
+        } else if (caller == null) {
+            return except("You can't call a function out of null", node.getLine());
         } else if (!(caller instanceof ClassObject)) {
             return except("You can't call a function out of a " + caller.getClass().getSimpleName(), node.getLine());
         }
@@ -1892,10 +1897,11 @@ public final class Interpreter {
         } else {
             apply = (boolean) result;
         }
+
         if (!apply) {
-            final Object o = interpretNode(node.getOrElse(), context);
-            if (!(o instanceof VoidObject)) return except(String.valueOf(o), node.getLine());
+            return except(String.valueOf(interpretNode(node.getOrElse(), context)), node.getLine());
         }
+
         return VOID_OBJECT;
     }
 
@@ -1959,7 +1965,7 @@ public final class Interpreter {
         if (rawName instanceof VoidObject) {
             return except("Unexpected async thread name (void)", node.getLine());
         } else if (!(rawName instanceof String)) {
-            return except("Unexpected async thread name (" + rawName.toString() + "), expected string", node.getLine());
+            return except("Unexpected async thread name (" + rawName + "), expected string", node.getLine());
         }
         new Thread(() -> interpretBlock(node.getBlock(), context), rawName.toString()).start();
         return VOID_OBJECT;

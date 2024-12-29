@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Deprecated
+@SuppressWarnings("unused")
 public final class ASTOptimizer {
     private final AST ast;
 

@@ -1,8 +1,0 @@
-for i : [1, 2, 3] {
-    native.println(i)
-}
-
-// for
-for var i = 1, i <= 100, i = i + 1 {
-    native.println("Iteration: " + i)
-}
