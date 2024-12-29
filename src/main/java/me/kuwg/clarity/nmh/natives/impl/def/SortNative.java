@@ -16,26 +16,14 @@ public class SortNative extends DefaultNativeFunction<VoidObject> {
     public VoidObject call(final List<Object> params) {
         final Object[] arr = (Object[]) params.get(0);
 
-        // Check if all elements are instances of Number
-        for (final Object obj : arr) {
-            if (!(obj instanceof Number)) {
+        for (final Object o : arr) {
+            if (!(o instanceof Number)) {
                 Register.throwException("Expected number array");
                 return VOID;
             }
         }
 
-        // Create a new array for sorting
-        double[] numberArr = new double[arr.length];
-        for (int i = 0; i < arr.length; i++) {
-            numberArr[i] = ((Number) arr[i]).doubleValue(); // Convert to double
-        }
-
-        QuickSort.quickSort(numberArr, 0, numberArr.length - 1);
-
-        // Update the original array with sorted values
-        for (int i = 0; i < numberArr.length; i++) {
-            arr[i] = numberArr[i]; // Convert back to the original type if needed
-        }
+        QuickSort.quickSort(arr, 0, arr.length - 1);
 
         return VOID;
     }
@@ -46,7 +34,7 @@ public class SortNative extends DefaultNativeFunction<VoidObject> {
     }
 
     public static class QuickSort {
-        public static void quickSort(final double[] arr, final int low, final int high) {
+        public static void quickSort(final Object[] arr, final int low, final int high) {
             if (low < high) {
                 final int pivotIndex = partition(arr, low, high);
                 quickSort(arr, low, pivotIndex - 1);
@@ -54,12 +42,12 @@ public class SortNative extends DefaultNativeFunction<VoidObject> {
             }
         }
 
-        private static int partition(final double[] arr, final int low, final int high) {
-            final double pivot = arr[high];
+        private static int partition(final Object[] arr, final int low, final int high) {
+            final Number pivot = ((Number) arr[high]);
             int i = (low - 1);
 
             for (int j = low; j < high; j++) {
-                if (arr[j] <= pivot) {
+                if (((Number) arr[j]).doubleValue() <= pivot.doubleValue()) {
                     i++;
                     swap(arr, i, j);
                 }
@@ -69,8 +57,8 @@ public class SortNative extends DefaultNativeFunction<VoidObject> {
             return i + 1;
         }
 
-        private static void swap(final double[] arr, final int i, final int j) {
-            final double temp = arr[i];
+        private static void swap(final Object[] arr, final int i, final int j) {
+            final Object temp = arr[i];
             arr[i] = arr[j];
             arr[j] = temp;
         }
