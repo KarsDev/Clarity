@@ -53,6 +53,7 @@ import static me.kuwg.clarity.token.TokenType.*;
 public final class ASTParser {
 
     private static final List<IncludeNode> includes = new ArrayList<>();
+    private static final IncludeNode DEFAULT_NODE;
 
     static {
         try {
@@ -62,7 +63,7 @@ public final class ASTParser {
                 throw new IOException("Default resource file not found: '" + file + "'");
             }
 
-            String content;
+            final String content;
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(defaultStream, StandardCharsets.UTF_8))) {
                 content = reader.lines().collect(Collectors.joining("\n"));
             }
@@ -71,9 +72,9 @@ public final class ASTParser {
             final ASTParser defaultParser = new ASTParser("defaults", file, defaultTokens);
             final AST defaultAst = defaultParser.parse();
 
-            IncludeNode defaultNode = new IncludeNode("DEFAULTS.clr", defaultAst.getRoot(), false);
-            includes.add(defaultNode);
-        } catch (IOException e) {
+            DEFAULT_NODE = new IncludeNode("DEFAULTS.clr", defaultAst.getRoot(), false);
+            includes.add(DEFAULT_NODE);
+        } catch (final IOException e) {
             throw new RuntimeException("Failed to include DEFAULTS.clr", e);
         }
     }
@@ -91,6 +92,9 @@ public final class ASTParser {
 
     public AST parse() {
         final BlockNode node = new BlockNode();
+
+        // file included by default
+        if (DEFAULT_NODE != null) node.addChild(DEFAULT_NODE);
 
         // parse includes
         while (matchAndConsume(KEYWORD, "include")) {
