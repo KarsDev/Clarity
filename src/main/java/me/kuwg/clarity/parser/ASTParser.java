@@ -53,9 +53,9 @@ import static me.kuwg.clarity.token.TokenType.*;
 public final class ASTParser {
 
     private static final List<IncludeNode> includes = new ArrayList<>();
-    private static final IncludeNode DEFAULT_NODE;
+    private static IncludeNode DEFAULT_NODE = null;
 
-    static {
+    private void load() {
         try {
             final String file = File.separator + "DEFAULTS.clr";
             final InputStream defaultStream = ASTParser.class.getClassLoader().getResourceAsStream(file);
@@ -79,13 +79,14 @@ public final class ASTParser {
         }
     }
 
-    private final String ORIGINAL;
+    private final String original;
     private final String fileName;
     private final List<Token> tokens;
     private int currentTokenIndex = 0;
 
     public ASTParser(final String original, final String fileName, final List<Token> tokens) {
-        ORIGINAL = original;
+        if (DEFAULT_NODE == null) load();
+        this.original = original;
         this.fileName = fileName;
         this.tokens = tokens;
     }
@@ -906,7 +907,7 @@ public final class ASTParser {
                                 if (file.isFile()) {
                                     final String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
                                     final List<Token> tokens = Tokenizer.tokenize(content);
-                                    final ASTParser parser = new ASTParser(ORIGINAL, file.getName(), tokens);
+                                    final ASTParser parser = new ASTParser(original, file.getName(), tokens);
                                     final AST ast = parser.parse();
 
                                     includes.add(new IncludeNode(file.getName(), ast.getRoot(), true).setLine(line));
@@ -936,7 +937,7 @@ public final class ASTParser {
                         if (file.isFile() && (fn.substring(fn.lastIndexOf('.' + 1)).equals("cclr") == compile)) {
                             final String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
                             final List<Token> tokens = Tokenizer.tokenize(content);
-                            final ASTParser parser = new ASTParser(ORIGINAL, file.getName(), tokens);
+                            final ASTParser parser = new ASTParser(original, file.getName(), tokens);
                             final AST ast = parser.parse();
 
                             includes.add(new IncludeNode(file.getName(), ast.getRoot(), true).setLine(line));
@@ -987,7 +988,7 @@ public final class ASTParser {
                 }
 
                 final List<Token> tokens = Tokenizer.tokenize(content);
-                final ASTParser parser = new ASTParser(ORIGINAL, path, tokens);
+                final ASTParser parser = new ASTParser(original, path, tokens);
                 final AST ast = parser.parse();
                 included = new IncludeNode(path, ast.getRoot(), true).setLine(line);
                 break include;
@@ -995,13 +996,13 @@ public final class ASTParser {
 
             final String content;
             try {
-                content = new String(Files.readAllBytes(new File(new File(ORIGINAL).getParentFile(), path).toPath()), StandardCharsets.UTF_8);
+                content = new String(Files.readAllBytes(new File(new File(original).getParentFile(), path).toPath()), StandardCharsets.UTF_8);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
             final List<Token> tokens = Tokenizer.tokenize(content);
-            final ASTParser parser = new ASTParser(ORIGINAL, path, tokens);
+            final ASTParser parser = new ASTParser(original, path, tokens);
             final AST ast = parser.parse();
 
             included = new IncludeNode(path, ast.getRoot(), false).setLine(line);

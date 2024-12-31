@@ -1,0 +1,39 @@
+const enum CTypes {
+    NULL, VOID, STR, INT, FLOAT, CLASS, ARR, BOOL, LAMBDA
+}
+
+const fn ctypeFromName(name) {
+    select (name.lower()) {
+        when "null" {
+            return ClarityTypes.NULL
+        }
+        when "void" {
+            return ClarityTypes.VOID
+        }
+        when "str" {
+            return ClarityTypes.STR
+        }
+        when "int" {
+            return ClarityTypes.INT
+        }
+        when "float" {
+            return ClarityTypes.FLOAT
+        }
+        when "arr" {
+            return ClarityTypes.ARR
+        }
+        when "bool" {
+            return ClarityTypes.BOOL
+        }
+        when "lambda" {
+            return ClarityTypes.LAMBDA
+        }
+        default {
+            return ClarityTypes.CLASS
+        }
+    }
+}
+
+const fn ctypeFromValue(value) {
+    return ctypeFromName(native.typeof(value))
+}
