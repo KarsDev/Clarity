@@ -41,17 +41,20 @@ public final class ClarityRunningInformation {
         final String[] args = Clarity.ARGS;
 
         // Parse the arguments and load options based on true/false values
-        for (int i = 1; i < args.length; i++) {
+        int count = 2;
+        for (int i = 2; i < args.length; i++) {
             final String arg = args[i];
             for (final Option option : OPTIONS) {
                 if (arg.equals(option.argTrue)) {
                     loadedOptions.put(option.name, true);
+                    count++;
                 } else if (arg.equals(option.argFalse)) {
                     loadedOptions.put(option.name, false);
+                    count++;
                 }
             }
         }
-
+        Clarity.ASC = count;
         // Set the default value for options that were not provided in the arguments
         for (final Option option : OPTIONS) {
             loadedOptions.putIfAbsent(option.name, option.def);

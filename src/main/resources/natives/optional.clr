@@ -1,0 +1,134 @@
+/####################################################
+ #  Optional Class
+ #
+ #  Overview:
+ #  The Optional class is a container that may or may not contain a value.
+ #  It is used to represent the absence or presence of a value, avoiding the need to use null references directly.
+ #  This class is useful for functions that might return a value or nothing.
+ #
+ #  Important:
+ #  - The Optional class enforces explicit handling of empty states, reducing null reference errors.
+ #  - Methods allow for safe access to the contained value or provide default alternatives.
+ #
+ #  Example Usage:
+ #  var result = new Optional(42)         // Initializes an Optional instance with value 42
+ #  var emptyResult = new Optional()      // Initializes an empty Optional instance
+ #  result.get()                         // Returns: 42
+ #  emptyResult.orElse(10)               // Returns: 10
+ #
+ #  Notes:
+ #  This class can wrap any type of value, including primitive and complex types.
+ ####################################################/
+class Optional {
+
+    /##
+     # Variable: value
+     #
+     # Description:
+     # The internal stored value or null if the Optional instance is empty.
+     #
+     # Usage:
+     # The value is immutable after initialization.
+     #/
+    const var value
+
+    /##
+     # Constructor: Optional
+     #
+     # Description:
+     # Initializes an Optional instance with a specific value.
+     #
+     # Parameters:
+     # - value (optional): The value to wrap in the Optional instance.
+     #/
+    constructor(value) {
+        local.value = value
+    }
+
+    /##
+     # Constructor: Optional
+     #
+     # Description:
+     # Initializes an Optional instance without any value.
+     #/
+    constructor() {
+        local.value = null
+    }
+
+    /##
+     # Method: isPresent
+     #
+     # Description:
+     # Checks if the Optional instance contains a value.
+     #
+     # Returns:
+     # - true if a value is present, false otherwise.
+     #/
+    fn isPresent() {
+        return local.value != null
+    }
+
+    /##
+     # Method: get
+     #
+     # Description:
+     # Retrieves the value contained in the Optional instance.
+     #
+     # Returns:
+     # - The contained value.
+     #
+     # Throws:
+     # - AssertionError: If no value is present.
+     #/
+    fn get() {
+        assert isPresent() else "No value present in Optional."
+        return local.value
+    }
+
+    /##
+     # Method: orElse
+     #
+     # Description:
+     # Returns the contained value if present, or a specified default value if empty.
+     #
+     # Parameters:
+     # - defaultValue: The value to return if no value is present.
+     #
+     # Returns:
+     # - The contained value or the default value if empty.
+     #/
+    fn orElse(defaultValue) {
+        return isPresent() ? local.value : defaultValue
+    }
+
+    /##
+     # Method: ifPresent
+     #
+     # Description:
+     # Executes a provided lambda if a value is present.
+     #
+     # Parameters:
+     # - action: Lambda to execute with the contained value.
+     #/
+    fn ifPresent(lambda action) {
+        if (isPresent()) {
+            action.run(local.value)
+        }
+    }
+
+    /##
+     # Method: map
+     #
+     # Description:
+     # Transforms the contained value using a provided lambda, returning a new Optional with the result.
+     #
+     # Parameters:
+     # - mapper: Lambda to apply to the contained value.
+     #
+     # Returns:
+     # - A new Optional containing the transformed value, or an empty Optional if no value is present.
+     #/
+    fn map(lambda mapper) {
+        return isPresent() ? new Optional(mapper.run(local.value)) : new Optional()
+    }
+}

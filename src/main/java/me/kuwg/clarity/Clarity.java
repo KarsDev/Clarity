@@ -25,6 +25,7 @@ public final class Clarity {
     public static Interpreter INTERPRETER;
     public static ClarityRunningInformation INFORMATION;
     public static String[] ARGS;
+    public static int ASC; // argument skip count
 
     private static int EXIT_CODE = 0;
 

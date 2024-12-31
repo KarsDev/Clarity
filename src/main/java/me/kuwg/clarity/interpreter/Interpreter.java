@@ -264,7 +264,7 @@ public final class Interpreter {
 
         final String name = node.getName();
 
-        final boolean sys = name.equals("System");
+        final boolean sys = "System".equals(name);
 
         context.setCurrentClassName(name);
 
@@ -301,7 +301,7 @@ public final class Interpreter {
 
                     final Object dValue;
                     if (sys && declarationNode.getName().equals("ARGS"))
-                        dValue = Arrays.copyOfRange(Clarity.ARGS, 2, Clarity.ARGS.length);
+                        dValue = Arrays.copyOfRange(Clarity.ARGS, Clarity.ASC, Clarity.ARGS.length);
                     else
                         dValue = declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context);
 
