@@ -10,10 +10,7 @@ import me.kuwg.clarity.interpreter.definition.VariableDefinition;
 import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.register.Register;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static me.kuwg.clarity.library.objects.VoidObject.VOID_OBJECT;
 
@@ -23,7 +20,7 @@ public final class Context {
     private final Map<String, List<FunctionDefinition>> functions = new HashMap<>();
     private final Map<String, ObjectType> classes = new HashMap<>();
     private final Map<String, ObjectType> annotations = new HashMap<>();
-    private final List<String> natives = new ArrayList<>();
+    private final Set<String> natives = new HashSet<>();
     private final List<String> currentAnnotationNames = new ArrayList<>();
 
     private String currentClassName;
@@ -46,9 +43,9 @@ public final class Context {
     }
 
     public Object getVariable(final String name) {
-        final ObjectType result = variables.get(name);
+        Object result = variables.get(name);
         if (result == null && parentContext != null) {
-            return parentContext.getVariable(name);
+            result = parentContext.getVariable(name);
         }
         return result != null ? ((VariableDefinition) result).getValue() : VOID_OBJECT;
     }
@@ -82,7 +79,6 @@ public final class Context {
     }
 
     public void defineFunction(final String name, final FunctionDefinition definition) {
-
         final String currentClass = getCurrentClassName();
 
         if (currentClass != null) {
@@ -92,7 +88,8 @@ public final class Context {
                 for (ASTNode node : inherited.getBody()) {
                     if (node instanceof FunctionDeclarationNode) {
                         final FunctionDeclarationNode fdn = (FunctionDeclarationNode) node;
-                        if (fdn.getFunctionName().equals(name) && fdn.getParameterNodes().size() == definition.getParams().size() && fdn.isConst()) {
+                        if (fdn.getFunctionName().equals(name) &&
+                                fdn.getParameterNodes().size() == definition.getParams().size() && fdn.isConst()) {
                             Register.throwException("Overriding const functions is not allowed", definition.getBlock().getLine());
                             return;
                         }
@@ -103,12 +100,11 @@ public final class Context {
         }
 
         final List<FunctionDefinition> existingDefinitions = functions.computeIfAbsent(name, k -> new ArrayList<>());
-        for (final FunctionDefinition d : existingDefinitions) {
-            if (d.getParams().size() == definition.getParams().size()) {
-                Register.throwException("Declaring an already declared function: " + name + " with the same number of parameters.");
-                break;
-            }
+        if (existingDefinitions.stream().anyMatch(d -> d.getParams().size() == definition.getParams().size())) {
+            Register.throwException("Declaring an already declared function: " + name + " with the same number of parameters.");
+            return;
         }
+
         existingDefinitions.add(definition);
     }
 
@@ -169,7 +165,7 @@ public final class Context {
         return result != VOID_OBJECT ? result : (parentContext != null ? parentContext.getAnnotation(name) : VOID_OBJECT);
     }
 
-    public List<String> getNatives() {
+    public Set<String> getNatives() {
         return natives;
     }
 
@@ -204,7 +200,21 @@ public final class Context {
     public void mergeContext(final Context source) {
         if (source == null) return;
 
-        source.variables.forEach(this.variables::putIfAbsent);
+        source.variables.forEach((key, value) -> {
+            if (!this.variables.containsKey(key)) {
+                this.variables.put(key, value);
+            }
+        });
+
+        source.functions.forEach((key, list) -> {
+            List<FunctionDefinition> targetFunctions = this.functions.computeIfAbsent(key, k -> new ArrayList<>());
+            for (FunctionDefinition function : list) {
+                if (!targetFunctions.contains(function)) {
+                    targetFunctions.add(function);
+                }
+            }
+        });
+
 
         for (final Map.Entry<String, List<FunctionDefinition>> entry : source.functions.entrySet()) {
             final String key = entry.getKey();
@@ -221,11 +231,7 @@ public final class Context {
 
         source.annotations.forEach(this.annotations::putIfAbsent);
 
-        for (final String nativeName : source.natives) {
-            if (!this.natives.contains(nativeName)) {
-                this.natives.add(nativeName);
-            }
-        }
+        this.natives.addAll(source.natives);
 
         this.currentAnnotationNames.addAll(source.currentAnnotationNames);
     }

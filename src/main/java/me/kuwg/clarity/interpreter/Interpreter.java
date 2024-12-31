@@ -1394,16 +1394,14 @@ public final class Interpreter {
             final long range = (long) object;
             long i = 0;
 
-            while (i < range){
+            while (i < range) {
                 forEachContext.defineVariable(node.getVariable(), new VariableDefinition(node.getVariable(), null, i, false, false, false));
                 final Object val = interpretBlock(node.getBlock(), forEachContext);
                 if (val == BREAK) {
                     break;
-                }
-                if (val == CONTINUE) {
+                } else if (val == CONTINUE) {
                     continue;
-                }
-                if (val != VOID_OBJECT) {
+                } else if (val != VOID_OBJECT) {
                     return new ReturnValue(val);
                 }
                 i++;
