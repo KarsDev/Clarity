@@ -431,7 +431,17 @@ public final class ASTParser {
     }
 
     private ASTNode parseExpression() {
-        return parsePrecedence(1);
+        final ASTNode node = parsePrecedence(1);
+
+        if (matchAndConsume(OPERATOR, "?")) {
+            final ASTNode trueBranch = parseExpression();
+            consume(OPERATOR, ":");
+            final ASTNode falseBranch = parseExpression();
+
+            return new TernaryOperatorNode(node, trueBranch, falseBranch).setLine(node.getLine());
+        }
+
+        return node;
     }
 
     private int getPrecedence(Token token) {
@@ -487,15 +497,16 @@ public final class ASTParser {
                 final CastType valueOf = match(KEYWORD) ? CastType.fromValue(consume(KEYWORD).getValue()) : CastType.CLASS.setValue(consume(VARIABLE).getValue());
                 if (valueOf == null) {
                     Register.throwException("Unknown native type: " + lookahead(-1).getValue());
-                    return null;
+                    throw new RuntimeException();
                 }
                 return new IsNode(left, valueOf).setLine(line);
             }
 
             ASTNode right = parsePrecedence(currentPrecedence + 1);
-
             left = new BinaryExpressionNode(left, operatorToken.getValue(), right).setLine(line);
+
         }
+
         return left;
     }
 
@@ -533,12 +544,6 @@ public final class ASTParser {
                     } else {
                         break;
                     }
-                }
-                if (matchAndConsume(OPERATOR, "?")) {
-                    final ASTNode trueBranch = parseExpression();
-                    consume(OPERATOR, ":");
-                    final ASTNode falseBranch = parseExpression();
-                    return new TernaryOperatorNode(node, trueBranch, falseBranch).setLine(line);
                 }
 
                 if (matchAndConsume(OPERATOR, "=")) {
@@ -594,13 +599,6 @@ public final class ASTParser {
                     } else break;
                 }
 
-                if (matchAndConsume(OPERATOR, "?")) {
-                    final ASTNode trueBranch = parseExpression();
-                    consume(OPERATOR, ":");
-                    final ASTNode falseBranch = parseExpression();
-                    return new TernaryOperatorNode(node, trueBranch, falseBranch).setLine(line);
-                }
-
                 return node;
             }
             case STRING: {
@@ -620,13 +618,6 @@ public final class ASTParser {
                             node = new ObjectVariableReferenceNode(node, name).setLine(current().getLine());
                         }
                     } else break;
-                }
-
-                if (matchAndConsume(OPERATOR, "?")) {
-                    final ASTNode trueBranch = parseExpression();
-                    consume(OPERATOR, ":");
-                    final ASTNode falseBranch = parseExpression();
-                    return new TernaryOperatorNode(node, trueBranch, falseBranch).setLine(line);
                 }
 
                 return node;
@@ -661,14 +652,6 @@ public final class ASTParser {
                 return parseKeyword();
             }
             case BOOLEAN: {
-
-                if (matchAndConsume(OPERATOR, "?")) {
-                    final ASTNode trueBranch = parseExpression();
-                    consume(OPERATOR, ":");
-                    final ASTNode falseBranch = parseExpression();
-                    return new TernaryOperatorNode(new BooleanNode(Boolean.parseBoolean(token.getValue())).setLine(line), trueBranch, falseBranch).setLine(line);
-                }
-
                 return new BooleanNode(Boolean.parseBoolean(token.getValue())).setLine(line);
             }
             case OPERATOR: {
