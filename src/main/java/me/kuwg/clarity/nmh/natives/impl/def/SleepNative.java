@@ -13,7 +13,7 @@ public class SleepNative extends DefaultNativeFunction<VoidObject> {
     @Override
     public VoidObject call(final List<Object> list) {
         try {
-            Thread.sleep((int) list.get(0));
+            Thread.sleep((long) list.get(0));
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

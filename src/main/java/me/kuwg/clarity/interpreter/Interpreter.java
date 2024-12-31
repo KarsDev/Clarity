@@ -1,5 +1,6 @@
 package me.kuwg.clarity.interpreter;
 
+import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.*;
@@ -262,6 +263,9 @@ public final class Interpreter {
     private Object interpretClassDeclaration(final ClassDeclarationNode node, final Context context) {
 
         final String name = node.getName();
+
+        final boolean sys = name.equals("System");
+
         context.setCurrentClassName(name);
 
         final ClassDefinition inheritedClass;
@@ -291,8 +295,12 @@ public final class Interpreter {
             if (statement instanceof VariableDeclarationNode) {
                 final VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
                 if (declarationNode.isStatic()) {
-                    definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getTypeDefault(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true, declarationNode.isLocal()));
-                }
+                    if (sys && declarationNode.getName().equals("ARGS")) {
+                        definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getTypeDefault(), Clarity.ARGS, declarationNode.isConstant(), true, declarationNode.isLocal()));
+                    } else {
+                        definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getTypeDefault(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true, declarationNode.isLocal()));
+                    }
+                    }
             } else if (statement instanceof FunctionDeclarationNode) {
                 final FunctionDeclarationNode declarationNode = (FunctionDeclarationNode) statement;
                 final List<String> params = new ArrayList<>();

@@ -1,5 +1,7 @@
 package me.kuwg.clarity.info;
 
+import me.kuwg.clarity.Clarity;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,13 +34,15 @@ public final class ClarityRunningInformation {
      * Constructor that initializes the {@code ClarityRunningInformation} object
      * by parsing command-line arguments and loading the corresponding options.
      *
-     * @param args an array of command-line arguments passed to the program
      */
-    public ClarityRunningInformation(final String[] args) {
+    public ClarityRunningInformation() {
         loadedOptions = new HashMap<>();
 
+        final String[] args = Clarity.ARGS;
+
         // Parse the arguments and load options based on true/false values
-        for (final String arg : args) {
+        for (int i = 1; i < args.length; i++) {
+            final String arg = args[i];
             for (final Option option : OPTIONS) {
                 if (arg.equals(option.argTrue)) {
                     loadedOptions.put(option.name, true);

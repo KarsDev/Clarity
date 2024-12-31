@@ -24,6 +24,8 @@ public final class Clarity {
     public static final String USER_HOME = System.getProperty("user.home");
     public static Interpreter INTERPRETER;
     public static ClarityRunningInformation INFORMATION;
+    public static String[] ARGS;
+
     private static int EXIT_CODE = 0;
 
     private Clarity() {
@@ -31,7 +33,8 @@ public final class Clarity {
     }
 
     public static void main(final String[] args) {
-        INFORMATION = new ClarityRunningInformation(args);
+        ARGS = args;
+        INFORMATION = new ClarityRunningInformation();
         new Thread("Clarity Main Thread") {
             @Override
             public void run() {
@@ -144,7 +147,7 @@ public final class Clarity {
                 }
             }
 
-            private void verboseLog(String message) {
+            private void verboseLog(final String message) {
                 if (INFORMATION.getOption("verbose")) {
                     System.out.println(message);
                 }

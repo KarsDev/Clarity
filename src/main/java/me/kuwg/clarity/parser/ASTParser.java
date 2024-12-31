@@ -60,22 +60,23 @@ public final class ASTParser {
     private void load() {
         try {
             LOADED = true;
-            final String file = File.separator + "DEFAULTS.clr";
-            final InputStream defaultStream = getClass().getClassLoader().getResourceAsStream(file);
-            if (defaultStream == null) {
-                throw new IOException("Default resource file not found: '" + file + "'");
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("DEFAULTS.clr");
+            if (inputStream == null) {
+                throw new IOException();
             }
 
-            final String content;
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(defaultStream, StandardCharsets.UTF_8))) {
+            String content;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
                 content = reader.lines().collect(Collectors.joining("\n"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
-            final List<Token> defaultTokens = Tokenizer.tokenize(content);
-            final ASTParser defaultParser = new ASTParser("defaults", file, defaultTokens);
-            final AST defaultAst = defaultParser.parse();
+            final List<Token> tokens = Tokenizer.tokenize(content);
+            final ASTParser parser = new ASTParser(original, "DEFAULTS.clr", tokens);
+            final AST ast = parser.parse();
 
-            DEFAULT_NODE = new IncludeNode("DEFAULTS.clr", defaultAst.getRoot(), false);
+            DEFAULT_NODE = new IncludeNode("DEFAULTS.clr", ast.getRoot(), false);
             includes.add(DEFAULT_NODE);
         } catch (final IOException e) {
             throw new RuntimeException("Failed to include DEFAULTS.clr", e);

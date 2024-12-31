@@ -24,6 +24,19 @@ include native deprecated
  #  environment for the methods to function correctly.
  ####################################################/
 const class System {
+
+    /#
+     # Arguments of Instantiation
+     #
+     # Description:
+     # This static array holds arguments passed during the system's startup or instantiation.
+     #
+     # Notes:
+     # - Direct access to ARGS can provide insights into how the program was initiated.
+     # - Modification of ARGS is not recommended.
+     #/
+    const static arr ARGS
+
     /##
      # Constructor: System
      #
