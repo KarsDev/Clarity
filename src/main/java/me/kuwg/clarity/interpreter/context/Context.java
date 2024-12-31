@@ -43,9 +43,9 @@ public final class Context {
     }
 
     public Object getVariable(final String name) {
-        Object result = variables.get(name);
+        final ObjectType result = variables.get(name);
         if (result == null && parentContext != null) {
-            result = parentContext.getVariable(name);
+            return parentContext.getVariable(name);
         }
         return result != null ? ((VariableDefinition) result).getValue() : VOID_OBJECT;
     }

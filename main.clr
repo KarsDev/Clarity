@@ -1,7 +1,4 @@
-include native system
+var x = 5
+var y = "lol"
 
-fn main() {
-    println("Wait 1 sec")
-    sleep(1000)
-    println(System.ARGS)
-}
+println(x is y)

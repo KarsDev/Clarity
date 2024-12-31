@@ -295,12 +295,24 @@ public final class Interpreter {
             if (statement instanceof VariableDeclarationNode) {
                 final VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
                 if (declarationNode.isStatic()) {
-                    if (sys && declarationNode.getName().equals("ARGS")) {
-                        definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getTypeDefault(), Clarity.ARGS, declarationNode.isConstant(), true, declarationNode.isLocal()));
-                    } else {
-                        definition.staticVariables.put(declarationNode.getName(), new VariableDefinition(declarationNode.getName(), declarationNode.getTypeDefault(), declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context), declarationNode.isConstant(), true, declarationNode.isLocal()));
-                    }
-                    }
+                    final String dName = declarationNode.getName();
+
+                    final String dType = declarationNode.getTypeDefault();
+
+                    final Object dValue;
+                    if (sys && declarationNode.getName().equals("ARGS"))
+                        dValue = Arrays.copyOfRange(Clarity.ARGS, 2, Clarity.ARGS.length);
+                    else
+                        dValue = declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context);
+
+                    final boolean dConst = declarationNode.isConstant();
+
+                    final boolean dStatic = true;
+
+                    final boolean dLocal = declarationNode.isLocal();
+
+                    definition.staticVariables.put(dName, new VariableDefinition(dName, dType, dValue, dConst, dStatic, dLocal));
+                }
             } else if (statement instanceof FunctionDeclarationNode) {
                 final FunctionDeclarationNode declarationNode = (FunctionDeclarationNode) statement;
                 final List<String> params = new ArrayList<>();
