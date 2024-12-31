@@ -53,12 +53,15 @@ import static me.kuwg.clarity.token.TokenType.*;
 public final class ASTParser {
 
     private static final List<IncludeNode> includes = new ArrayList<>();
+
     private static IncludeNode DEFAULT_NODE = null;
+    private static boolean LOADED;
 
     private void load() {
         try {
+            LOADED = true;
             final String file = File.separator + "DEFAULTS.clr";
-            final InputStream defaultStream = ASTParser.class.getClassLoader().getResourceAsStream(file);
+            final InputStream defaultStream = getClass().getClassLoader().getResourceAsStream(file);
             if (defaultStream == null) {
                 throw new IOException("Default resource file not found: '" + file + "'");
             }
@@ -85,7 +88,7 @@ public final class ASTParser {
     private int currentTokenIndex = 0;
 
     public ASTParser(final String original, final String fileName, final List<Token> tokens) {
-        if (DEFAULT_NODE == null) load();
+        if (!LOADED) load();
         this.original = original;
         this.fileName = fileName;
         this.tokens = tokens;

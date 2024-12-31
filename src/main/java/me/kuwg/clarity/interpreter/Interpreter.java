@@ -106,9 +106,13 @@ public final class Interpreter {
                 ret = ((Long) result).intValue();
             }
         } else {
-            if (interpretNode(ast.getRoot(), general) != VOID_OBJECT)
+            if (interpretNode(ast.getRoot(), general) != VOID_OBJECT) {
                 except("Unexpected return without main function");
-            ret = 1;
+                ret = 1;
+            } else {
+                ret = 0;
+            }
+
         }
 
         except(""); // if any exception is raised then except, else don't do anything
