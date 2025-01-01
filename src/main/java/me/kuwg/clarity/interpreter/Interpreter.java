@@ -55,16 +55,14 @@ public final class Interpreter {
     private final AST ast;
     private final NativeMethodHandler nmh;
     private final Context general;
-
-    private boolean EXCEPT;
-    private String EXCEPT_MESSAGE;
-    private Integer EXCEPT_LINE;
+    private final ExemptionHandler exemptionHandler;
 
     public Interpreter(final AST ast) {
         // optimization is useless
         this.ast = ast;
         this.nmh = new NativeMethodHandler();
         this.general = new Context();
+        this.exemptionHandler = new ExemptionHandler();
     }
 
     public Context general() {
@@ -116,7 +114,7 @@ public final class Interpreter {
 
         }
 
-        except(""); // if any exception is raised then except, else don't do anything
+        checkExemption();
 
         return ret;
     }
@@ -152,11 +150,8 @@ public final class Interpreter {
     }
 
     public Object interpretNode(final ASTNode node, final Context context) {
+        checkExemption();
 
-        if (EXCEPT) {
-            if (EXCEPT_LINE != null) Register.throwException(EXCEPT_MESSAGE, EXCEPT_LINE);
-            else Register.throwException(EXCEPT_MESSAGE);
-        }
         if (node instanceof BlockNode) return interpretBlock((BlockNode) node, context);
         else if (node instanceof VariableDeclarationNode) return interpretVariableDeclaration((VariableDeclarationNode) node, context);
         else if (node instanceof BinaryExpressionNode) return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
@@ -2019,11 +2014,10 @@ public final class Interpreter {
         for (final ASTNode anode : tryBlock) {
             final Object result = interpretNode(anode, tryContext);
 
-            if (EXCEPT) {
-                EXCEPT = false;
+            if (exemptionHandler.changeIfGet()) {
                 final BlockNode exceptBlock = node.getExceptBlock();
                 final Context exceptContext = new Context(context);
-                exceptContext.defineVariable(node.getExcepted(), new VariableDefinition(node.getExcepted(), "str", EXCEPT_MESSAGE, false, false, false));
+                exceptContext.defineVariable(node.getExcepted(), new VariableDefinition(node.getExcepted(), "str", exemptionHandler.exemptMessage(), false, false, false));
                 interpretBlock(exceptBlock, exceptContext);
                 break;
             }
@@ -2103,30 +2097,15 @@ public final class Interpreter {
     *
      */
 
-
-
+    private void checkExemption() {
+        exemptionHandler.checkExemption();
+    }
 
     public Object except(final String message, final int line) {
-        if (EXCEPT) {
-            if (EXCEPT_LINE != null) Register.throwException(EXCEPT_MESSAGE, EXCEPT_LINE);
-            else Register.throwException(EXCEPT_MESSAGE);
-        }
-
-        EXCEPT = true;
-        EXCEPT_MESSAGE = message;
-        EXCEPT_LINE = line;
-        return VOID_OBJECT;
+        return exemptionHandler.except(message, line);
     }
 
     private Object except(final String message) {
-        if (EXCEPT) {
-            if (EXCEPT_LINE != null) Register.throwException(EXCEPT_MESSAGE, EXCEPT_LINE);
-            else Register.throwException(EXCEPT_MESSAGE);
-        }
-
-        EXCEPT = true;
-        EXCEPT_MESSAGE = message;
-        EXCEPT_LINE = null;
-        return VOID_OBJECT;
+        return exemptionHandler.except(message);
     }
 }
