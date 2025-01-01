@@ -21,7 +21,7 @@ public final class Tokenizer {
      */
     public static List<Token> tokenize(final String src) {
         final List<Token> tokens = new ArrayList<>();
-        String remainingSrc = src;
+        String remainingSrc = src.replaceAll(";", " ");
         int line = 1;
 
         while (!remainingSrc.isEmpty()) {
