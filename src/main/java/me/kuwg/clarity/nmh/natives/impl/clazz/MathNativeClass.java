@@ -28,11 +28,11 @@ public class MathNativeClass extends NativeClass {
             case "isPrime": {
                 check("Invalid parameters for 'isPrime'. Expected 1 Integer, got " + params.size() + " with types " + getParamTypes(params),
                         params.size() == 1 && params.get(0) instanceof Integer);
-                final int num = (int) params.get(0);
+                final long num = (long) params.get(0);
                 if (num <= 1) return false;
                 if (num <= 3) return true;
                 if (num % 2 == 0 || num % 3 == 0) return false;
-                for (int i = 5; i * i <= num; i = i + 6) if (num % i == 0 || num % (i + 2) == 0) return false;
+                for (long i = 5; i * i <= num; i = i + 6) if (num % i == 0 || num % (i + 2) == 0) return false;
                 return true;
             }
             case "pow": {
@@ -78,7 +78,7 @@ public class MathNativeClass extends NativeClass {
             case "fact": {
                 check("Invalid parameters for 'fact'. Expected 1 Number, got " + params.size() + " with types " + getParamTypes(params),
                         params.size() == 1 && params.get(0) instanceof Integer);
-                final int n = (int) params.get(0);
+                final long n = (long) params.get(0);
 
                 if (n < 0) Register.throwException("Negative numbers are not allowed.");
 
