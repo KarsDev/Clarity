@@ -236,7 +236,7 @@ public final class Interpreter {
             if (valueObj instanceof ReturnValue) valueObj = ((ReturnValue) valueObj).getValue();
 
             if (valueObj instanceof VoidObject) {
-                except("Creating a void variable: " + node.getName());
+                except("Creating a void variable: " + node.getName(), node.getLine());
                 return VOID_OBJECT;
             }
 
@@ -462,7 +462,7 @@ public final class Interpreter {
         for (final ASTNode param : node.getParams()) {
             final Object added = interpretNode(param, context);
             if (added instanceof VoidObject) {
-                except("Passing void as parameter");
+                except("Passing void as parameter", node.getLine());
                 return VOID_OBJECT;
             }
             params.add(added);
@@ -526,7 +526,7 @@ public final class Interpreter {
             final String name = definitionParams.get(i);
             final Object value = params.get(i);
             if (value instanceof VoidObject) {
-                except("Passing void as parameter");
+                except("Passing void as parameter", node.getLine());
             }
             functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
         }
@@ -543,7 +543,7 @@ public final class Interpreter {
         final String typeDefault = definition.getTypeDefault();
 
         if (checkTypes(typeDefault, result)) {
-            except("Unexpected return: " + result.getClass().getSimpleName() + ", expected " + typeDefault);
+            except("Unexpected return: " + result.getClass().getSimpleName() + ", expected " + typeDefault, node.getLine());
         }
 
         context.setCurrentFunctionName(null);
@@ -596,7 +596,7 @@ public final class Interpreter {
         for (final ASTNode sub : node.getParams()) {
             final Object added = interpretNode(sub, context);
             if (added instanceof VoidObject) {
-                return except("Passing void as parameter");
+                return except("Passing void as parameter", node.getLine());
             }
             params.add(added);
         }
@@ -1029,7 +1029,7 @@ public final class Interpreter {
         for (final ASTNode param : node.getParams()) {
             final Object returned = interpretNode(param, context);
             if (returned == VOID_OBJECT) {
-                except("Passing void as a parameter function");
+                except("Passing void as a parameter function", node.getLine());
                 return new ArrayList<>();
             }
             params.add(returned);
@@ -1765,7 +1765,7 @@ public final class Interpreter {
                         for (final EnumClassDefinition.EnumValue value : ecd.getValues()) {
                             if (value.getName().equals(valueOfLiteral)) return value;
                         }
-                        return except("Enum value not found by name " + valueOfLiteral);
+                        return except("Enum value not found by name " + valueOfLiteral, node.getLine());
                     }
                     default: {
                         break;
@@ -1871,7 +1871,7 @@ public final class Interpreter {
         for (final ASTNode param : node.getParams()) {
             final Object returned = interpretNode(param, context);
             if (returned == VOID_OBJECT) {
-                except("Passing void as a parameter function");
+                except("Passing void as a parameter function", node.getLine());
                 return new ArrayList<>();
             }
             params.add(returned);
@@ -1889,7 +1889,7 @@ public final class Interpreter {
         for (final ASTNode param : node.getParams()) {
             final Object returned = interpretNode(param, context);
             if (returned == VOID_OBJECT) {
-                except("Passing void as a parameter function");
+                except("Passing void as a parameter function", node.getLine());
                 return new ArrayList<>();
             }
             params.add(returned);
@@ -1971,7 +1971,7 @@ public final class Interpreter {
         */
         final ObjectType rawDefinition = context.getAnnotation(node.getName());
         if (!(rawDefinition instanceof AnnotationDefinition)) {
-            return except("Annotation not found: " + node.getName());
+            return except("Annotation not found: " + node.getName(), node.getLine());
         }
 
         final AnnotationDefinition annotation = (AnnotationDefinition) rawDefinition;
@@ -1997,7 +1997,7 @@ public final class Interpreter {
         final Object result = interpretNode(node.getException(), context);
 
         if (!(result instanceof String)) {
-            return except("Expected string in exception raising");
+            return except("Expected string in exception raising", node.getLine());
         } else {
             return except((String) result, node.getLine());
         }
@@ -2038,12 +2038,12 @@ public final class Interpreter {
         if (node.isAsync()) {
             new Thread(() -> {
                 if (!(interpretBlock(node.getBlock(), context) instanceof VoidObject)) {
-                    except("Return in static async block");
+                    except("Return in static async block", node.getLine());
                 }
             }, "<static-block>").start();
         } else {
             if (!(interpretBlock(node.getBlock(), context) instanceof VoidObject)) {
-                except("Return in static block");
+                except("Return in static block", node.getLine());
             }
         }
 
@@ -2070,9 +2070,9 @@ public final class Interpreter {
 
         if (!(params instanceof Number)) {
             if (params == null) {
-                return except("Parameter is not a num, instead it is null");
+                return except("Parameter is not a num, instead it is null", node.getLine());
             }
-            return except("Parameter is not a num, instead it is " + params.getClass().getSimpleName());
+            return except("Parameter is not a num, instead it is " + params.getClass().getSimpleName(), node.getLine());
         }
 
         Register.register(new Register.RegisterElement(FUNDEL, node.getName() + "(" + params + ")", node.getLine(), context.getCurrentClassName()));
@@ -2105,7 +2105,7 @@ public final class Interpreter {
         return exemptionHandler.except(message, line);
     }
 
-    private Object except(final String message) {
-        return exemptionHandler.except(message);
+    private void except(final String message) {
+        exemptionHandler.except(message);
     }
 }

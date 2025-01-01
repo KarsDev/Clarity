@@ -28,7 +28,7 @@ final class ExemptionHandler {
         return VOID_OBJECT;
     }
 
-    Object except(final String message) {
+    void except(final String message) {
         if (this.isExempt) {
             if (this.exemptLine != null) Register.throwException(this.exemptMessage, this.exemptLine);
             else Register.throwException(this.exemptMessage);
@@ -37,14 +37,12 @@ final class ExemptionHandler {
         this.isExempt = true;
         this.exemptMessage = message;
         this.exemptLine = null;
-        return VOID_OBJECT;
     }
 
     @SuppressWarnings("ConstantValue")
     boolean changeIfGet() {
         return this.isExempt && !(this.isExempt = false);
     }
-
 
     String exemptMessage() {
         return this.exemptMessage;
