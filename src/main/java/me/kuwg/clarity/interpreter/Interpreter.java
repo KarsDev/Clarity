@@ -809,7 +809,7 @@ public final class Interpreter {
 
 
         switch (fn) {
-            case "at":
+            case "at": {
                 if (params.size() == 1 && params.get(0) instanceof Long) {
                     try {
                         return array[((Number) params.get(0)).intValue()];
@@ -817,11 +817,13 @@ public final class Interpreter {
                         return except("Array out of bounds: " + params.get(0), raw.getLine());
                     }
                 }
-            case "size":
+            }
+            case "size": {
                 if (params.isEmpty()) {
                     return array.length;
                 }
-            case "set":
+            }
+            case "set": {
                 if (params.size() == 2 && (params.get(0) instanceof Long || params.get(0) instanceof Integer)) {
                     try {
                         array[((Number) params.get(0)).intValue()] = params.get(1);
@@ -830,7 +832,8 @@ public final class Interpreter {
                     }
                     return VOID_OBJECT;
                 }
-            case "setSize":
+            }
+            case "setSize": {
                 if (params.size() == 1 && params.get(0) instanceof Long) {
                     int newSize = ((Number) params.get(0)).intValue();
                     if (newSize < 0) {
@@ -840,6 +843,23 @@ public final class Interpreter {
                     System.arraycopy(array, 0, newArray, 0, Math.min(array.length, newSize));
                     return newArray;
                 }
+            }
+            case "push": {
+                final List<Object> list = new ArrayList<>(Arrays.asList(array));
+                list.addAll(params);
+                return list.toArray();
+            }
+            case "splice": {
+                if (params.size() >= 2 && params.get(0) instanceof Long && params.get(1) instanceof Long) {
+                    final int start = ((Long) params.get(0)).intValue();
+                    final int deleteCount = ((Long) params.get(1)).intValue();
+                    final List<Object> spliced = new ArrayList<>(Arrays.asList(array));
+                    final int end = Math.min(start + deleteCount, spliced.size());
+                    spliced.subList(start, end).clear();
+                    if (params.size() > 2) spliced.addAll(start, params.subList(2, params.size()));
+                    return spliced.toArray();
+                }
+            }
             default:
                 return except("Illegal function in array context: " + fn + " with params " + getParams(params), raw.getLine());
         }
@@ -1815,7 +1835,7 @@ public final class Interpreter {
         } else if (caller instanceof EnumClassDefinition.EnumValue) {
             return handleEnumValueFunctionCall(node, (EnumClassDefinition.EnumValue) caller);
         } else if (caller instanceof Object[]) {
-            Object resultArray = handleArrayFunctionCall(node, context, (Object[]) caller);
+            final Object resultArray = handleArrayFunctionCall(node, context, (Object[]) caller);
             if (resultArray instanceof Object[] && ((Object[]) resultArray).length != ((Object[]) caller).length) {
                 if (!(node.getCaller() instanceof VariableReferenceNode)) {
                     return except("Expected variable reference", node.getLine());
@@ -1856,7 +1876,7 @@ public final class Interpreter {
 
         defineFunctionParameters(functionContext, definition, params);
 
-        Register.register(new Register.RegisterElement(RegisterElementType.NATIVECALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(RegisterElementType.FUNCALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
 
         context.setCurrentClassName(objectName);
         context.setCurrentFunctionName(node.getName());

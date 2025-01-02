@@ -60,6 +60,12 @@ public enum CastType {
         public boolean is(final Object object) {
             return object instanceof Number;
         }
+    },
+    NULL(null) {
+        @Override
+        public boolean is(final Object object) {
+            return object == null;
+        }
     };
 
     private String value;
