@@ -606,19 +606,6 @@ public final class ASTParser {
                                     break;
                                 }
                             }
-
-                            /*
-                            old
-                            final ASTNode primary = parsePrimary();
-                            if (primary instanceof VariableReassignmentNode) {
-                                final VariableReassignmentNode vrn = (VariableReassignmentNode) primary;
-                                return new ObjectVariableReassignmentNode(((VariableReferenceNode) node).getName(), vrn.getName(), vrn.getValue()); // problem here is that removing "account.", the parses reads it as "balance += amount
-                            } else if (primary instanceof VariableReferenceNode) {
-                                return new ObjectVariableReferenceNode(node, ((VariableReferenceNode) primary).getName());
-                            } else {
-                                throw new RuntimeException("Unexpected node: " + primary);
-                            }
-                            */
                         }
                     } else if (matchAndConsume(DIVIDER, "(")) {
                         List<ASTNode> params = new ArrayList<>();
@@ -865,30 +852,13 @@ public final class ASTParser {
             final ASTNode node = parsePrimary();
             if (node instanceof VariableReassignmentNode) {
                 final VariableReassignmentNode vrn = (VariableReassignmentNode) node;
-                return new LocalVariableReassignmentNode(vrn.getName(), vrn.getValue());
+                return new LocalVariableReassignmentNode(vrn.getName(), vrn.getValue()).setLine(line);
             } else if (node instanceof VariableReferenceNode) {
                 final VariableReferenceNode vrn = (VariableReferenceNode) node;
-                return new LocalVariableReferenceNode(vrn.getName());
+                return new LocalVariableReferenceNode(vrn.getName()).setLine(line);
             } else {
                 throw new RuntimeException("Unexpected node: " + node);
             }
-            /*
-            OLD
-            final String name = consume(VARIABLE).getValue();
-            if (match(DIVIDER, "(")) {
-                consume(); // consume open paren
-                List<ASTNode> params = new ArrayList<>();
-                while (!match(DIVIDER, ")")) {
-                    params.add(parseExpression());
-                    if (!matchAndConsume(DIVIDER, ",")) break;
-                }
-                consume(DIVIDER, ")");
-                return new LocalFunctionCallNode(name, params).setLine(line);
-            } else if (matchAndConsume(OPERATOR, "=")) {
-                return new LocalVariableReassignmentNode(name, parseExpression()).setLine(line);
-            }
-            return new LocalVariableReferenceNode(name).setLine(line);
-              */
         }
         undo();
 
