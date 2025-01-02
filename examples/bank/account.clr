@@ -1,0 +1,58 @@
+const class Account {
+    local const str name
+    local var balance
+
+    constructor(name) {
+        local.name = name
+        local.balance = 0
+    }
+
+    constructor(name, balance) {
+        local.name = name
+        assert balance is num
+        local.balance = balance
+    }
+
+    fn deposit(amount) -> int {
+        if amount > 0 {
+            local.balance += amount
+            return 0
+        } else {
+            return 1
+        }
+    }
+
+    fn withdraw(amount) -> int {
+        if amount > local.balance {
+            return 1
+        } else if amount > 0 {
+            local.balance -= amount
+        } else {
+            return 2
+        }
+
+        return 0
+    }
+
+    fn transfer(amount, account) -> int {
+        if amount > 0 && amount <= local.balance {
+            local.balance -= amount
+            account.balance += amount
+            return 0
+        } else {
+            return 1
+        }
+    }
+
+    fn getName() {
+        return local.name
+    }
+
+    fn getBalance() {
+        return local.balance
+    }
+
+    fn print() {
+        return "Account{name=" + name + ", balance=" + balance + "}"
+    }
+}

@@ -1,0 +1,51 @@
+const class Bank {
+    const local var accounts
+
+    constructor() {
+        local.accounts = []
+    }
+
+    fn addAccount(account) {
+        for oth : local.accounts {
+            if oth.getName() == account.getName() {
+                return 1
+            }
+        }
+        local.accounts.push(account)
+        return 0
+    }
+
+    fn findAccount(name) {
+        for acc : local.accounts {
+            if acc.getName() == name {
+                return acc
+            }
+        }
+        return null
+    }
+
+    fn removeAccount(name) {
+        for i : local.accounts.size() {
+            if local.accounts.at(i).getName() == name {
+                local.accounts.splice(i, 1)
+                return 0
+            }
+        }
+        return 1 
+    }
+
+    fn transfer(fromName, toName, amount) {
+        const var fromAccount = findAccount(fromName)
+        const var toAccount = findAccount(toName)
+
+        if fromAccount is null || toAccount is null {
+            return 1
+        }
+
+        return fromAccount.transfer(amount, toAccount)
+    }
+
+    fn getAccounts() {
+        return local.accounts
+    }
+}
