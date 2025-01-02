@@ -1,20 +1,20 @@
 package me.kuwg.clarity.nmh;
 
+import me.kuwg.clarity.interpreter.context.Context;
+import me.kuwg.clarity.library.ClarityNativeLibrary;
 import me.kuwg.clarity.library.natives.ClarityNativeClass;
 import me.kuwg.clarity.library.natives.ClarityNativeFunction;
-import me.kuwg.clarity.library.ClarityNativeLibrary;
-import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.library.natives.ClarityPackagedNativeFunction;
 import me.kuwg.clarity.library.objects.VoidObject;
-import me.kuwg.clarity.nmh.natives.impl.pkg.date.*;
+import me.kuwg.clarity.nmh.natives.abstracts.PackagedNativeFunction;
+import me.kuwg.clarity.nmh.natives.impl.pkg.date.NowDateNative;
+import me.kuwg.clarity.nmh.natives.impl.pkg.error.ThrowNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.CheckNativeTypeNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.CurrentThreadNameNative;
-import me.kuwg.clarity.nmh.natives.impl.pkg.system.LoadNativeLibraryNative;
-import me.kuwg.clarity.register.Register;
-import me.kuwg.clarity.nmh.natives.abstracts.PackagedNativeFunction;
-import me.kuwg.clarity.nmh.natives.impl.pkg.error.ThrowNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.system.ExitNative;
+import me.kuwg.clarity.nmh.natives.impl.pkg.system.LoadNativeLibraryNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.util.CreateListNative;
+import me.kuwg.clarity.register.Register;
 
 import java.util.HashMap;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.Map;
 public final class NativeMethodHandler {
 
     private static final Map<String, ClarityNativeFunction<?>> defaultFunctions = new HashMap<>();
-    private static final Map<String, PackagedNativeFunction<?>> packagedFunctions = new HashMap<>();
+    private static final Map<String, ClarityPackagedNativeFunction<?>> packagedFunctions = new HashMap<>();
     private static final Map<String, ClarityNativeClass> nativeClasses = new HashMap<>();
 
     /**
@@ -126,7 +126,7 @@ public final class NativeMethodHandler {
      */
     public Object callPackaged(final String pkg, final String name, final String callerClass, final List<Object> params) {
         final String key = pkg + "." + name;
-        final PackagedNativeFunction<?> function = packagedFunctions.get(key);
+        final ClarityPackagedNativeFunction<?> function = packagedFunctions.get(key);
 
         if (function != null && function.applies(pkg, name, callerClass, params)) {
             return function.call(params);
@@ -194,7 +194,7 @@ public final class NativeMethodHandler {
         }
 
         for (final ClarityPackagedNativeFunction<?> function : lib.getPackagedNativeFunctions()) {
-            defaultFunctions.put(function.getName(), function);
+            packagedFunctions.put(function.getFullyQualifiedName(), function);
         }
     }
 }
