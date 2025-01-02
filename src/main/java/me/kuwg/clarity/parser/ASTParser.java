@@ -15,7 +15,6 @@ import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.DefaultNativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.call.FunctionCallNode;
-import me.kuwg.clarity.ast.nodes.function.call.LocalFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.call.PackagedNativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
@@ -536,11 +535,90 @@ public final class ASTParser {
                             }
                             consume(DIVIDER, ")");
                             node = new MemberFunctionCallNode(node, name, params).setLine(line);
-                        } else if (matchAndConsume(OPERATOR, "=")) {
-                            final VariableReferenceNode vrn = (VariableReferenceNode) node;
-                            return new ObjectVariableReassignmentNode(vrn.getName(), name, parseExpression());
                         } else {
-                            node = new ObjectVariableReferenceNode(node, name).setLine(current().getLine());
+                            undo();
+
+                            String called = consume(VARIABLE).getValue();
+
+                            while (matchAndConsume(OPERATOR, ".")) {
+                                node = new ObjectVariableReferenceNode(node, called).setLine(current().getLine());
+                                called = consume(VARIABLE).getValue();
+                            }
+
+                            if (!match(OPERATOR)) {
+                                return node.setLine(line);
+                            }
+
+                            switch (current().getValue()) {
+                                case "=": {
+                                    consume();
+                                    final ASTNode expression = parseExpression();
+                                    if (node instanceof ObjectVariableReferenceNode)
+                                        return new VariableReassignmentNode(((ObjectVariableReferenceNode) node).getCalled(), expression).setLine(line);
+                                    else
+                                        return new VariableReassignmentNode(((VariableReferenceNode) node).getName(), expression).setLine(line);
+                                }
+                                case "+=":
+                                case "-=":
+                                case "*=":
+                                case "/=":
+                                case "^=":
+                                case "%=": {
+                                    if (node instanceof ObjectVariableReferenceNode) {
+                                        final char v = consume().getValue().charAt(0); // consume op
+                                        final ObjectVariableReferenceNode left = (ObjectVariableReferenceNode) node;
+                                        return new ObjectVariableReassignmentNode(
+                                                ((VariableReferenceNode) left.getCaller()).getName(),
+                                                left.getCalled(),
+                                                new BinaryExpressionNode(left, String.valueOf(v), parseExpression())
+                                        ).setLine(current().getLine());
+                                    } else if (node instanceof VariableReferenceNode) {
+                                        final char v = consume().getValue().charAt(0); // consume op
+                                        final VariableReferenceNode left = (VariableReferenceNode) node;
+                                        return new ObjectVariableReassignmentNode(
+                                                left.getName(),
+                                                called,
+                                                new BinaryExpressionNode(new ObjectVariableReferenceNode(new VariableReferenceNode(left.getName()), called), String.valueOf(v), parseExpression())
+                                        ).setLine(current().getLine());
+                                    }
+                                    break;
+                                }
+                                case "++":
+                                case "--": {
+                                    if (node instanceof ObjectVariableReferenceNode) {
+                                        final char v = consume().getValue().charAt(0); // consume op
+                                        final ObjectVariableReferenceNode left = (ObjectVariableReferenceNode) node;
+                                        return new ObjectVariableReassignmentNode(
+                                                ((VariableReferenceNode) left.getCaller()).getName(),
+                                                left.getCalled(),
+                                                new BinaryExpressionNode(left, String.valueOf(v), IntegerNode.ONE)
+                                        ).setLine(current().getLine());
+                                    } else if (node instanceof VariableReferenceNode) {
+                                        final char v = consume().getValue().charAt(0); // consume op
+                                        final VariableReferenceNode left = (VariableReferenceNode) node;
+
+                                        return new ObjectVariableReassignmentNode(
+                                                left.getName(),
+                                                called,
+                                                new BinaryExpressionNode(new ObjectVariableReferenceNode(new VariableReferenceNode(left.getName()), called), String.valueOf(v), IntegerNode.ONE)
+                                        ).setLine(current().getLine());
+                                    }
+                                    break;
+                                }
+                            }
+
+                            /*
+                            old
+                            final ASTNode primary = parsePrimary();
+                            if (primary instanceof VariableReassignmentNode) {
+                                final VariableReassignmentNode vrn = (VariableReassignmentNode) primary;
+                                return new ObjectVariableReassignmentNode(((VariableReferenceNode) node).getName(), vrn.getName(), vrn.getValue()); // problem here is that removing "account.", the parses reads it as "balance += amount
+                            } else if (primary instanceof VariableReferenceNode) {
+                                return new ObjectVariableReferenceNode(node, ((VariableReferenceNode) primary).getName());
+                            } else {
+                                throw new RuntimeException("Unexpected node: " + primary);
+                            }
+                            */
                         }
                     } else if (matchAndConsume(DIVIDER, "(")) {
                         List<ASTNode> params = new ArrayList<>();
@@ -710,7 +788,7 @@ public final class ASTParser {
         final ASTNode right = parsePrimary();
         switch (token.getValue()) {
             case "-":
-                return new BinaryExpressionNode(new IntegerNode(0).setLine(line), "-", right).setLine(line);
+                return new BinaryExpressionNode(IntegerNode.ZERO, "-", right).setLine(line);
             case "!":
                 return new BinaryExpressionNode(new BooleanNode(false), "==", right).setLine(line);
             case ".":
@@ -784,6 +862,18 @@ public final class ASTParser {
         final int line = current().getLine();
 
         if (matchAndConsume(OPERATOR, ".")) {
+            final ASTNode node = parsePrimary();
+            if (node instanceof VariableReassignmentNode) {
+                final VariableReassignmentNode vrn = (VariableReassignmentNode) node;
+                return new LocalVariableReassignmentNode(vrn.getName(), vrn.getValue());
+            } else if (node instanceof VariableReferenceNode) {
+                final VariableReferenceNode vrn = (VariableReferenceNode) node;
+                return new LocalVariableReferenceNode(vrn.getName());
+            } else {
+                throw new RuntimeException("Unexpected node: " + node);
+            }
+            /*
+            OLD
             final String name = consume(VARIABLE).getValue();
             if (match(DIVIDER, "(")) {
                 consume(); // consume open paren
@@ -798,6 +888,7 @@ public final class ASTParser {
                 return new LocalVariableReassignmentNode(name, parseExpression()).setLine(line);
             }
             return new LocalVariableReferenceNode(name).setLine(line);
+              */
         }
         undo();
 

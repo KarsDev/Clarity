@@ -7,6 +7,9 @@ import java.io.IOException;
 
 public class IntegerNode extends AbstractNumberNode {
 
+    public static final IntegerNode ZERO = new IntegerNode(0);
+    public static final IntegerNode ONE = new IntegerNode(1);
+
     private long value;
 
     public IntegerNode(final long value) {
