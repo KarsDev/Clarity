@@ -17,6 +17,17 @@ public abstract class ClarityPackagedNativeFunction<R> extends ClarityNativeFunc
     private final String pkg;
 
     /**
+     * Constructs a new {@code ClarityPackagedNativeFunction} with the specified function name and package.
+     *
+     * @param name The name of the native function.
+     * @param pkg The custom package of the native function.
+     */
+    protected ClarityPackagedNativeFunction(final String name, final String pkg) {
+        super(name);
+        this.pkg = pkg;
+    }
+
+    /**
      * Constructs a new {@code ClarityPackagedNativeFunction} with the specified function name.
      * The package is derived from the class's package name, starting at the 38th character.
      *
