@@ -54,6 +54,12 @@ public enum CastType {
         public boolean is(Object object) {
             return object instanceof LambdaObject; // Assuming LambdaObject is a type in your code
         }
+    },
+    NUM(null) {
+        @Override
+        public boolean is(final Object object) {
+            return object instanceof Number;
+        }
     };
 
     private String value;

@@ -550,10 +550,13 @@ public final class Interpreter {
         return result;
     }
 
-    public static boolean checkTypes(final String typeDefault, final Object result) {
+    public static boolean
+    checkTypes(final String typeDefault, final Object result) {
         final boolean match;
         if (typeDefault == null) {
             match = true;
+        } else if (typeDefault.equals("num")) {
+            match = result instanceof Number;
         } else if (result instanceof VoidObject) {
             match = typeDefault.equals("void");
         } else if (result instanceof String) {

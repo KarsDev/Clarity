@@ -485,16 +485,25 @@ public final class ASTParser {
     private ASTNode parsePrecedence(int precedence) {
         ASTNode left = parsePrimary();
         while (true) {
-            int currentPrecedence = getPrecedence(current());
+            final int currentPrecedence = getPrecedence(current());
             if (currentPrecedence < precedence) {
                 break;
             }
 
             final int line = current().getLine();
-            Token operatorToken = consume();
+            final Token operatorToken = consume();
 
             if (operatorToken.is(KEYWORD, "is")) {
-                final CastType valueOf = match(KEYWORD) ? CastType.fromValue(consume(KEYWORD).getValue()) : CastType.CLASS.setValue(consume(VARIABLE).getValue());
+                final CastType valueOf;
+
+                if (match(KEYWORD)) {
+                    valueOf = CastType.fromValue(consume(KEYWORD).getValue());
+                } else {
+                    final String value = consume(VARIABLE).getValue();
+
+                    valueOf = value.equals("num") ? CastType.NUM : CastType.CLASS.setValue(value);
+                }
+
                 if (valueOf == null) {
                     Register.throwException("Unknown native type: " + lookahead(-1).getValue());
                     throw new RuntimeException();
@@ -502,7 +511,7 @@ public final class ASTParser {
                 return new IsNode(left, valueOf).setLine(line);
             }
 
-            ASTNode right = parsePrecedence(currentPrecedence + 1);
+            final ASTNode right = parsePrecedence(currentPrecedence + 1);
             left = new BinaryExpressionNode(left, operatorToken.getValue(), right).setLine(line);
 
         }
