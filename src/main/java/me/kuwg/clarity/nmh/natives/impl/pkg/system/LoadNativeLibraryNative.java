@@ -1,9 +1,9 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.system;
 
 import me.kuwg.clarity.Clarity;
+import me.kuwg.clarity.library.ClarityNativeLibrary;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.register.Register;
-import me.kuwg.clarity.library.ClarityNativeLibrary;
 
 import java.io.*;
 import java.net.URL;
@@ -52,7 +52,6 @@ public class LoadNativeLibraryNative extends SystemNativeFunction<Integer> {
             }
 
             final ClarityNativeLibrary libraryInstance = (ClarityNativeLibrary) clazz.getDeclaredConstructor().newInstance();
-
             NativeMethodHandler.loadLibrary(libraryInstance);
             return 0;
         } catch (final Exception e) {
