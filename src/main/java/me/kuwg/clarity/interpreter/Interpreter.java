@@ -892,9 +892,9 @@ public final class Interpreter {
             case "subs":
                 try {
                     if (params.size() == 1 && params.get(0) instanceof Long) {
-                        return caller.substring((int) params.get(0));
+                        return caller.substring(((Long) params.get(0)).intValue());
                     } else if (params.size() == 2 && params.get(0) instanceof Long && params.get(1) instanceof Long) {
-                        return caller.substring((int) params.get(0), (int) params.get(1));
+                        return caller.substring(((Long) params.get(0)).intValue(), ((Long) params.get(1)).intValue());
                     }
                 } catch (final IndexOutOfBoundsException e) {
                     return except("String index out of bounds: " + params, raw.getLine());
@@ -922,7 +922,7 @@ public final class Interpreter {
                 break;
             case "length":
                 if (params.isEmpty()) {
-                    return caller.length();
+                    return (long) caller.length();
                 }
                 break;
             case "lower":
@@ -935,6 +935,12 @@ public final class Interpreter {
                     return caller.toUpperCase();
                 }
                 break;
+            case "charAt": {
+                if (params.size() == 1 && params.get(0) instanceof Long) {
+                    return String.valueOf(caller.charAt(((Long) params.get(0)).intValue()));
+                }
+                break;
+            }
         }
 
         Register.throwException("Illegal function in string context: " + fn + " with params " + getParams(params), raw.getLine());

@@ -47,7 +47,7 @@ public final class LambdaObject {
      *
      * @return The {@link BlockNode} representing the lambda's code.
      */
-    public final BlockNode getBlock() {
+    public BlockNode getBlock() {
         return block;
     }
 
@@ -56,7 +56,7 @@ public final class LambdaObject {
      *
      * @return A {@link List} of {@link ParameterNode} objects representing the lambda's parameters.
      */
-    public final List<ParameterNode> getParams() {
+    public List<ParameterNode> getParams() {
         return params;
     }
 
@@ -65,7 +65,7 @@ public final class LambdaObject {
      *
      * @return The {@link Context} in which the lambda is defined.
      */
-    public final Context getContext() {
+    public Context getContext() {
         return context;
     }
 
