@@ -37,12 +37,17 @@ public final class Context {
     }
 
     public void defineVariable(final String name, final VariableDefinition value) {
+        if (name.equals("_")) return;
         if (variables.putIfAbsent(name, value) != null) {
             Register.throwException("Declaring an already declared variable: " + name);
         }
     }
 
     public Object getVariable(final String name) {
+        if (name.equals("_")) {
+            Register.throwException("Getting a unnamed variable (_)");
+            return VOID_OBJECT;
+        }
         final ObjectType result = variables.get(name);
         if (result == null && parentContext != null) {
             return parentContext.getVariable(name);

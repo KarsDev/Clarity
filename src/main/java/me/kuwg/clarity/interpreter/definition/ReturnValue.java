@@ -10,4 +10,9 @@ public class ReturnValue {
     public final Object getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        throw new IllegalStateException("You cannot print a Returning Object Value");
+    }
 }

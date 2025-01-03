@@ -550,8 +550,7 @@ public final class Interpreter {
         return result;
     }
 
-    public static boolean
-    checkTypes(final String typeDefault, final Object result) {
+    public static boolean checkTypes(final String typeDefault, final Object result) {
         final boolean match;
         if (typeDefault == null) {
             match = true;
@@ -579,7 +578,8 @@ public final class Interpreter {
 
     private Object interpretReturnNode(final ReturnNode node, final Context context) {
         final Object ret = interpretNode(node.getValue(), context);
-        return ret instanceof ReturnValue ? ret : new ReturnValue(ret);
+        if (ret instanceof ReturnValue) return except("Return in return", node.getLine());
+        return new ReturnValue(ret);
     }
 
     private Object interpretClassInstantiation(final ClassInstantiationNode node, final Context context) {
@@ -1710,7 +1710,7 @@ public final class Interpreter {
     private Double parseDoubleOrThrow(final String expression,final  NativeCastNode node) {
         try {
             return Double.parseDouble(expression);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             except("Could not cast to float", node.getLine());
             return 0D;
         }
@@ -1724,6 +1724,7 @@ public final class Interpreter {
                 try {
                     return (long) Tokenizer.processNumber(expression.split("\\.")[0]);
                 } catch (final NumberFormatException ignored) {
+                    except("Could not cast to int", node.getLine());
                 }
             }
             except("Could not cast to int", node.getLine());
