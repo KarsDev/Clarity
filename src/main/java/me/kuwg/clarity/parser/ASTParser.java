@@ -1419,7 +1419,7 @@ public final class ASTParser {
 
     private ASTNode parseLambdaDeclaration() {
         final int line = matchIfConsume(KEYWORD, "lambda").getLine(); // consume "lambda"
-        final List<ParameterNode> params = parseParameters();
+        final List<ParameterNode> params = match(OPERATOR, "(") ? parseParameters() : new ArrayList<>();
         consume(OPERATOR, "->");
         final BlockNode block = parseBlock();
         return new LambdaBlockNode(params, block).setLine(line);
