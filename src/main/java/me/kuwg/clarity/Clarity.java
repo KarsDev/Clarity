@@ -10,6 +10,7 @@ import me.kuwg.clarity.installer.sys.ClarityInstaller;
 import me.kuwg.clarity.installer.sys.OS;
 import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.parser.ASTParser;
+import me.kuwg.clarity.parser.Keyword;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.Tokenizer;
 
@@ -64,6 +65,34 @@ public final class Clarity {
                     return;
                 }
 
+                if (args[0].equalsIgnoreCase("-help") || args[0].equalsIgnoreCase("help")) {
+                    if (args.length == 2) {
+                        final String arg2 = args[1].toLowerCase();
+                        if (arg2.equals("keyword") || arg2.equals("keywords")) {
+                            verboseLog("Verbose: Printing keywords.");
+                            System.out.println(getKeywords());
+                            return;
+                        }
+
+                        verboseLog("Verbose: Printing kw information.");
+                        final Keyword kw = Keyword.keyword(arg2);
+
+                        if (kw == null) {
+                            System.err.println("Keyword not found: " + arg2);
+                            return;
+                        }
+
+                        for (final String usg : kw.usage()) {
+                            System.out.println(usg);
+                        }
+
+                        return;
+                    }
+                    verboseLog("Verbose: Displaying usage information.");
+                    printUsage();
+                    return;
+                }
+
                 if (args.length == 1) {
                     switch (args[0].toLowerCase()) {
                         case "install":
@@ -86,11 +115,6 @@ public final class Clarity {
                             } else {
                                 System.out.println("Running JAR file not found.");
                             }
-                            return;
-                        case "help":
-                        case "-help":
-                            verboseLog("Verbose: Displaying usage information.");
-                            printUsage();
                             return;
                         case "memory":
                             verboseLog("Verbose: Printing heap size recommendations.");
@@ -148,6 +172,19 @@ public final class Clarity {
                 }
             }
 
+            private StringBuilder getKeywords() {
+                StringBuilder s = new StringBuilder("Keywords: ");
+                Keyword[] values = Keyword.values();
+                for (int i = 0, valuesLength = values.length; i < valuesLength; i++) {
+                    final Keyword value = values[i];
+                    s.append(value.toString());
+                    if (i < valuesLength - 1) {
+                        s.append(", ");
+                    }
+                }
+                return s;
+            }
+
             private void verboseLog(final String message) {
                 if (INFORMATION.getOption("verbose")) {
                     System.out.println(message);
@@ -179,16 +216,16 @@ public final class Clarity {
 
     private static void printUsage() {
         System.out.println("Usage:");
-        System.out.println("  interpret <source.clr>                     - Interpret and run the source file");
-        System.out.println("  run <compiled.cclr>                        - Interpret the compiled source file");
-        System.out.println("  compile <source.clr> [output.cclr]        - Compile the source file to AST format");
-        System.out.println("  test <source.clr>                          - Compile the source file to clarity IR");
-        System.out.println("  test <source.clr> [output.cclr]           - Interpret, run, and then compile the source file");
+        System.out.println("  interpret <source.clr>                      - Interpret and run the source file");
+        System.out.println("  run <compiled.cclr>                         - Interpret the compiled source file");
+        System.out.println("  compile <source.clr> [output.cclr]          - Compile the source file to AST format");
+        System.out.println("  test <source.clr>                           - Compile the source file to clarity IR");
+        System.out.println("  test <source.clr> [output.cclr]             - Interpret, run, and then compile the source file");
         System.out.println("  install                                     - Install Clarity");
         System.out.println("  install <module-name>                       - Install a specific module");
         System.out.println("  os                                          - Display current operating system info");
         System.out.println("  size                                        - Display size of the running JAR file");
-        System.out.println("  help | -help                                - Display this help message");
+        System.out.println("  help | -help [value]                        - Display this help message");
         System.out.println("  ast                                         - Display AST information");
     }
 
