@@ -286,6 +286,10 @@ public final class ASTParser {
             Register.throwException("Void variables are not supported: " + name, line);
         }
 
+        if (isAsync) {
+            Register.throwException("Async variables are not supported: " + name, line);
+        }
+
         final ASTNode value = matchAndConsume(OPERATOR, "=") ? parseExpression() : new VoidNode().setLine(line);
         return new VariableDeclarationNode(name, typeDefault.equals("var") ? null : typeDefault, value, isConst, isStatic, isLocal).setLine(lookahead(-1).getLine());
     }
