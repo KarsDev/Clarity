@@ -47,8 +47,7 @@ import static me.kuwg.clarity.interpreter.definition.BreakValue.BREAK;
 import static me.kuwg.clarity.interpreter.definition.ContinueValue.CONTINUE;
 import static me.kuwg.clarity.library.objects.VoidObject.VOID_OBJECT;
 import static me.kuwg.clarity.library.objects.VoidObject.VOID_RETURN;
-import static me.kuwg.clarity.register.Register.RegisterElementType.FUNDEL;
-import static me.kuwg.clarity.register.Register.RegisterElementType.VARDEL;
+import static me.kuwg.clarity.register.Register.RegisterElementType.*;
 
 public final class Interpreter {
 
@@ -467,7 +466,7 @@ public final class Interpreter {
             }
             params.add(added);
         }
-        Register.register(new Register.RegisterElement(RegisterElementType.NATIVECALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(NATIVECALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
         return nmh.callDefault(node.getName(), params);
     }
 
@@ -531,7 +530,7 @@ public final class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
         }
 
-        Register.register(new Register.RegisterElement(RegisterElementType.FUNCALL, ((VariableReferenceNode) node.getCaller()).getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(FUNCALL, ((VariableReferenceNode) node.getCaller()).getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
 
         if (definition.isAsync()) {
             new Thread(() -> interpretBlock(definition.getBlock(), functionContext), "async:" + functionName).start();
@@ -585,7 +584,7 @@ public final class Interpreter {
     private Object interpretClassInstantiation(final ClassInstantiationNode node, final Context context) {
         final String name = node.getName();
 
-        Register.register(new Register.RegisterElement(RegisterElementType.CLASSINST, name, node.getLine(), context.getCurrentClassName() == null ? "none" : context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(CLASSINST, name, node.getLine(), context.getCurrentClassName() == null ? "none" : context.getCurrentClassName()));
 
         context.setCurrentClassName(name);
 
@@ -732,7 +731,7 @@ public final class Interpreter {
         final Context functionContext = new Context(context);
         defineFunctionParameters(functionContext, definition, params);
 
-        Register.register(new Register.RegisterElement(RegisterElementType.STATICCALL, node.getCalled() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(STATICCALL, node.getCalled() + getParams(params), node.getLine(), context.getCurrentClassName()));
         final Object result = interpretBlock(definition.getBlock(), functionContext);
         context.setCurrentClassName(null);
         context.setCurrentFunctionName(null);
@@ -767,7 +766,7 @@ public final class Interpreter {
             return except("Accessing a local function: " + definition.getName(), node.getLine());
         }
 
-        Register.register(new Register.RegisterElement(RegisterElementType.STATICCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(STATICCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
         final Object result = interpretBlock(definition.getBlock(), functionContext);
         context.setCurrentClassName(null);
         context.setCurrentFunctionName(null);
@@ -805,7 +804,7 @@ public final class Interpreter {
             return VOID_OBJECT;
         }
 
-        Register.register(new Register.RegisterElement(RegisterElementType.ARRAYCALL, fn + getParams(params), raw.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(ARRAYCALL, fn + getParams(params), raw.getLine(), context.getCurrentClassName()));
 
 
         switch (fn) {
@@ -873,12 +872,12 @@ public final class Interpreter {
             ObjectFunctionCallNode node = (ObjectFunctionCallNode) raw;
             fn = node.getCalled();
             params = getFunctionParameters(node, context, -1);
-            Register.register(new Register.RegisterElement(RegisterElementType.STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+            Register.register(new Register.RegisterElement(STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
         } else if (raw instanceof MemberFunctionCallNode) {
             MemberFunctionCallNode node = (MemberFunctionCallNode) raw;
             fn = node.getName();
             params = getFunctionParameters(node, context, -1);
-            Register.register(new Register.RegisterElement(RegisterElementType.STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+            Register.register(new Register.RegisterElement(STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
         } else {
             return VOID_OBJECT;
         }
@@ -966,7 +965,7 @@ public final class Interpreter {
             return VOID_OBJECT;
         }
 
-        Register.register(new Register.RegisterElement(RegisterElementType.LAMBDACALL, fn + getParams(params), raw.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(LAMBDACALL, fn + getParams(params), raw.getLine(), context.getCurrentClassName()));
 
         if (!fn.equals("run")) {
             Register.throwException("Illegal function in lambda context: " + fn + " with params " + getParams(params), raw.getLine());
@@ -1018,7 +1017,7 @@ public final class Interpreter {
 
         defineFunctionParameters(functionContext, definition, params);
 
-        Register.register(new Register.RegisterElement(RegisterElementType.NATIVECALL, node.getCalled() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(NATIVECALL, node.getCalled() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
         context.setCurrentClassName(null);
@@ -1128,7 +1127,7 @@ public final class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
         }
 
-        Register.register(new Register.RegisterElement(RegisterElementType.LOCALCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(LOCALCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
 
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
@@ -1246,7 +1245,7 @@ public final class Interpreter {
         final List<Object> params = new ArrayList<>();
         for (final ASTNode param : node.getParams()) params.add(interpretNode(param, context));
 
-        Register.register(new Register.RegisterElement(RegisterElementType.NATIVECALL,  node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(NATIVECALL,  node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
 
 
         final ObjectType rawCurrent =  context.getClass(context.getCurrentClassName());
@@ -1818,7 +1817,7 @@ public final class Interpreter {
 
             defineFunctionParameters(functionContext, definition, params);
 
-            Register.register(new Register.RegisterElement(RegisterElementType.NATIVECALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
+            Register.register(new Register.RegisterElement(NATIVECALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
 
             final String preName = context.getCurrentClassName();
 
@@ -1883,7 +1882,7 @@ public final class Interpreter {
 
         defineFunctionParameters(functionContext, definition, params);
 
-        Register.register(new Register.RegisterElement(RegisterElementType.FUNCALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(FUNCALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
 
         context.setCurrentClassName(objectName);
         context.setCurrentFunctionName(node.getName());
@@ -2064,7 +2063,7 @@ public final class Interpreter {
     }
 
     private Object interpretStaticBlock(final StaticBlockNode node, final Context context) {
-        Register.register(new Register.RegisterElement(RegisterElementType.STATICINIT, "<static-block>", node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(STATICINIT, "<static-block>", node.getLine(), context.getCurrentClassName()));
         if (node.isAsync()) {
             new Thread(() -> {
                 if (!(interpretBlock(node.getBlock(), context) instanceof VoidObject)) {
