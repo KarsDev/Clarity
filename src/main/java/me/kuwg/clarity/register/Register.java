@@ -221,37 +221,37 @@ public final class Register {
         public String toString() {
             switch (getType()) {
                 case FUNCALL: {
-                    return "function call " + getParam() + formatClass() + formatLine();
+                    return "function call " + format();
                 }
                 case ARRAYCALL: {
-                    return "array function " + getParam() + formatClass() + formatLine();
+                    return "array function " + format();
                 }
                 case NATIVECALL: {
-                    return "native call " + getParam() + formatClass() + formatLine();
+                    return "native call " + format();
                 }
                 case CLASSINST: {
-                    return "init class " + getParam() + formatClass() + formatLine();
+                    return "init class " + format();
                 }
                 case LOCALCALL: {
-                    return "local function call " + getParam() + formatClass() + formatLine();
+                    return "local function call " + format();
                 }
                 case STATICCALL: {
-                    return "static call " + getParam() + formatClass() + formatLine();
+                    return "static call " + format();
                 }
                 case STRINGCALL: {
-                    return "string function " + getParam() + formatClass() + formatLine();
+                    return "string function " + format();
                 }
                 case STATICINIT: {
-                    return "static initialization: " + getParam() + formatClass() + formatLine();
+                    return "static initialization: " + format();
                 }
                 case LAMBDACALL: {
-                    return "lambda function " + getParam() + formatLine() + formatLine();
+                    return "lambda function " +format();
                 }
                 case VARDEL: {
-                    return "variable delete " + getParam() + formatClass() + formatLine();
+                    return "variable delete " + format();
                 }
                 case FUNDEL: {
-                    return "function delete " + getParam() + formatClass() + formatLine();
+                    return "function delete " + format();
                 }
                 default: {
                     throwException("Unsupported register element type: " + getType());
@@ -276,6 +276,15 @@ public final class Register {
          */
         private String formatLine() {
             return getLine() == 0 ? " (unknown line)" : ", at line: " + getLine();
+        }
+
+        /**
+         * Formats with all the required elements.
+         *
+         * @return A formatted string with parameter, class and line.
+         */
+        private String format() {
+            return getParam() + formatClass() + formatLine();
         }
     }
 }
