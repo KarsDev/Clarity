@@ -1391,7 +1391,14 @@ public final class ASTParser {
     private ASTNode parseAsyncDeclaration() {
         final int line = consume().getLine(); // consume "async"
 
+        if (match(KEYWORD)) {
+            undo();
+            return parseFunctionDeclaration();
+        }
+
         final ASTNode name;
+
+
 
         if (matchAndConsume(OPERATOR, "->")) {
             name = parseExpression();
