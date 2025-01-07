@@ -229,6 +229,8 @@ public final class Clarity {
         System.out.println("  size                                        - Display size of the running JAR file");
         System.out.println("  help | -help [value]                        - Display this help message");
         System.out.println("  ast                                         - Display AST information");
+        System.out.println("  keyword | keywords                          - Display all the Clarity keywords");
+        System.out.println("  <keyword>                                   - Display info about a single keyword");
     }
 
     private static void printInputFileRequired() {
