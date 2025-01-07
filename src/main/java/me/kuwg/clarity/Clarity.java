@@ -71,14 +71,16 @@ public final class Clarity {
                         if (arg2.equals("keyword") || arg2.equals("keywords")) {
                             verboseLog("Verbose: Printing keywords.");
                             System.out.println(getKeywords());
+                            System.out.println("Use \"help <keyword>\" for information about a keyword.");
                             return;
                         }
 
-                        verboseLog("Verbose: Printing kw information.");
+                        verboseLog("Verbose: Printing keyword information.");
                         final Keyword kw = Keyword.keyword(arg2);
 
                         if (kw == null) {
                             System.err.println("Keyword not found: " + arg2);
+                            System.err.println("Use \"help keywords\" to list all keywords.");
                             return;
                         }
 
