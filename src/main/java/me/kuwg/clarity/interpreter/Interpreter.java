@@ -29,6 +29,8 @@ import me.kuwg.clarity.ast.nodes.variable.assign.VariableReassignmentNode;
 import me.kuwg.clarity.ast.nodes.variable.get.LocalVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.ObjectVariableReferenceNode;
 import me.kuwg.clarity.ast.nodes.variable.get.VariableReferenceNode;
+import me.kuwg.clarity.debug.MethodTimingRegistry;
+import me.kuwg.clarity.debug.PerformanceHistogram;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.*;
 import me.kuwg.clarity.library.objects.ObjectType;
@@ -115,6 +117,8 @@ public final class Interpreter {
 
         checkExemption();
 
+        if (Clarity.SPEED_INFO) PerformanceHistogram.showHistogram();
+
         return ret;
     }
 
@@ -149,6 +153,8 @@ public final class Interpreter {
     }
 
     public Object interpretNode(final ASTNode node, final Context context) {
+        if (Clarity.SPEED_INFO) return interpretNodeTiming(node, context);
+
         checkExemption();
 
         if (node instanceof BlockNode) return interpretBlock((BlockNode) node, context);
@@ -204,6 +210,172 @@ public final class Interpreter {
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
+
+    private Object interpretNodeTiming(final ASTNode node, final Context context) {
+        checkExemption();
+
+        final long start = System.nanoTime(); // Start timing
+        String methodName = "?";
+        try {
+            if (node instanceof BlockNode) {
+                methodName = "interpretBlock";
+                return interpretBlock((BlockNode) node, context);
+            } else if (node instanceof VariableDeclarationNode) {
+                methodName = "interpretVariableDeclaration";
+                return interpretVariableDeclaration((VariableDeclarationNode) node, context);
+            } else if (node instanceof BinaryExpressionNode) {
+                methodName = "interpretBinaryExpressionNode";
+                return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
+            } else if (node instanceof DefaultNativeFunctionCallNode) {
+                methodName = "interpretDefaultNativeFunctionCall";
+                return interpretDefaultNativeFunctionCall((DefaultNativeFunctionCallNode) node, context);
+            } else if (node instanceof IntegerNode) {
+                methodName = "IntegerNode.getValue";
+                return ((IntegerNode) node).getValue();
+            } else if (node instanceof DecimalNode) {
+                methodName = "DecimalNode.getValue";
+                return ((DecimalNode) node).getValue();
+            } else if (node instanceof LiteralNode) {
+                methodName = "LiteralNode.getValue";
+                return ((LiteralNode) node).getValue();
+            } else if (node instanceof VariableReferenceNode) {
+                methodName = "interpretVariableReference";
+                return interpretVariableReference((VariableReferenceNode) node, context);
+            } else if (node instanceof FunctionCallNode) {
+                methodName = "interpretFunctionCall";
+                return interpretFunctionCall((FunctionCallNode) node, context);
+            } else if (node instanceof ReturnNode) {
+                methodName = "interpretReturnNode";
+                return interpretReturnNode((ReturnNode) node, context);
+            } else if (node instanceof ClassInstantiationNode) {
+                methodName = "interpretClassInstantiation";
+                return interpretClassInstantiation((ClassInstantiationNode) node, context);
+            } else if (node instanceof FunctionDeclarationNode) {
+                methodName = "interpretFunctionDeclaration";
+                return interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
+            } else if (node instanceof ClassDeclarationNode) {
+                methodName = "interpretClassDeclaration";
+                return interpretClassDeclaration((ClassDeclarationNode) node, context);
+            } else if (node instanceof VariableReassignmentNode) {
+                methodName = "interpretVariableReassignment";
+                return interpretVariableReassignment((VariableReassignmentNode) node, context);
+            } else if (node instanceof ObjectFunctionCallNode) {
+                methodName = "interpretObjectFunctionCall";
+                return interpretObjectFunctionCall((ObjectFunctionCallNode) node, context);
+            } else if (node instanceof LocalVariableReferenceNode) {
+                methodName = "interpretLocalVariableReferenceNode";
+                return interpretLocalVariableReferenceNode((LocalVariableReferenceNode) node, context);
+            } else if (node instanceof LocalFunctionCallNode) {
+                methodName = "interpretLocalFunctionCallNode";
+                return interpretLocalFunctionCallNode((LocalFunctionCallNode) node, context);
+            } else if (node instanceof ObjectVariableReferenceNode) {
+                methodName = "interpretObjectVariableReference";
+                return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
+            } else if (node instanceof ObjectVariableReassignmentNode) {
+                methodName = "interpretObjectVariableReassignment";
+                return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
+            } else if (node instanceof VoidNode) {
+                methodName = "VOID_RETURN";
+                return VOID_RETURN;
+            } else if (node instanceof PackagedNativeFunctionCallNode) {
+                methodName = "interpretPackagedNativeFunctionCall";
+                return interpretPackagedNativeFunctionCall((PackagedNativeFunctionCallNode) node, context);
+            } else if (node instanceof ArrayNode) {
+                methodName = "interpretArray";
+                return interpretArray((ArrayNode) node, context);
+            } else if (node instanceof IfNode) {
+                methodName = "interpretIf";
+                return interpretIf((IfNode) node, context);
+            } else if (node instanceof NullNode) {
+                methodName = "NullNode";
+                return null;
+            } else if (node instanceof ForNode) {
+                methodName = "interpretFor";
+                return interpretFor((ForNode) node, context);
+            } else if (node instanceof WhileNode) {
+                methodName = "interpretWhile";
+                return interpretWhile((WhileNode) node, context);
+            } else if (node instanceof BooleanNode) {
+                methodName = "BooleanNode.getValue";
+                return ((BooleanNode) node).getValue();
+            } else if (node instanceof ForeachNode) {
+                methodName = "interpretForeach";
+                return interpretForeach((ForeachNode) node, context);
+            } else if (node instanceof ReflectedNativeFunctionDeclaration) {
+                methodName = "interpretReflectedNativeFunctionDeclaration";
+                return interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) node, context);
+            } else if (node instanceof NativeClassDeclarationNode) {
+                methodName = "interpretNativeClassDeclaration";
+                return interpretNativeClassDeclaration((NativeClassDeclarationNode) node, context);
+            } else if (node instanceof LocalVariableReassignmentNode) {
+                methodName = "interpretLocalVariableReassignment";
+                return interpretLocalVariableReassignment((LocalVariableReassignmentNode) node, context);
+            } else if (node instanceof SelectNode) {
+                methodName = "interpretSelect";
+                return interpretSelect((SelectNode) node, context);
+            } else if (node instanceof BreakNode) {
+                methodName = "BREAK";
+                return BREAK;
+            } else if (node instanceof ContinueNode) {
+                methodName = "CONTINUE";
+                return CONTINUE;
+            } else if (node instanceof NativeCastNode) {
+                methodName = "interpretNativeCast";
+                return interpretNativeCast((NativeCastNode) node, context);
+            } else if (node instanceof ConditionedReturnNode) {
+                methodName = "interpretConditionedReturn";
+                return interpretConditionedReturn((ConditionedReturnNode) node, context);
+            } else if (node instanceof MemberFunctionCallNode) {
+                methodName = "interpretMemberFunctionCall";
+                return interpretMemberFunctionCall((MemberFunctionCallNode) node, context);
+            } else if (node instanceof AssertNode) {
+                methodName = "interpretAssert";
+                return interpretAssert((AssertNode) node, context);
+            } else if (node instanceof IsNode) {
+                methodName = "interpretIs";
+                return interpretIs((IsNode) node, context);
+            } else if (node instanceof EnumDeclarationNode) {
+                methodName = "interpretEnumDeclaration";
+                return interpretEnumDeclaration((EnumDeclarationNode) node, context);
+            } else if (node instanceof AnnotationDeclarationNode) {
+                methodName = "interpretAnnotationDeclaration";
+                return interpretAnnotationDeclaration((AnnotationDeclarationNode) node, context);
+            } else if (node instanceof AnnotationUseNode) {
+                methodName = "interpretAnnotationUse";
+                return interpretAnnotationUse((AnnotationUseNode) node, context);
+            } else if (node instanceof AsyncBlockNode) {
+                methodName = "interpretAsyncBlock";
+                return interpretAsyncBlock((AsyncBlockNode) node, context);
+            } else if (node instanceof RaiseNode) {
+                methodName = "interpretRaise";
+                return interpretRaise((RaiseNode) node, context);
+            } else if (node instanceof TryExceptBlock) {
+                methodName = "interpretTryExcept";
+                return interpretTryExcept((TryExceptBlock) node, context);
+            } else if (node instanceof StaticBlockNode) {
+                methodName = "interpretStaticBlock";
+                return interpretStaticBlock((StaticBlockNode) node, context);
+            } else if (node instanceof TernaryOperatorNode) {
+                methodName = "interpretTernaryOperator";
+                return interpretTernaryOperator((TernaryOperatorNode) node, context);
+            } else if (node instanceof LambdaBlockNode) {
+                methodName = "interpretLambdaBlock";
+                return interpretLambdaBlock((LambdaBlockNode) node, context);
+            } else if (node instanceof DeleteVariableNode) {
+                methodName = "interpretDeleteVariable";
+                return interpretDeleteVariable((DeleteVariableNode) node, context);
+            } else if (node instanceof DeleteFunctionNode) {
+                methodName = "interpretDeleteFunction";
+                return interpretDeleteFunction((DeleteFunctionNode) node, context);
+            } else {
+                methodName = "Unknown";
+            }
+            throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
+        } finally {
+            MethodTimingRegistry.register(methodName, System.nanoTime() - start);
+        }
+    }
+
     public Object interpretBlock(final BlockNode block, final Context context) {
         if (block == null || block.isEmpty()) {
             return VOID_OBJECT;

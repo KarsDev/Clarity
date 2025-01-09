@@ -23,10 +23,12 @@ import java.util.List;
 public final class Clarity {
 
     public static final String USER_HOME = System.getProperty("user.home");
+
     public static Interpreter INTERPRETER;
     public static ClarityRunningInformation INFORMATION;
     public static String[] ARGS;
     public static int ASC; // argument skip count
+    public static boolean SPEED_INFO;
 
     private static int EXIT_CODE = 0;
 
@@ -49,6 +51,9 @@ public final class Clarity {
             }
 
             void exec() throws IOException {
+
+                SPEED_INFO = INFORMATION.getOption("speedinfo");
+
                 if (INFORMATION.getOption("startinfo")) {
                     long startTime = ManagementFactory.getRuntimeMXBean().getStartTime();
                     long currentTime = System.currentTimeMillis();
