@@ -654,8 +654,7 @@ public final class Interpreter {
         final String functionName = ((VariableReferenceNode) node.getCaller()).getName();
         context.setCurrentFunctionName(functionName);
 
-        final List<Object> params = new ArrayList<>();
-
+        final List<Object> params = new ArrayList<>(node.getParams().size());
         for (final ASTNode param : node.getParams()) {
             final Object returned = interpretNode(param, context);
             if (returned == VOID_OBJECT) {
@@ -664,12 +663,11 @@ public final class Interpreter {
             params.add(returned);
         }
 
-        final ObjectType type = context.getFunction(functionName, node.getParams().size());
+        final ObjectType type = context.getFunction(functionName, params.size());
         final FunctionDefinition definition;
 
         if (type == VOID_OBJECT) {
-            final ObjectType clazz = context.getClass(context.getCurrentClassName());
-
+            ObjectType clazz = context.getClass(context.getCurrentClassName());
             if (clazz == null) {
                 final Object maybeLambda = context.getVariable(functionName);
                 if (maybeLambda instanceof LambdaObject) {
@@ -677,32 +675,31 @@ public final class Interpreter {
                 }
                 return except("Calling a function that doesn't exist: " + functionName + getParams(params), node.getLine());
             }
-            final FunctionDefinition rawStaticFun = ((ClassDefinition) clazz).getStaticFunction(functionName, node.getParams().size());
-            if (rawStaticFun != null) {
-                definition = rawStaticFun;
-            } else {
+
+            definition = ((ClassDefinition) clazz).getStaticFunction(functionName, params.size());
+            if (definition == null) {
                 return except("Calling a function that doesn't exist: " + functionName + getParams(params), node.getLine());
             }
-        } else definition = (FunctionDefinition) type;
+        } else {
+            definition = (FunctionDefinition) type;
+        }
 
-        if (params.size() > definition.getParams().size()) {
-            return except("Passing more parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
-        } else if (params.size() < definition.getParams().size()) {
-            return except("Passing less parameters than needed (" + params.size() + ", " + definition.getParams().size() + ") in fn: " + functionName, node.getLine());
+        final int paramSize = params.size();
+        final int expectedSize = definition.getParams().size();
+
+        if (paramSize != expectedSize) {
+            return except("Incorrect parameter count (" + paramSize + " vs " + expectedSize + ") in fn: " + functionName, node.getLine());
         }
 
         final Context functionContext = new Context(context.parentContext());
-        List<String> definitionParams = definition.getParams();
+        final List<String> definitionParams = definition.getParams();
         for (int i = 0; i < definitionParams.size(); i++) {
             final String name = definitionParams.get(i);
             final Object value = params.get(i);
-            if (value instanceof VoidObject) {
-                except("Passing void as parameter", node.getLine());
-            }
             functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
         }
 
-        Register.register(new Register.RegisterElement(FUNCALL, ((VariableReferenceNode) node.getCaller()).getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(new Register.RegisterElement(FUNCALL, functionName + getParams(params), node.getLine(), context.getCurrentClassName()));
 
         if (definition.isAsync()) {
             new Thread(() -> interpretBlock(definition.getBlock(), functionContext), "async:" + functionName).start();
@@ -711,10 +708,8 @@ public final class Interpreter {
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
 
-        final String typeDefault = definition.getTypeDefault();
-
-        if (checkTypes(typeDefault, result)) {
-            except("Unexpected return: " + result.getClass().getSimpleName() + ", expected " + typeDefault, node.getLine());
+        if (checkTypes(definition.getTypeDefault(), result)) {
+            except("Unexpected return: " + (result != null ? result.getClass().getSimpleName() : "null") + ", expected " + definition.getTypeDefault(), node.getLine());
         }
 
         context.setCurrentFunctionName(null);
@@ -744,6 +739,7 @@ public final class Interpreter {
         } else {
             throw new RuntimeException("unsupported return for type default: " + (result != null ? result.getClass().getSimpleName() : null));
         }
+
         return !match;
     }
 
