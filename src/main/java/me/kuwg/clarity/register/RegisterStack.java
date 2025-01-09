@@ -1,7 +1,5 @@
 package me.kuwg.clarity.register;
 
-import java.util.Arrays;
-
 /**
  * A stack data structure for storing {@link Register.RegisterElement} objects, with a fixed maximum size.
  * <p>
@@ -23,9 +21,9 @@ public final class RegisterStack {
     private final int maxSize;
 
     /**
-     * The current size of the stack (i.e., the number of elements currently stored).
+     * The index of the top element in the stack.
      */
-    private int size = 0;
+    private int top = -1;
 
     /**
      * Constructs a new {@code RegisterStack} with the specified maximum size.
@@ -50,13 +48,9 @@ public final class RegisterStack {
      * @param element The {@link Register.RegisterElement} to push onto the stack.
      */
     public void push(final Register.RegisterElement element) {
-        if (size >= maxSize) {
-            // Shift all elements one position to the left to remove the oldest element
-            System.arraycopy(elements, 1, elements, 0, maxSize - 1);
-            elements[maxSize - 1] = element;
-        } else {
-            elements[size++] = element;
-        }
+        // If the stack is full, the next element will overwrite the oldest one
+        top = (top + 1) % maxSize;  // Move top pointer in a circular way
+        elements[top] = element;
     }
 
     /**
@@ -70,9 +64,11 @@ public final class RegisterStack {
      * @throws IllegalStateException if the stack is empty.
      */
     public Register.RegisterElement pop() {
-        if (size == 0) throw new IllegalStateException("Stack is empty");
-        final Register.RegisterElement element = elements[--size];
-        elements[size] = null;  // Clear the reference for garbage collection
+        if (top == -1) throw new IllegalStateException("Stack is empty");
+
+        Register.RegisterElement element = elements[top];
+        elements[top] = null;  // Clear reference for garbage collection
+        top = (top - 1 + maxSize) % maxSize;  // Move top pointer circularly
         return element;
     }
 
@@ -82,7 +78,7 @@ public final class RegisterStack {
      * @return {@code true} if the stack is empty, {@code false} otherwise.
      */
     public boolean isEmpty() {
-        return size == 0;
+        return top == -1;
     }
 
     /**
@@ -91,7 +87,7 @@ public final class RegisterStack {
      * @return The number of elements currently in the stack.
      */
     public int size() {
-        return size;
+        return top + 1;
     }
 
     /**
@@ -105,6 +101,7 @@ public final class RegisterStack {
      * @return The {@link Register.RegisterElement} at the specified index.
      */
     public Register.RegisterElement at(final int i) {
+        if (i < 0 || i > top) throw new IndexOutOfBoundsException("Index out of bounds");
         return elements[i];
     }
 
@@ -118,6 +115,14 @@ public final class RegisterStack {
      */
     @Override
     public String toString() {
-        return Arrays.toString(Arrays.copyOf(elements, size));
+        if (top == -1) return "[]";  // Return empty string if stack is empty
+
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i <= top; i++) {
+            sb.append(elements[i]);
+            if (i < top) sb.append(", ");
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }
