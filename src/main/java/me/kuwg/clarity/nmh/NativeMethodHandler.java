@@ -9,10 +9,7 @@ import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.nmh.natives.abstracts.PackagedNativeFunction;
 import me.kuwg.clarity.nmh.natives.impl.pkg.date.NowDateNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.error.ThrowNative;
-import me.kuwg.clarity.nmh.natives.impl.pkg.system.CheckNativeTypeNative;
-import me.kuwg.clarity.nmh.natives.impl.pkg.system.CurrentThreadNameNative;
-import me.kuwg.clarity.nmh.natives.impl.pkg.system.ExitNative;
-import me.kuwg.clarity.nmh.natives.impl.pkg.system.LoadNativeLibraryNative;
+import me.kuwg.clarity.nmh.natives.impl.pkg.system.*;
 import me.kuwg.clarity.nmh.natives.impl.pkg.util.CreateListNative;
 import me.kuwg.clarity.register.Register;
 
@@ -79,6 +76,7 @@ public final class NativeMethodHandler {
         registerPackagedFunction(new CheckNativeTypeNative());
         registerPackagedFunction(new LoadNativeLibraryNative());
         registerPackagedFunction(new CurrentThreadNameNative());
+        registerPackagedFunction(new LoadJarNativeLibraryNative());
 
         // required accessor: Date
         registerPackagedFunction(new NowDateNative());

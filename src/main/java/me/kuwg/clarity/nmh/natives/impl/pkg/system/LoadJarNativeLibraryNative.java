@@ -1,6 +1,5 @@
 package me.kuwg.clarity.nmh.natives.impl.pkg.system;
 
-import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.library.ClarityNativeLibrary;
 import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.register.Register;
@@ -10,12 +9,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
 
-public class LoadNativeLibraryNative extends SystemNativeFunction<Integer> {
-
-    private static final File LIBRARIES = new File(Clarity.USER_HOME + "/Clarity/libraries/");
-
-    public LoadNativeLibraryNative() {
-        super("loadNativeLibrary");
+public class LoadJarNativeLibraryNative extends SystemNativeFunction<Integer> {
+    public LoadJarNativeLibraryNative() {
+        super("loadJarNativeLibrary");
     }
 
     @Override
@@ -28,7 +24,7 @@ public class LoadNativeLibraryNative extends SystemNativeFunction<Integer> {
         final String path = (String) params.get(0);
 
         try {
-            final File jarFile = new File(LIBRARIES,  path + ".jar");
+            final File jarFile = new File(path + ".jar");
 
             if (!jarFile.exists()) {
                 return 4;
