@@ -709,7 +709,7 @@ public final class Interpreter {
         final Object result = interpretBlock(definition.getBlock(), functionContext);
 
         if (checkTypes(definition.getTypeDefault(), result)) {
-            except("Unexpected return: " + (result != null ? result.getClass().getSimpleName() : "null") + ", expected " + definition.getTypeDefault(), node.getLine());
+            return except("Unexpected return: " + getAsCLRStr(result) + ", expected " + definition.getTypeDefault(), node.getLine());
         }
 
         context.setCurrentFunctionName(null);
@@ -1425,8 +1425,12 @@ public final class Interpreter {
         final ClassDefinition current = (ClassDefinition) rawCurrent;
 
         if (current.isNative()) {
-            return nmh.callClassNative(current.getName(), node.getName(), params, context);
+            // return value cuz single block!
+            final Object ret = nmh.callClassNative(current.getName(), node.getName(), params, context);
+            if (ret == VOID_OBJECT) return ret;
+            return new ReturnValue(ret);
         }
+
         return nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params);
     }
 
