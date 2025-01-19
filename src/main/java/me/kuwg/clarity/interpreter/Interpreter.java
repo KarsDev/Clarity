@@ -432,6 +432,8 @@ public final class Interpreter {
 
         final boolean sys = "System".equals(name);
 
+        final String ocn = context.getCurrentClassName();
+
         context.setCurrentClassName(name);
 
         final ClassDefinition inheritedClass;
@@ -499,7 +501,7 @@ public final class Interpreter {
             }
         }
 
-        context.setCurrentClassName(null);
+        context.setCurrentClassName(ocn);
 
         return VOID_OBJECT;
     }
@@ -754,6 +756,8 @@ public final class Interpreter {
 
         Register.register(new Register.RegisterElement(CLASSINST, name, node.getLine(), context.getCurrentClassName() == null ? "none" : context.getCurrentClassName()));
 
+        final String ocn = context.getCurrentClassName();
+
         context.setCurrentClassName(name);
 
         // Create a new context for the class instantiation
@@ -804,7 +808,7 @@ public final class Interpreter {
             return except("Return in class body", node.getLine());
         }
         final ClassObject result = interpretConstructors(inheritedObject, definition.getConstructors(), params, classContext, name);
-        context.setCurrentClassName(null);
+        context.setCurrentClassName(ocn);
         return result;
     }
 
@@ -885,7 +889,10 @@ public final class Interpreter {
 
         final ClassDefinition classDefinition = (ClassDefinition) rawDefinition;
 
+        final String ocn = context.getCurrentClassName();
+
         context.setCurrentClassName(classDefinition.getName());
+
         context.setCurrentFunctionName(node.getCalled());
 
         final FunctionDefinition definition = classDefinition.getStaticFunction(node.getCalled(), node.getParams().size());
@@ -901,7 +908,7 @@ public final class Interpreter {
 
         Register.register(new Register.RegisterElement(STATICCALL, node.getCalled() + getParams(params), node.getLine(), context.getCurrentClassName()));
         final Object result = interpretBlock(definition.getBlock(), functionContext);
-        context.setCurrentClassName(null);
+        context.setCurrentClassName(ocn);
         context.setCurrentFunctionName(null);
         return result;
     }
@@ -915,6 +922,8 @@ public final class Interpreter {
         final ClassDefinition classDefinition = (ClassDefinition) rawDefinition;
 
         final String preName = context.getCurrentClassName();
+
+        final String ocn = context.getCurrentClassName();
 
         context.setCurrentClassName(classDefinition.getName());
         context.setCurrentFunctionName(node.getName());
@@ -936,7 +945,7 @@ public final class Interpreter {
 
         Register.register(new Register.RegisterElement(STATICCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
         final Object result = interpretBlock(definition.getBlock(), functionContext);
-        context.setCurrentClassName(null);
+        context.setCurrentClassName(ocn);
         context.setCurrentFunctionName(null);
         return result;
     }
@@ -1163,6 +1172,8 @@ public final class Interpreter {
 
 
     private Object handleInstanceMethodCall(final ObjectFunctionCallNode node, final Context context, final ClassObject classObject) {
+        final String ocn = context.getCurrentClassName();
+
         context.setCurrentClassName(classObject.getName());
         context.setCurrentFunctionName(node.getCalled());
 
@@ -1188,7 +1199,7 @@ public final class Interpreter {
         Register.register(new Register.RegisterElement(NATIVECALL, node.getCalled() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
-        context.setCurrentClassName(null);
+        context.setCurrentClassName(ocn);
         context.setCurrentFunctionName(null);
         return result;
     }
@@ -1430,7 +1441,6 @@ public final class Interpreter {
             if (ret == VOID_OBJECT) return ret;
             return new ReturnValue(ret);
         }
-
         return nmh.callPackaged(node.getPackage(), node.getName(), context.getCurrentClassName(), params);
     }
 
@@ -1699,6 +1709,8 @@ public final class Interpreter {
 
     private Object interpretNativeClassDeclaration(final NativeClassDeclarationNode node, final Context context) {
         final String name = node.getName();
+        final String ocn = context.getCurrentClassName();
+
         context.setCurrentClassName(name);
 
         final ClassDefinition inheritedClass = (ClassDefinition) context.getClass(node.getInheritedClass()); // no need to check, native class do not have errors (we hope)
@@ -1732,7 +1744,7 @@ public final class Interpreter {
             }
         });
 
-        context.setCurrentClassName(null);
+        context.setCurrentClassName(ocn);
         return VOID_OBJECT;
     }
 
@@ -1992,6 +2004,7 @@ public final class Interpreter {
             Register.register(new Register.RegisterElement(NATIVECALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
 
             final String preName = context.getCurrentClassName();
+            final String ocn = context.getCurrentClassName();
 
             context.setCurrentClassName(classDefinition.getName());
             context.setCurrentFunctionName(node.getName());
@@ -2004,7 +2017,7 @@ public final class Interpreter {
 
 
 
-            context.setCurrentClassName(null);
+            context.setCurrentClassName(ocn);
             context.setCurrentFunctionName(null);
             return result;
         }
@@ -2054,13 +2067,14 @@ public final class Interpreter {
         defineFunctionParameters(functionContext, definition, params);
 
         Register.register(new Register.RegisterElement(FUNCALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
+        final String ocn = context.getCurrentClassName();
 
         context.setCurrentClassName(objectName);
         context.setCurrentFunctionName(node.getName());
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
 
-        context.setCurrentClassName(null);
+        context.setCurrentClassName(ocn);
         context.setCurrentFunctionName(null);
 
         return result;
