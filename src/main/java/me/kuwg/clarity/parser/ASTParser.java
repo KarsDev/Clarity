@@ -203,6 +203,8 @@ public final class ASTParser {
                 return parseLambdaDeclaration();
             case DELETE:
                 return parseDeleteDeclaration();
+            case INCLUDE:
+                return parseSingleInclude();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -1070,6 +1072,75 @@ public final class ASTParser {
         }
 
         return Collections.singletonList(included);
+    }
+
+    private IncludeNode parseSingleInclude() {
+        consume(); // consume "include"
+        boolean isNative = matchAndConsume(KEYWORD, "native");
+        boolean isCompiled = matchAndConsume(KEYWORD, "compiled");
+
+        if (isNative && isCompiled) {
+            throw new UnsupportedOperationException("Native compiled files do not exist, at line " + current().getLine());
+        }
+
+        final int line = current().getLine();
+        final String path = parseIncludePath(isCompiled);
+
+        if (isCompiled) {
+            final File file;
+            if (matchAndConsume(VARIABLE, "from")) {
+                file = new File(Clarity.USER_HOME + "/Clarity/libraries/" + consume(VARIABLE).getValue(), path);
+            } else {
+                file = new File(path);
+            }
+
+            ASTLoader loader = new ASTLoader(file);
+            try {
+                return new IncludeNode(path, loader.load().getRoot(), false).setLine(line);
+            } catch (IOException e) {
+                System.err.println("Failed to load the AST:");
+                if (e instanceof NoSuchFileException) {
+                    System.err.println("No such file: " + file);
+                }
+                System.exit(1);
+            }
+        }
+
+        if (isNative) {
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("natives/" + path);
+            if (inputStream == null) {
+                try {
+                    throw new IOException("Native library not found: '" + path + "'");
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            String content;
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                content = reader.lines().collect(Collectors.joining("\n"));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+            final List<Token> tokens = Tokenizer.tokenize(content);
+            final ASTParser parser = new ASTParser(original, path, tokens);
+            final AST ast = parser.parse();
+            return new IncludeNode(path, ast.getRoot(), true).setLine(line);
+        }
+
+        final String content;
+        try {
+            content = new String(Files.readAllBytes(new File(new File(original).getParentFile(), path).toPath()), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        final List<Token> tokens = Tokenizer.tokenize(content);
+        final ASTParser parser = new ASTParser(original, path, tokens);
+        final AST ast = parser.parse();
+
+        return new IncludeNode(path, ast.getRoot(), false).setLine(line);
     }
 
     private String parseIncludePath(final boolean compiled) {

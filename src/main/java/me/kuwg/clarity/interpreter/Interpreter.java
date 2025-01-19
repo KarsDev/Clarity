@@ -2035,7 +2035,6 @@ public final class Interpreter {
         final ObjectType rawDefinition = object.getContext().getFunction(node.getName(), node.getParams().size());
 
         if (!(rawDefinition instanceof FunctionDefinition)) {
-            System.out.println(object.getContext());
             return except("Instance function not found: " + objectName + "#" + node.getName() + getParams(getFunctionParameters(node, context, node.getParams().size())), node.getLine());
         }
 
