@@ -94,7 +94,7 @@ public final class Interpreter {
 
             Register.register(new Register.RegisterElement(RegisterElementType.FUNCALL, "main", main.getLine(), "none"));
 
-            final Object result = interpretNode(main.getBlock(), new Context(general));
+            final Object result = interpretNode(main.getBlock(), general);
 
 
             if (result == VOID_OBJECT || result == VOID_RETURN || result == null) {
