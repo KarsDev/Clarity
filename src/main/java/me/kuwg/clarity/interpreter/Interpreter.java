@@ -626,6 +626,7 @@ public final class Interpreter {
             case "&": return left & right;
             case "|": return left | right;
             case "^^": return left ^ right;
+            case ">>>": return left >>> right;
             default: return except("Unsupported operator for integers: " + operator, line);
         }
     }

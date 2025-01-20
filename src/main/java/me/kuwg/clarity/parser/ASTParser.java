@@ -472,6 +472,7 @@ public final class ASTParser {
                 return 7;
             case "<<":
             case ">>":
+            case ">>>":
                 return 8;
             case "+":
             case "-":
