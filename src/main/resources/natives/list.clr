@@ -169,7 +169,7 @@ class List {
      #/
     fn toArray() {
         const var size = elements.size()
-        const var arr0 = [size]
+        const var arr0 = native.array(size)
         for var i = 0, i < size, i = i + 1 {
             arr0.set(i, elements.at(i))
         }
@@ -229,5 +229,33 @@ class List {
             }
         }
         return false
+    }
+
+    /##
+     # Function: forEach
+     #
+     # Description:
+     # Iterates over each element in the list and applies the provided lambda function to it.
+     #
+     # Parameters:
+     # - lmd: A lambda function that accepts a single argument. It is invoked for each not-null element in the list.
+     #
+     # Returns:
+     # - None.
+     #
+     # Example:
+     # list.forEach(lambda(item) -> {
+     #     native.println("Item=" + item)
+     # })
+     #/
+    fn forEach(lambda lmd) {
+        const var size = elements.size()
+        for var i = 0, i < size, i = i + 1 {
+            const var item = elements.at(i)
+
+            if item != null {
+                lmd.run(item)
+            }
+        }
     }
 }
