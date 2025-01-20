@@ -77,6 +77,7 @@ public final class NativeMethodHandler {
         registerPackagedFunction(new LoadNativeLibraryNative());
         registerPackagedFunction(new CurrentThreadNameNative());
         registerPackagedFunction(new LoadJarNativeLibraryNative());
+        registerPackagedFunction(new IdentityHashCodeNative());
 
         // required accessor: Date
         registerPackagedFunction(new NowDateNative());

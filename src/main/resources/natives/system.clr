@@ -212,4 +212,34 @@ const class System {
     static fn loadJarNativeLibrary(lib) -> int {
         return native.system.loadJarNativeLibrary(lib)
     }
+
+    /##
+    # Method: identityHashCode
+    #
+    # Description:
+    # Computes and returns the identity hash code of the specified object. This is a
+    # native method that internally calls Java's `System.identityHashCode(Object obj)`.
+    # The identity hash code is based on the memory address of the object and is independent
+    # of any custom `hashCode` implementation.
+    #
+    # Parameters:
+    # - obj: The object whose identity hash code is to be determined. If `null`, the behavior
+    #   depends on the native Java implementation (typically returns 0).
+    #
+    # Returns:
+    # - An integer representing the identity hash code of the object.
+    #
+    # Notes:
+    # - This function relies on Java's `System.identityHashCode` and provides the same behavior.
+    # - The identity hash code is not guaranteed to be unique across different objects.
+    # - This method is useful for cases where you need a hash code based on the object's
+    #   memory reference rather than its logical state.
+    #
+    # Example:
+    # System.identityHashCode(myObject)  // Returns the identity hash code of `myObject`.
+    #
+    #/
+    static fn identityHashCode(obj) -> int {
+        return System.identityHashCode(obj)
+    }
 }
