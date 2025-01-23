@@ -1374,10 +1374,25 @@ public final class Interpreter {
     }
 
     private Object interpretObjectVariableReassignment(final ObjectVariableReassignmentNode node, final Context context) {
-        final Object callerObjectRaw = context.getVariable(node.getCaller());
+        final Object callerObjectRaw;
+
+        if (node.getCaller() instanceof VariableReferenceNode) {
+            callerObjectRaw = context.getVariable(((VariableReferenceNode) node.getCaller()).getName());
+        } else {
+            final ObjectVariableReferenceNode ref = (ObjectVariableReferenceNode) node.getCaller();
+            final Object callerObjRaw = interpretNode(ref.getCaller(), context);
+            if (!(callerObjRaw instanceof ClassObject)) {
+                return except("Expected Class Object, instead found " + getAsCLRStr(callerObjRaw), node.getLine());
+            }
+            final ClassObject callerClass = (ClassObject) callerObjRaw;
+            callerObjectRaw = callerClass.getContext().getVariable(node.getCalled());
+        }
 
         if (callerObjectRaw instanceof VoidObject) {
-            final ObjectType type = context.getClass(node.getCaller());
+            if (!(node.getCaller() instanceof VariableReferenceNode)) {
+                return except("Insufficient condition for static variable reassignment (as non-static)", node.getLine());
+            }
+            final ObjectType type = context.getClass(((VariableReferenceNode) node.getCaller()).getName());
             if (type instanceof ClassDefinition) {
                 final ClassDefinition obj = (ClassDefinition) type;
                 final VariableDefinition variable = obj.staticVariables.get(node.getCalled());

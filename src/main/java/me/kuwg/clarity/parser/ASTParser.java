@@ -545,25 +545,23 @@ public final class ASTParser {
                         } else {
                             undo();
 
-                            String called = consume(VARIABLE).getValue();
+                            String called;
 
-                            while (matchAndConsume(OPERATOR, ".")) {
-                                node = new ObjectVariableReferenceNode(node, called).setLine(current().getLine());
+                            do {
                                 called = consume(VARIABLE).getValue();
-                            }
-
-                            if (!match(OPERATOR)) {
-                                return node.setLine(line);
-                            }
+                                node = new ObjectVariableReferenceNode(node, called).setLine(current().getLine());
+                            } while (matchAndConsume(OPERATOR, "."));
 
                             switch (current().getValue()) {
                                 case "=": {
                                     consume();
                                     final ASTNode expression = parseExpression();
-                                    if (node instanceof ObjectVariableReferenceNode)
-                                        return new VariableReassignmentNode(((ObjectVariableReferenceNode) node).getCalled(), expression).setLine(line);
-                                    else
+                                    if (node instanceof ObjectVariableReferenceNode) {
+                                        final ObjectVariableReferenceNode ref = (ObjectVariableReferenceNode) node;
+                                        return new ObjectVariableReassignmentNode(ref.getCaller(), ref.getCalled(), expression).setLine(line);
+                                    } else {
                                         return new VariableReassignmentNode(((VariableReferenceNode) node).getName(), expression).setLine(line);
+                                    }
                                 }
                                 case "+=":
                                 case "-=":
@@ -571,48 +569,48 @@ public final class ASTParser {
                                 case "/=":
                                 case "^=":
                                 case "%=": {
+                                    final char v = consume().getValue().charAt(0); // consume op
+
                                     if (node instanceof ObjectVariableReferenceNode) {
-                                        final char v = consume().getValue().charAt(0); // consume op
                                         final ObjectVariableReferenceNode left = (ObjectVariableReferenceNode) node;
                                         return new ObjectVariableReassignmentNode(
-                                                ((VariableReferenceNode) left.getCaller()).getName(),
+                                                left.getCaller(),
                                                 left.getCalled(),
                                                 new BinaryExpressionNode(left, String.valueOf(v), parseExpression())
                                         ).setLine(current().getLine());
-                                    } else if (node instanceof VariableReferenceNode) {
-                                        final char v = consume().getValue().charAt(0); // consume op
+                                    } else {
                                         final VariableReferenceNode left = (VariableReferenceNode) node;
                                         return new ObjectVariableReassignmentNode(
-                                                left.getName(),
+                                                left,
                                                 called,
                                                 new BinaryExpressionNode(new ObjectVariableReferenceNode(new VariableReferenceNode(left.getName()), called), String.valueOf(v), parseExpression())
                                         ).setLine(current().getLine());
                                     }
-                                    break;
                                 }
                                 case "++":
                                 case "--": {
+                                    final char v = consume().getValue().charAt(0); // consume op
+
                                     if (node instanceof ObjectVariableReferenceNode) {
-                                        final char v = consume().getValue().charAt(0); // consume op
                                         final ObjectVariableReferenceNode left = (ObjectVariableReferenceNode) node;
                                         return new ObjectVariableReassignmentNode(
-                                                ((VariableReferenceNode) left.getCaller()).getName(),
+                                                left.getCaller(),
                                                 left.getCalled(),
                                                 new BinaryExpressionNode(left, String.valueOf(v), IntegerNode.ONE)
                                         ).setLine(current().getLine());
-                                    } else if (node instanceof VariableReferenceNode) {
-                                        final char v = consume().getValue().charAt(0); // consume op
+                                    } else {
                                         final VariableReferenceNode left = (VariableReferenceNode) node;
 
                                         return new ObjectVariableReassignmentNode(
-                                                left.getName(),
+                                                left,
                                                 called,
                                                 new BinaryExpressionNode(new ObjectVariableReferenceNode(new VariableReferenceNode(left.getName()), called), String.valueOf(v), IntegerNode.ONE)
                                         ).setLine(current().getLine());
                                     }
-                                    break;
                                 }
                             }
+
+                            return node.setLine(line);
                         }
                     } else if (matchAndConsume(DIVIDER, "(")) {
                         List<ASTNode> params = new ArrayList<>();

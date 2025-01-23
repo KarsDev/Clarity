@@ -7,11 +7,11 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 import java.io.IOException;
 
 public class ObjectVariableReassignmentNode extends ASTNode {
-    private String caller;
+    private ASTNode caller;
     private String called;
     private ASTNode value;
 
-    public ObjectVariableReassignmentNode(final String caller, final String called, final ASTNode value) {
+    public ObjectVariableReassignmentNode(final ASTNode caller, final String called, final ASTNode value) {
         this.caller = caller;
         this.called = called;
         this.value = value;
@@ -20,7 +20,7 @@ public class ObjectVariableReassignmentNode extends ASTNode {
     public ObjectVariableReassignmentNode() {
     }
 
-    public final String getCaller() {
+    public final ASTNode getCaller() {
         return caller;
     }
 
@@ -45,14 +45,14 @@ public class ObjectVariableReassignmentNode extends ASTNode {
 
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
-        out.writeString(caller);
+        out.writeNode(caller);
         out.writeString(called);
         out.writeNode(value);
     }
 
     @Override
     public void load0(final ASTInputStream in) throws IOException {
-        this.caller = in.readString();
+        this.caller = in.readNode();
         this.called = in.readString();
         this.value = in.readNode();
     }
