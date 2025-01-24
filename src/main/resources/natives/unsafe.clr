@@ -1,0 +1,138 @@
+/##
+ # Class: Unsafe
+ #
+ # Description:
+ # The `Unsafe` class provides low-level, memory manipulation methods and primitives. It offers direct memory management,
+ # access to raw memory addresses, and atomic operations. These methods should be used with caution as they
+ # can compromise the safety and stability of the application.
+ #
+ # Notes:
+ # - The methods in this class are native and interact directly with system-level memory.
+ # - Improper use can lead to undefined behavior, memory leaks, or security vulnerabilities.
+ #/
+const native class Unsafe {
+
+    /##
+     # Method: allocateMemory
+     #
+     # Description:
+     # Allocates a block of memory of the specified size and returns its address.
+     #
+     # Parameters:
+     # - size: The size of the memory block to allocate (in bytes).
+     #
+     # Returns:
+     # - An integer representing the memory address of the allocated block.
+     #
+     # Notes:
+     # - The allocated memory is not initialized.
+     # - The caller is responsible for freeing the allocated memory using `freeMemory`.
+     #/
+    static native fn allocateMemory(size) -> int
+
+    /##
+     # Method: freeMemory
+     #
+     # Description:
+     # Frees a previously allocated block of memory.
+     #
+     # Parameters:
+     # - address: The memory address of the block to free.
+     #
+     # Returns:
+     # - void
+     #
+     # Notes:
+     # - The address must be a valid pointer returned by `allocateMemory`.
+     # - Attempting to free memory that was not allocated or already freed may result in undefined behavior.
+     #/
+    static native fn freeMemory(address) -> void
+
+    /##
+     # Method: getInt
+     #
+     # Description:
+     # Reads an integer value from the specified memory address.
+     #
+     # Parameters:
+     # - address: The memory address to read from.
+     #
+     # Returns:
+     # - An integer value stored at the specified address.
+     #/
+    static native fn getInt(address) -> int
+
+    /##
+     # Method: putInt
+     #
+     # Description:
+     # Writes an integer value to the specified memory address.
+     #
+     # Parameters:
+     # - address: The memory address to write to.
+     # - value: The integer value to write.
+     #
+     # Returns:
+     # - void
+     #/
+    static native fn putInt(address, value) -> void
+
+    /##
+     # Method: getBool
+     #
+     # Description:
+     # Reads a boolean value from a memory address.
+     #
+     # Parameters:
+     # - address: The base address.
+     # - value: The boolean value to retrieve.
+     #
+     # Returns:
+     # - A boolean value stored at the specified address.
+     #/
+    static native fn getBool(address) -> bool
+
+    /##
+     # Method: putBool
+     #
+     # Description:
+     # Writes a boolean value to a memory address.
+     #
+     # Parameters:
+     # - address: The base address.
+     # - value: The boolean value to write.
+     #
+     # Returns:
+     # - void
+     #/
+    static native fn putBool(address, value) -> void
+
+    /##
+     # Method: getFloat
+     #
+     # Description:
+     # Reads a float value from a memory address.
+     #
+     # Parameters:
+     # - address: The base address.
+     #
+     # Returns:
+     # - A float value stored at the specified address.
+     #/
+    static native fn getFloat(address) -> float
+
+    /##
+     # Method: putFloat
+     #
+     # Description:
+     # Writes a float value to a memory address.
+     #
+     # Parameters:
+     # - address: The base address.
+     # - value: The float value to write.
+     #
+     # Returns:
+     # - void
+     #/
+    static native fn putFloat(address, value) -> void
+}
