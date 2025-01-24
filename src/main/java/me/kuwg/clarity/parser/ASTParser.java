@@ -511,13 +511,14 @@ public final class ASTParser {
                 } else {
                     final String value = consume(VARIABLE).getValue();
 
-                    valueOf = value.equals("num") ? CastType.NUM : CastType.CLASS.setValue(value);
+                    valueOf = value.equals("num") ? CastType.NUM : new CastType.ClassCastType(value);
                 }
 
                 if (valueOf == null) {
                     Register.throwException("Unknown native type: " + lookahead(-1).getValue());
                     throw new RuntimeException();
                 }
+
                 return new IsNode(left, valueOf).setLine(line);
             }
 

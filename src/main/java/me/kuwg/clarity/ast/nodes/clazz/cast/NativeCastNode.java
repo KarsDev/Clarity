@@ -28,14 +28,14 @@ public class NativeCastNode extends ASTNode {
     @Override
     protected void save0(final ASTOutputStream out) throws IOException {
         out.writeVarInt(type.ordinal());
-        if (type == CastType.CLASS) out.writeString(type.getValue());
+        if (type.isClass()) out.writeString(type.getValue());
         out.writeNode(casted);
     }
 
     @Override
     protected void load0(final ASTInputStream in) throws IOException {
-        this.type = CastType.VALUES[(in.readVarInt())];
-        if (this.type == CastType.CLASS) this.type.setValue(in.readString());
+        this.type = CastType.ofOrdinal((in.readVarInt()));
+        if (this.type.isClass()) this.type.setValue(in.readString());
         this.casted = in.readNode();
     }
 
@@ -46,5 +46,4 @@ public class NativeCastNode extends ASTNode {
     public final ASTNode getCasted() {
         return casted;
     }
-
 }

@@ -51,7 +51,7 @@ public final class ClassObject {
      *
      * @return The name of the class as a String.
      */
-    public final String getName() {
+    public String getName() {
         return name;
     }
 
@@ -60,7 +60,7 @@ public final class ClassObject {
      *
      * @return The inherited ClassObject, or null if no class is inherited.
      */
-    public final ClassObject getInherited() {
+    public ClassObject getInherited() {
         return inherited;
     }
 
@@ -71,7 +71,7 @@ public final class ClassObject {
      *
      * @return The Context object associated with this class.
      */
-    public final Context getContext() {
+    public Context getContext() {
         return context;
     }
 

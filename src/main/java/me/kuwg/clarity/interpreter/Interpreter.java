@@ -45,6 +45,7 @@ import me.kuwg.clarity.token.Tokenizer;
 
 import java.util.*;
 
+import static me.kuwg.clarity.ast.nodes.clazz.cast.CastType.*;
 import static me.kuwg.clarity.interpreter.definition.BreakValue.BREAK;
 import static me.kuwg.clarity.interpreter.definition.ContinueValue.CONTINUE;
 import static me.kuwg.clarity.library.objects.VoidObject.VOID_OBJECT;
@@ -1805,20 +1806,18 @@ public final class Interpreter {
             return node.getType() == CastType.FLOAT ? 0d : 0;
         }
 
-        switch (node.getType()) {
-            case STR:
-                return castToStr(expression, node);
-            case FLOAT:
-                return castToFloat(expression, node);
-            case INT:
-                return castToInt(expression, node);
-            case ARR:
-                return castToArr(expression, node);
-            case BOOL:
-                return castToBool(expression, node);
-            default:
-                return except("Unknown cast: " + node.getType().name().toLowerCase(), node.getLine());
+        if (node.getType().equals(STR)) {
+            return castToStr(expression, node);
+        } else if (node.getType().equals(FLOAT)) {
+            return castToFloat(expression, node);
+        } else if (node.getType().equals(INT)) {
+            return castToInt(expression, node);
+        } else if (node.getType().equals(ARR)) {
+            return castToArr(expression, node);
+        } else if (node.getType().equals(BOOL)) {
+            return castToBool(expression, node);
         }
+        return except("Unknown cast: " + node.getType().getClass().getSimpleName(), node.getLine());
     }
 
     private String castToStr(final Object expr, final NativeCastNode node) {
