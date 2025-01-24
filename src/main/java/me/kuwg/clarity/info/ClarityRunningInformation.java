@@ -18,10 +18,11 @@ public final class ClarityRunningInformation {
      * true and false argument representations.
      */
     private static final Option[] OPTIONS = {
-            load("optimize", true, "noopt", "opt"),              // optimization option
-            load("verbose", false, "noverb", "verb"),            // verbose option
-            load("startinfo", false, "nsinfo", "sinfo"),         // starting info
-            load("speedinfo", false, "nspeedinfo", "speedinfo")  // speed info
+            load("optimize", true, "noopt", "opt"),              // optimization (deprecated)
+            load("verbose", false, "noverb", "verb"),            // verbose (log)
+            load("startinfo", false, "nsinfo", "sinfo"),         // starting info (jvm startup times)
+            load("speedinfo", false, "nspeedinfo", "speedinfo"), // speed info (graph)
+            load("defaults", true, "nodef", "def"),              // defaults natives (include)
 
     };
 

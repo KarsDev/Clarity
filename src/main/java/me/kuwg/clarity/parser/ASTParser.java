@@ -75,8 +75,12 @@ public final class ASTParser {
             final ASTParser parser = new ASTParser(original, "DEFAULTS.clr", tokens);
             final AST ast = parser.parse();
 
-            DEFAULT_NODE = new IncludeNode("DEFAULTS.clr", ast.getRoot(), false);
-            includes.add(DEFAULT_NODE);
+            if (Clarity.INFORMATION.getOption("defaults")) {
+                DEFAULT_NODE = new IncludeNode("DEFAULTS.clr", ast.getRoot(), false);
+                includes.add(DEFAULT_NODE);
+            } else {
+                DEFAULT_NODE = null;
+            }
         } catch (final IOException e) {
             throw new RuntimeException("Failed to include DEFAULTS.clr", e);
         }
