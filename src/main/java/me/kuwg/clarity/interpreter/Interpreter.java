@@ -2151,7 +2151,11 @@ public final class Interpreter {
         }
 
         if (!apply) {
-            return except(String.valueOf(interpretNode(node.getOrElse(), context)), node.getLine());
+            final Object value = interpretNode(node.getOrElse(), context);
+            if (value instanceof VoidObject) {
+                return except("Assert result can not be void!", node.getLine());
+            }
+            return except(String.valueOf(value), node.getLine());
         }
 
         return VOID_OBJECT;
