@@ -6,6 +6,7 @@ import me.kuwg.clarity.library.natives.ClarityNativeClass;
 import me.kuwg.clarity.library.natives.ClarityNativeFunction;
 import me.kuwg.clarity.library.natives.ClarityPackagedNativeFunction;
 import me.kuwg.clarity.library.objects.VoidObject;
+import me.kuwg.clarity.nmh.natives.abstracts.DefaultNativeFunction;
 import me.kuwg.clarity.nmh.natives.abstracts.PackagedNativeFunction;
 import me.kuwg.clarity.nmh.natives.impl.pkg.date.NowDateNative;
 import me.kuwg.clarity.nmh.natives.impl.pkg.error.ThrowNative;
@@ -160,6 +161,18 @@ public final class NativeMethodHandler {
 
         Register.throwException("Class native function " + name + "(" + objectsToClassesString(params) + ") not found or not accessible.");
         return VoidObject.VOID_OBJECT;
+    }
+
+    public boolean help(final String name) {
+        final ClarityNativeFunction<?> cnf = defaultFunctions.get(name);
+
+        if (!(cnf instanceof DefaultNativeFunction<?>)) return false;
+
+        System.out.println("Printing help for default native function " + name);
+
+        ((DefaultNativeFunction<?>) cnf).help();
+
+        return true;
     }
 
     /**

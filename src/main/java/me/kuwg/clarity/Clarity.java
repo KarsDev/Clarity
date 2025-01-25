@@ -9,6 +9,7 @@ import me.kuwg.clarity.installer.modules.ClarityModuleInstaller;
 import me.kuwg.clarity.installer.sys.ClarityInstaller;
 import me.kuwg.clarity.installer.sys.OS;
 import me.kuwg.clarity.interpreter.Interpreter;
+import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.parser.ASTParser;
 import me.kuwg.clarity.parser.Keyword;
 import me.kuwg.clarity.token.Token;
@@ -84,7 +85,12 @@ public final class Clarity {
                         final Keyword kw = Keyword.keyword(arg2);
 
                         if (kw == null) {
-                            System.err.println("Keyword not found: " + arg2);
+
+                            final NativeMethodHandler nmh = new NativeMethodHandler();
+
+                            if (nmh.help(arg2)) return;
+
+                            System.err.println("Keyword or native function not found: " + arg2);
                             System.err.println("Use \"help keywords\" to list all keywords.");
                             return;
                         }

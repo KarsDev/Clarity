@@ -3,7 +3,9 @@ package me.kuwg.clarity.nmh.natives.impl.def;
 import me.kuwg.clarity.nmh.natives.abstracts.DefaultNativeFunction;
 import me.kuwg.clarity.register.Register;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ArrayNative extends DefaultNativeFunction<Object[]> {
     public ArrayNative() {
@@ -23,5 +25,14 @@ public class ArrayNative extends DefaultNativeFunction<Object[]> {
     @Override
     protected boolean applies0(final List<Object> params) {
         return params.size() == 1 && params.get(0) instanceof Long;
+    }
+
+    @Override
+    public void help() {
+        final Map<String, String> map = new HashMap<>();
+
+        map.put("size", "int");
+
+        System.out.println(formatHelp(map));
     }
 }

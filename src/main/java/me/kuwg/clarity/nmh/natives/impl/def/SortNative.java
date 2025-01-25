@@ -4,7 +4,9 @@ import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.nmh.natives.abstracts.DefaultNativeFunction;
 import me.kuwg.clarity.register.Register;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SortNative extends DefaultNativeFunction<VoidObject> {
 
@@ -62,5 +64,14 @@ public class SortNative extends DefaultNativeFunction<VoidObject> {
             arr[i] = arr[j];
             arr[j] = temp;
         }
+    }
+
+    @Override
+    public void help() {
+        final Map<String, String> map = new HashMap<>();
+
+        map.put("array", "arr");
+
+        System.out.println(formatHelp(map));
     }
 }

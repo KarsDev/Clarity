@@ -3,7 +3,9 @@ package me.kuwg.clarity.nmh.natives.impl.def;
 import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.nmh.natives.abstracts.DefaultNativeFunction;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PrintlnNative extends DefaultNativeFunction<VoidObject> {
 
@@ -49,5 +51,14 @@ public class PrintlnNative extends DefaultNativeFunction<VoidObject> {
         }
         s.append("]");
         return s.toString();
+    }
+
+    @Override
+    public void help() {
+        final Map<String, String> map = new HashMap<>();
+
+        map.put("obj...", "var");
+
+        System.out.println(formatHelp(map));
     }
 }

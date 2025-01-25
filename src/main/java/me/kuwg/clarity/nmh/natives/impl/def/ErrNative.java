@@ -4,7 +4,9 @@ import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.nmh.natives.abstracts.DefaultNativeFunction;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ErrNative extends DefaultNativeFunction<VoidObject> {
 
@@ -26,5 +28,15 @@ public class ErrNative extends DefaultNativeFunction<VoidObject> {
     private String paramsToString(final List<Object> params) {
         final String line = params.get(0) instanceof Object[] ? Arrays.toString((Object[]) params.get(0)) : params.get(0).toString();
         return params.size() == 1 ? line : (boolean) params.get(1) ? line + "\n" : line;
+    }
+
+    @Override
+    public void help() {
+        final Map<String, String> map = new HashMap<>();
+
+        map.put("value", "var");
+        map.put("[newLine]", "bool");
+
+        System.out.println(formatHelp(map));
     }
 }

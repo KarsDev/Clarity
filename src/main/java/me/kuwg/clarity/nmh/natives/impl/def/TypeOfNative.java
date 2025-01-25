@@ -6,7 +6,9 @@ import me.kuwg.clarity.library.objects.types.LambdaObject;
 import me.kuwg.clarity.nmh.natives.abstracts.DefaultNativeFunction;
 import me.kuwg.clarity.register.Register;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TypeOfNative extends DefaultNativeFunction<String> {
     public TypeOfNative() {
@@ -42,5 +44,14 @@ public class TypeOfNative extends DefaultNativeFunction<String> {
     @Override
     protected boolean applies0(final List<Object> list) {
         return list.size() == 1;
+    }
+
+    @Override
+    public void help() {
+        final Map<String, String> map = new HashMap<>();
+
+        map.put("obj", "var");
+
+        System.out.println(formatHelp(map));
     }
 }

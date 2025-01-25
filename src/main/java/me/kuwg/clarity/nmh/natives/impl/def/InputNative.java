@@ -2,7 +2,9 @@ package me.kuwg.clarity.nmh.natives.impl.def;
 
 import me.kuwg.clarity.nmh.natives.abstracts.DefaultNativeFunction;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class InputNative extends DefaultNativeFunction<String> {
@@ -30,5 +32,14 @@ public class InputNative extends DefaultNativeFunction<String> {
     @Override
     protected void finalize()  {
         scanner.close();
+    }
+
+    @Override
+    public void help() {
+        final Map<String, String> map = new HashMap<>();
+
+        map.put("[print]", "var");
+
+        System.out.println(formatHelp(map));
     }
 }
