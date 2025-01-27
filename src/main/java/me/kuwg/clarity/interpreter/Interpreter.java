@@ -44,6 +44,8 @@ import me.kuwg.clarity.register.Register.RegisterElementType;
 import me.kuwg.clarity.token.Tokenizer;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import static me.kuwg.clarity.ast.nodes.clazz.cast.CastType.*;
 import static me.kuwg.clarity.interpreter.definition.BreakValue.BREAK;
@@ -208,6 +210,8 @@ public final class Interpreter {
         else if (node instanceof LambdaBlockNode) return interpretLambdaBlock((LambdaBlockNode) node, context);
         else if (node instanceof DeleteVariableNode) return interpretDeleteVariable((DeleteVariableNode) node, context);
         else if (node instanceof DeleteFunctionNode) return interpretDeleteFunction((DeleteFunctionNode) node, context);
+        else if (node instanceof AwaitBlockNode) return interpretAwaitBlock((AwaitBlockNode) node, context);
+        else if (node instanceof AwaitFunctionCallNode) return interpretAwaitFunctionCall((AwaitFunctionCallNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -2312,6 +2316,82 @@ public final class Interpreter {
 
         context.deleteFunction(node.getName(), ((Number) params).intValue());
         return VOID_OBJECT;
+    }
+
+    private Object interpretAwaitBlock(final AwaitBlockNode node, final Context context) {
+        final CompletableFuture<Object> future = new CompletableFuture<>();
+        new Thread(() -> future.complete(interpretBlock(node.getBlock(), context)), "async-block-?").start();
+        try {
+            return future.get();
+        } catch (final InterruptedException | ExecutionException e) {
+            return except("Unknown exception in await block", node.getLine());
+        }
+    }
+
+    private Object interpretAwaitFunctionCall(final AwaitFunctionCallNode node, final Context context) {
+        final FunctionCallNode call = node.getFunctionCallNode();
+
+        final String functionName = ((VariableReferenceNode) call.getCaller()).getName();
+        context.setCurrentFunctionName(functionName);
+
+        final List<Object> params = new ArrayList<>(call.getParams().size());
+        for (final ASTNode param : call.getParams()) {
+            final Object returned = interpretNode(param, context);
+            if (returned == VOID_OBJECT) {
+                return except("Passing void as a parameter function: " + param.getClass().getSimpleName() + ", fn: " + functionName, call.getLine());
+            }
+            params.add(returned);
+        }
+
+        final ObjectType type = context.getFunction(functionName, params.size());
+        final FunctionDefinition definition;
+
+        if (type == VOID_OBJECT) {
+            return except("Calling a function that doesn't exist: " + functionName + getParams(params) + ", please remember that lambdas are NOT supported here", call.getLine());
+        }
+
+        definition = (FunctionDefinition) type;
+
+
+        final int paramSize = params.size();
+        final int expectedSize = definition.getParams().size();
+
+        if (paramSize != expectedSize) {
+            return except("Incorrect parameter count (" + paramSize + " vs " + expectedSize + ") in fn: " + functionName, call.getLine());
+        }
+
+        final Context functionContext = new Context(context.parentContext());
+        final List<String> definitionParams = definition.getParams();
+        for (int i = 0; i < definitionParams.size(); i++) {
+            final String name = definitionParams.get(i);
+            final Object value = params.get(i);
+            functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
+        }
+
+        Register.register(new Register.RegisterElement(FUNCALL, functionName + getParams(params), call.getLine(), context.getCurrentClassName()));
+
+        final Object result;
+
+        if (definition.isAsync()) {
+            final CompletableFuture<Object> future = new CompletableFuture<>();
+            new Thread(() -> future.complete(interpretBlock(definition.getBlock(), functionContext)), "async:" + functionName).start();
+            try {
+                result = future.get();
+            } catch (final InterruptedException | ExecutionException e) {
+                return except("Unknown error while handling await function.", node.getLine());
+            }
+        } else {
+            result = interpretBlock(definition.getBlock(), functionContext);
+        }
+
+
+
+        if (checkTypes(definition.getTypeDefault(), result)) {
+            return except("Unexpected return: " + getAsCLRStr(result) + ", expected " + definition.getTypeDefault(), call.getLine());
+        }
+
+        context.setCurrentFunctionName(null);
+        return result;
     }
 
     /*

@@ -374,6 +374,17 @@ public enum Keyword {
             };
         }
     },
+    AWAIT {
+        @Override
+        public String[] usage() {
+            return new String[] {
+                    format("await <function>", "Pauses execution until the asynchronous function completes and returns a result."),
+                    format("await -> <block>", "Waits for the asynchronous execution of a block of code."),
+
+            };
+        }
+    },
+
 
     ;
 

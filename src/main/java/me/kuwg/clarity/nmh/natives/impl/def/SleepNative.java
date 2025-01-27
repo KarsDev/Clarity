@@ -3,7 +3,9 @@ package me.kuwg.clarity.nmh.natives.impl.def;
 import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.nmh.natives.abstracts.DefaultNativeFunction;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SleepNative extends DefaultNativeFunction<VoidObject> {
     public SleepNative() {
@@ -23,5 +25,14 @@ public class SleepNative extends DefaultNativeFunction<VoidObject> {
     @Override
     protected boolean applies0(final List<Object> list) {
         return list.size() == 1 && list.get(0) instanceof Long;
+    }
+
+    @Override
+    public void help() {
+        final Map<String, String> map = new HashMap<>();
+
+        map.put("time", "int");
+
+        System.out.println(formatHelp(map));
     }
 }

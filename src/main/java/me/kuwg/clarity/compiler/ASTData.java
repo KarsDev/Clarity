@@ -54,6 +54,7 @@ public final class ASTData {
         registerNode(AsyncBlockNode.class, 0x105);
         registerNode(RaiseNode.class, 0x106);
         registerNode(StaticBlockNode.class, 0x107);
+        registerNode(AwaitBlockNode.class, 0x0108);
 
         // Expression (0x200)
         registerNode(BinaryExpressionNode.class, 0x200);
@@ -69,6 +70,7 @@ public final class ASTData {
         registerNode(PackagedNativeFunctionCallNode.class, 0x307);
         registerNode(ReflectedNativeFunctionDeclaration.class, 0x308);
         registerNode(MemberFunctionCallNode.class, 0x309);
+        registerNode(AwaitFunctionCallNode.class, 0x310);
 
         // Variable (0x400)
         registerNode(VariableDeclarationNode.class, 0x400);

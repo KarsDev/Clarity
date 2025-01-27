@@ -13,6 +13,7 @@ import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
+import me.kuwg.clarity.ast.nodes.function.call.AwaitFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.call.DefaultNativeFunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.call.FunctionCallNode;
 import me.kuwg.clarity.ast.nodes.function.call.PackagedNativeFunctionCallNode;
@@ -209,6 +210,8 @@ public final class ASTParser {
                 return parseDeleteDeclaration();
             case INCLUDE:
                 return parseSingleInclude();
+            case AWAIT:
+                return parseAwaitDeclaration();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -1477,8 +1480,6 @@ public final class ASTParser {
 
         final ASTNode name;
 
-
-
         if (matchAndConsume(OPERATOR, "->")) {
             name = parseExpression();
         } else {
@@ -1516,7 +1517,7 @@ public final class ASTParser {
     }
 
     private ASTNode parseDeleteDeclaration() {
-        final int line = consume(KEYWORD, "delete").getLine(); // "consume "delete"
+        final int line = consume().getLine(); // "consume "delete"
 
         final String name = consume(VARIABLE).getValue();
 
@@ -1527,6 +1528,24 @@ public final class ASTParser {
         }
 
         return new DeleteVariableNode(name).setLine(line);
+    }
+
+    private ASTNode parseAwaitDeclaration() {
+        final int line = consume().getLine();
+
+        if (matchAndConsume(OPERATOR, "->")) {
+            final BlockNode block = parseBlock();
+            return new AwaitBlockNode(block).setLine(line);
+        }
+
+        final ASTNode node = parsePrimary();
+
+        if (!(node instanceof FunctionCallNode)) {
+            Register.throwException("Expected function call after await. No member function calls are supported.");
+            throw new RuntimeException();
+        }
+
+        return new AwaitFunctionCallNode((FunctionCallNode) node);
     }
 
     /*

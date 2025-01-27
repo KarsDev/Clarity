@@ -6,7 +6,7 @@ public enum TokenType {
     COMMENT("//[^\r\n]*|/#.*?#/"),
     NEWLINE("\r\n|\n|\r"),
     WHITESPACE("\\s+"),
-    KEYWORD("\\b(class|var|constructor|local|fn|native|if|else|return|new|void|include|static|const|compiled|null|for|while|select|when|default|break|continue|float|int|inherits|assert|is|arr|str|enum|bool|async|raise|try|except|lambda|delete)\\b"),
+    KEYWORD("\\b(class|var|constructor|local|fn|native|if|else|return|new|void|include|static|const|compiled|null|for|while|select|when|default|break|continue|float|int|inherits|assert|is|arr|str|enum|bool|async|raise|try|except|lambda|delete|await)\\b"),
     BOOLEAN("\\b(true|false)\\b"),
     STRING("\"(\\\\.|[^\"\\\\])*\"|'(\\\\.|[^'\\\\])*'"),
     OPERATOR("\\^\\=|\\-\\>|\\^\\^|\\|\\||>>>|<<|>>|\\+\\+|--|[@+\\-*/%=<>!]=?|==|\\.\\.\\.|\\.|&&|\\?|:|\\^|&|\\|"),
