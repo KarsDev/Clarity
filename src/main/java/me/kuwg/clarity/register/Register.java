@@ -19,10 +19,13 @@ public final class Register {
     /**
      * Registers a new {@link RegisterElement} into the register stack.
      *
-     * @param element The element to be registered.
+     * @param type The element type.
+     * @param param The element parameter.
+     * @param line The current node line.
+     * @param currentClass The current context class.
      */
-    public static void register(final RegisterElement element) {
-        stack.push(element);
+    public static void register(final RegisterElementType type, final String param, final int line, final String currentClass) {
+        stack.push(new RegisterElement(type, param, line, currentClass));
     }
 
     /**

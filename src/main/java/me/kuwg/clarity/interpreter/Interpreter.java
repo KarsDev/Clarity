@@ -95,7 +95,7 @@ public final class Interpreter {
 
         if (main != null) {
 
-            Register.register(new Register.RegisterElement(RegisterElementType.FUNCALL, "main", main.getLine(), "none"));
+            Register.register(RegisterElementType.FUNCALL, "main", main.getLine(), "none");
 
             final Object result = interpretNode(main.getBlock(), general);
 
@@ -218,166 +218,112 @@ public final class Interpreter {
 
     private Object interpretNodeTiming(final ASTNode node, final Context context) {
         checkExemption();
-
         final long start = System.nanoTime(); // Start timing
-        String methodName = "?";
         try {
             if (node instanceof BlockNode) {
-                methodName = "interpretBlock";
                 return interpretBlock((BlockNode) node, context);
             } else if (node instanceof VariableDeclarationNode) {
-                methodName = "interpretVariableDeclaration";
                 return interpretVariableDeclaration((VariableDeclarationNode) node, context);
             } else if (node instanceof BinaryExpressionNode) {
-                methodName = "interpretBinaryExpressionNode";
                 return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
             } else if (node instanceof DefaultNativeFunctionCallNode) {
-                methodName = "interpretDefaultNativeFunctionCall";
                 return interpretDefaultNativeFunctionCall((DefaultNativeFunctionCallNode) node, context);
             } else if (node instanceof IntegerNode) {
-                methodName = "IntegerNode.getValue";
                 return ((IntegerNode) node).getValue();
             } else if (node instanceof DecimalNode) {
-                methodName = "DecimalNode.getValue";
                 return ((DecimalNode) node).getValue();
             } else if (node instanceof LiteralNode) {
-                methodName = "LiteralNode.getValue";
                 return ((LiteralNode) node).getValue();
             } else if (node instanceof VariableReferenceNode) {
-                methodName = "interpretVariableReference";
                 return interpretVariableReference((VariableReferenceNode) node, context);
             } else if (node instanceof FunctionCallNode) {
-                methodName = "interpretFunctionCall";
                 return interpretFunctionCall((FunctionCallNode) node, context);
             } else if (node instanceof ReturnNode) {
-                methodName = "interpretReturnNode";
                 return interpretReturnNode((ReturnNode) node, context);
             } else if (node instanceof ClassInstantiationNode) {
-                methodName = "interpretClassInstantiation";
                 return interpretClassInstantiation((ClassInstantiationNode) node, context);
             } else if (node instanceof FunctionDeclarationNode) {
-                methodName = "interpretFunctionDeclaration";
                 return interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
             } else if (node instanceof ClassDeclarationNode) {
-                methodName = "interpretClassDeclaration";
                 return interpretClassDeclaration((ClassDeclarationNode) node, context);
             } else if (node instanceof VariableReassignmentNode) {
-                methodName = "interpretVariableReassignment";
                 return interpretVariableReassignment((VariableReassignmentNode) node, context);
             } else if (node instanceof ObjectFunctionCallNode) {
-                methodName = "interpretObjectFunctionCall";
                 return interpretObjectFunctionCall((ObjectFunctionCallNode) node, context);
             } else if (node instanceof LocalVariableReferenceNode) {
-                methodName = "interpretLocalVariableReferenceNode";
                 return interpretLocalVariableReferenceNode((LocalVariableReferenceNode) node, context);
             } else if (node instanceof LocalFunctionCallNode) {
-                methodName = "interpretLocalFunctionCallNode";
                 return interpretLocalFunctionCallNode((LocalFunctionCallNode) node, context);
             } else if (node instanceof ObjectVariableReferenceNode) {
-                methodName = "interpretObjectVariableReference";
                 return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
             } else if (node instanceof ObjectVariableReassignmentNode) {
-                methodName = "interpretObjectVariableReassignment";
                 return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
             } else if (node instanceof VoidNode) {
-                methodName = "VOID_RETURN";
                 return VOID_RETURN;
             } else if (node instanceof PackagedNativeFunctionCallNode) {
-                methodName = "interpretPackagedNativeFunctionCall";
                 return interpretPackagedNativeFunctionCall((PackagedNativeFunctionCallNode) node, context);
             } else if (node instanceof ArrayNode) {
-                methodName = "interpretArray";
                 return interpretArray((ArrayNode) node, context);
             } else if (node instanceof IfNode) {
-                methodName = "interpretIf";
                 return interpretIf((IfNode) node, context);
             } else if (node instanceof NullNode) {
-                methodName = "NullNode";
                 return null;
             } else if (node instanceof ForNode) {
-                methodName = "interpretFor";
                 return interpretFor((ForNode) node, context);
             } else if (node instanceof WhileNode) {
-                methodName = "interpretWhile";
                 return interpretWhile((WhileNode) node, context);
             } else if (node instanceof BooleanNode) {
-                methodName = "BooleanNode.getValue";
                 return ((BooleanNode) node).getValue();
             } else if (node instanceof ForeachNode) {
-                methodName = "interpretForeach";
                 return interpretForeach((ForeachNode) node, context);
             } else if (node instanceof ReflectedNativeFunctionDeclaration) {
-                methodName = "interpretReflectedNativeFunctionDeclaration";
                 return interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) node, context);
             } else if (node instanceof NativeClassDeclarationNode) {
-                methodName = "interpretNativeClassDeclaration";
                 return interpretNativeClassDeclaration((NativeClassDeclarationNode) node, context);
             } else if (node instanceof LocalVariableReassignmentNode) {
-                methodName = "interpretLocalVariableReassignment";
                 return interpretLocalVariableReassignment((LocalVariableReassignmentNode) node, context);
             } else if (node instanceof SelectNode) {
-                methodName = "interpretSelect";
                 return interpretSelect((SelectNode) node, context);
             } else if (node instanceof BreakNode) {
-                methodName = "BREAK";
                 return BREAK;
             } else if (node instanceof ContinueNode) {
-                methodName = "CONTINUE";
                 return CONTINUE;
             } else if (node instanceof NativeCastNode) {
-                methodName = "interpretNativeCast";
                 return interpretNativeCast((NativeCastNode) node, context);
             } else if (node instanceof ConditionedReturnNode) {
-                methodName = "interpretConditionedReturn";
                 return interpretConditionedReturn((ConditionedReturnNode) node, context);
             } else if (node instanceof MemberFunctionCallNode) {
-                methodName = "interpretMemberFunctionCall";
                 return interpretMemberFunctionCall((MemberFunctionCallNode) node, context);
             } else if (node instanceof AssertNode) {
-                methodName = "interpretAssert";
                 return interpretAssert((AssertNode) node, context);
             } else if (node instanceof IsNode) {
-                methodName = "interpretIs";
                 return interpretIs((IsNode) node, context);
             } else if (node instanceof EnumDeclarationNode) {
-                methodName = "interpretEnumDeclaration";
                 return interpretEnumDeclaration((EnumDeclarationNode) node, context);
             } else if (node instanceof AnnotationDeclarationNode) {
-                methodName = "interpretAnnotationDeclaration";
                 return interpretAnnotationDeclaration((AnnotationDeclarationNode) node, context);
             } else if (node instanceof AnnotationUseNode) {
-                methodName = "interpretAnnotationUse";
                 return interpretAnnotationUse((AnnotationUseNode) node, context);
             } else if (node instanceof AsyncBlockNode) {
-                methodName = "interpretAsyncBlock";
                 return interpretAsyncBlock((AsyncBlockNode) node, context);
             } else if (node instanceof RaiseNode) {
-                methodName = "interpretRaise";
                 return interpretRaise((RaiseNode) node, context);
             } else if (node instanceof TryExceptBlock) {
-                methodName = "interpretTryExcept";
                 return interpretTryExcept((TryExceptBlock) node, context);
             } else if (node instanceof StaticBlockNode) {
-                methodName = "interpretStaticBlock";
                 return interpretStaticBlock((StaticBlockNode) node, context);
             } else if (node instanceof TernaryOperatorNode) {
-                methodName = "interpretTernaryOperator";
                 return interpretTernaryOperator((TernaryOperatorNode) node, context);
             } else if (node instanceof LambdaBlockNode) {
-                methodName = "interpretLambdaBlock";
                 return interpretLambdaBlock((LambdaBlockNode) node, context);
             } else if (node instanceof DeleteVariableNode) {
-                methodName = "interpretDeleteVariable";
                 return interpretDeleteVariable((DeleteVariableNode) node, context);
             } else if (node instanceof DeleteFunctionNode) {
-                methodName = "interpretDeleteFunction";
                 return interpretDeleteFunction((DeleteFunctionNode) node, context);
-            } else {
-                methodName = "Unknown";
             }
-            throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
+            throw new UnsupportedOperationException("Unsupported node: " + node.getClass().getSimpleName() + ", val=" + node);
         } finally {
-            MethodTimingRegistry.register(methodName, System.nanoTime() - start);
+            MethodTimingRegistry.register(node.getClass().getSimpleName(), System.nanoTime() - start);
         }
     }
 
@@ -637,7 +583,7 @@ public final class Interpreter {
     }
 
     private Object interpretDefaultNativeFunctionCall(final DefaultNativeFunctionCallNode node, final Context context) {
-        final List<Object> params = new ArrayList<>();
+        final List<Object> params = new ArrayList<>(node.getParams().size());
         for (final ASTNode param : node.getParams()) {
             final Object added = interpretNode(param, context);
             if (added instanceof VoidObject) {
@@ -646,7 +592,7 @@ public final class Interpreter {
             }
             params.add(added);
         }
-        Register.register(new Register.RegisterElement(NATIVECALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(NATIVECALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
         return nmh.callDefault(node.getName(), params);
     }
 
@@ -707,7 +653,7 @@ public final class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
         }
 
-        Register.register(new Register.RegisterElement(FUNCALL, functionName + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(FUNCALL, functionName + getParams(params), node.getLine(), context.getCurrentClassName());
 
         if (definition.isAsync()) {
             new Thread(() -> interpretBlock(definition.getBlock(), functionContext), "async:" + functionName).start();
@@ -760,7 +706,7 @@ public final class Interpreter {
     private Object interpretClassInstantiation(final ClassInstantiationNode node, final Context context) {
         final String name = node.getName();
 
-        Register.register(new Register.RegisterElement(CLASSINST, name, node.getLine(), context.getCurrentClassName() == null ? "none" : context.getCurrentClassName()));
+        Register.register(CLASSINST, name, node.getLine(), context.getCurrentClassName() == null ? "none" : context.getCurrentClassName());
 
         final String ocn = context.getCurrentClassName();
 
@@ -912,7 +858,7 @@ public final class Interpreter {
         final Context functionContext = new Context(context);
         defineFunctionParameters(functionContext, definition, params);
 
-        Register.register(new Register.RegisterElement(STATICCALL, node.getCalled() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(STATICCALL, node.getCalled() + getParams(params), node.getLine(), context.getCurrentClassName());
         final Object result = interpretBlock(definition.getBlock(), functionContext);
         context.setCurrentClassName(ocn);
         context.setCurrentFunctionName(null);
@@ -949,7 +895,7 @@ public final class Interpreter {
             return except("Accessing a local function: " + definition.getName(), node.getLine());
         }
 
-        Register.register(new Register.RegisterElement(STATICCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(STATICCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
         final Object result = interpretBlock(definition.getBlock(), functionContext);
         context.setCurrentClassName(ocn);
         context.setCurrentFunctionName(null);
@@ -987,7 +933,7 @@ public final class Interpreter {
             return VOID_OBJECT;
         }
 
-        Register.register(new Register.RegisterElement(ARRAYCALL, fn + getParams(params), raw.getLine(), context.getCurrentClassName()));
+        Register.register(ARRAYCALL, fn + getParams(params), raw.getLine(), context.getCurrentClassName());
 
 
         switch (fn) {
@@ -1055,12 +1001,12 @@ public final class Interpreter {
             ObjectFunctionCallNode node = (ObjectFunctionCallNode) raw;
             fn = node.getCalled();
             params = getFunctionParameters(node, context, -1);
-            Register.register(new Register.RegisterElement(STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+            Register.register(STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName());
         } else if (raw instanceof MemberFunctionCallNode) {
             MemberFunctionCallNode node = (MemberFunctionCallNode) raw;
             fn = node.getName();
             params = getFunctionParameters(node, context, -1);
-            Register.register(new Register.RegisterElement(STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName()));
+            Register.register(STRINGCALL, fn + getParams(params), node.getLine(), context.getCurrentClassName());
         } else {
             return VOID_OBJECT;
         }
@@ -1148,7 +1094,7 @@ public final class Interpreter {
             return VOID_OBJECT;
         }
 
-        Register.register(new Register.RegisterElement(LAMBDACALL, fn + getParams(params), raw.getLine(), context.getCurrentClassName()));
+        Register.register(LAMBDACALL, fn + getParams(params), raw.getLine(), context.getCurrentClassName());
 
         if (!fn.equals("run")) {
             Register.throwException("Illegal function in lambda context: " + fn + " with params " + getParams(params), raw.getLine());
@@ -1202,7 +1148,7 @@ public final class Interpreter {
 
         defineFunctionParameters(functionContext, definition, params);
 
-        Register.register(new Register.RegisterElement(NATIVECALL, node.getCalled() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
+        Register.register(NATIVECALL, node.getCalled() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName());
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
         context.setCurrentClassName(ocn);
@@ -1312,7 +1258,7 @@ public final class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
         }
 
-        Register.register(new Register.RegisterElement(LOCALCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(LOCALCALL, node.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
 
 
         final Object result = interpretBlock(definition.getBlock(), functionContext);
@@ -1445,7 +1391,7 @@ public final class Interpreter {
         final List<Object> params = new ArrayList<>();
         for (final ASTNode param : node.getParams()) params.add(interpretNode(param, context));
 
-        Register.register(new Register.RegisterElement(NATIVECALL,  node.getName() + getParams(params), node.getLine(), context.getCurrentClassName()));
+        Register.register(NATIVECALL,  node.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
 
 
         final ObjectType rawCurrent =  context.getClass(context.getCurrentClassName());
@@ -2020,7 +1966,7 @@ public final class Interpreter {
 
             defineFunctionParameters(functionContext, definition, params);
 
-            Register.register(new Register.RegisterElement(NATIVECALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
+            Register.register(NATIVECALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName());
 
             final String preName = context.getCurrentClassName();
             final String ocn = context.getCurrentClassName();
@@ -2085,7 +2031,7 @@ public final class Interpreter {
 
         defineFunctionParameters(functionContext, definition, params);
 
-        Register.register(new Register.RegisterElement(FUNCALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName()));
+        Register.register(FUNCALL, node.getName() + getParams(definition.getParams()), node.getLine(), context.getCurrentClassName());
         final String ocn = context.getCurrentClassName();
 
         context.setCurrentClassName(objectName);
@@ -2271,7 +2217,7 @@ public final class Interpreter {
     }
 
     private Object interpretStaticBlock(final StaticBlockNode node, final Context context) {
-        Register.register(new Register.RegisterElement(STATICINIT, "<static-block>", node.getLine(), context.getCurrentClassName()));
+        Register.register(STATICINIT, "<static-block>", node.getLine(), context.getCurrentClassName());
         if (node.isAsync()) {
             new Thread(() -> {
                 if (!(interpretBlock(node.getBlock(), context) instanceof VoidObject)) {
@@ -2297,7 +2243,7 @@ public final class Interpreter {
     }
 
     private Object interpretDeleteVariable(final DeleteVariableNode node, final Context context) {
-        Register.register(new Register.RegisterElement(VARDEL, node.getName(), node.getLine(), context.getCurrentClassName()));
+        Register.register(VARDEL, node.getName(), node.getLine(), context.getCurrentClassName());
         context.deleteVariable(node.getName());
         return VOID_OBJECT;
     }
@@ -2312,7 +2258,7 @@ public final class Interpreter {
             return except("Parameter is not a num, instead it is " + params.getClass().getSimpleName(), node.getLine());
         }
 
-        Register.register(new Register.RegisterElement(FUNDEL, node.getName() + "(" + params + ")", node.getLine(), context.getCurrentClassName()));
+        Register.register(FUNDEL, node.getName() + "(" + params + ")", node.getLine(), context.getCurrentClassName());
 
         context.deleteFunction(node.getName(), ((Number) params).intValue());
         return VOID_OBJECT;
@@ -2368,7 +2314,7 @@ public final class Interpreter {
             functionContext.defineVariable(name, new VariableDefinition(name, null, value, false, false, false));
         }
 
-        Register.register(new Register.RegisterElement(FUNCALL, functionName + getParams(params), call.getLine(), context.getCurrentClassName()));
+        Register.register(FUNCALL, functionName + getParams(params), call.getLine(), context.getCurrentClassName());
 
         final Object result;
 

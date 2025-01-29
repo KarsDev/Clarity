@@ -33,7 +33,7 @@ public class PerformanceHistogram extends JPanel {
             g.fillRect(x, height + 50 - barHeight, barWidth, barHeight);
 
             g.setColor(Color.BLACK);
-            g.drawString(entry.getKey() + ": " + (entry.getValue() / 1E6), x, height + 70);
+            g.drawString(entry.getKey() + ": " + (entry.getValue() / 1E6) + "ms", x, height + 70);
 
             x += barWidth;
         }
