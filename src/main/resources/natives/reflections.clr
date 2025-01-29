@@ -1,104 +1,18 @@
-include native system
-
-/####################################################
- #  Reflections Class
- #
- #  Overview:
- #  The Reflections class provides a set of static native methods to perform reflection-based
- #  operations, such as editing and creating variables dynamically and retrieving information
- #  about the caller class. These methods facilitate meta-programming capabilities where
- #  code can inspect, modify, and dynamically create program constructs at runtime.
- #
- #  Important:
- #  - This class is non-instantiable; all methods are static and interact directly with
- #    the runtime environment.
- #  - The native functions must be defined in the runtime environment for these methods
- #    to function correctly.
- #
- #  Example Usage:
- #  Reflections.editVariable("myVar", 10)    // Dynamically changes the value of 'myVar' to 10.
- #  Reflections.getCallerClass()             // Returns the class of the method that called this function.
- #
- #  Notes:
- #  Reflection is a powerful tool that should be used carefully to avoid unintended side effects
- #  such as security risks or performance degradation.
- ####################################################/
-native class Reflections {
-
-    /##
-     # Constructor: Reflections
-     #
-     # Description:
-     # The constructor is private and used internally to ensure any necessary initialization.
-     # This prevents instantiation of the Reflections class.
-     #
-     # Example:
-     # new Reflections()  // Not allowed; Reflections is non-instantiable.
-     #/
+const native class Reflections {
     constructor() {
-        System.initExcept()
+        raise "You can not instantiate Reflection class"
     }
 
     /##
-     # Native Method: editVariable
-     #
-     # Description:
-     # Edits the value of an existing variable dynamically at runtime.
-     #
-     # Parameters:
-     # - name: A string representing the name of the variable to edit.
-     # - value: The new value to assign to the variable.
-     #
-     # Returns:
-     # - None.
-     #
-     # Note:
-     # This method is declared as native and relies on an external implementation.
-     #
-     # Example:
-     # Reflections.editVariable("myVar", 10)  // Changes the value of 'myVar' to 10.
+     # Retrieves the class of the caller of the function calling this funciton, and returns null if none is found.
      #/
-    static native fn editVariable(name, value)
+    native fn getCallerClass() -> str
 
-    /##
-     # Native Method: createVariable
-     #
-     # Description:
-     # Dynamically creates a new variable with the specified name and value at runtime.
-     # Allows the option to specify if the variable is static or constant.
-     #
+    /#
+     # Returns whether a class is native or not.
      # Parameters:
-     # - name: A string representing the name of the variable to create.
-     # - value: The initial value of the new variable.
-     # - isStatic: A boolean indicating whether the variable should be static.
-     # - isConstant: A boolean indicating whether the variable should be constant (immutable).
      #
-     # Returns:
-     # - None.
-     #
-     # Note:
-     # This method is declared as native and relies on an external implementation.
-     #
-     # Example:
-     # Reflections.createVariable("newVar", 100, false, true, false)  // Creates a static variable 'newVar' with the value 100.
+     # - name: The class name.
      #/
-    static native fn createVariable(name, value, isStatic, isConstant, isLocal)
-
-    /##
-     # Native Method: getCallerClass
-     #
-     # Description:
-     # Retrieves the class of the method that called the current function. This can be useful
-     # for debugging, logging, or dynamically inspecting the flow of execution.
-     #
-     # Returns:
-     # - A reference to the caller class.
-     #
-     # Note:
-     # This method is declared as native and relies on an external implementation.
-     #
-     # Example:
-     # Reflections.getCallerClass()  // Returns the class that called this function.
-     #/
-    static native fn getCallerClass()
+    native fn isClassNative(name) -> bool
 }
