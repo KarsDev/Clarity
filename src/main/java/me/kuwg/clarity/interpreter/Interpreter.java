@@ -46,6 +46,8 @@ import me.kuwg.clarity.token.Tokenizer;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static me.kuwg.clarity.ast.nodes.clazz.cast.CastType.*;
 import static me.kuwg.clarity.interpreter.definition.BreakValue.BREAK;
@@ -55,6 +57,8 @@ import static me.kuwg.clarity.library.objects.VoidObject.VOID_RETURN;
 import static me.kuwg.clarity.register.Register.RegisterElementType.*;
 
 public final class Interpreter {
+
+    private static final ExecutorService ASYNC_POOL = Executors.newCachedThreadPool();
 
     private final AST ast;
     private final NativeMethodHandler nmh;
@@ -2265,8 +2269,10 @@ public final class Interpreter {
     }
 
     private Object interpretAwaitBlock(final AwaitBlockNode node, final Context context) {
-        final CompletableFuture<Object> future = new CompletableFuture<>();
-        new Thread(() -> future.complete(interpretBlock(node.getBlock(), context)), "async-block-?").start();
+        final CompletableFuture<Object> future = CompletableFuture.supplyAsync(
+                () -> interpretBlock(node.getBlock(), context),
+                ASYNC_POOL
+        );
         try {
             return future.get();
         } catch (final InterruptedException | ExecutionException e) {
@@ -2319,11 +2325,15 @@ public final class Interpreter {
         final Object result;
 
         if (definition.isAsync()) {
-            final CompletableFuture<Object> future = new CompletableFuture<>();
-            new Thread(() -> future.complete(interpretBlock(definition.getBlock(), functionContext)), "async:" + functionName).start();
+            final CompletableFuture<Object> future = CompletableFuture.supplyAsync(
+                    () -> interpretBlock(definition.getBlock(), functionContext),
+                    ASYNC_POOL
+            );
+
             try {
-                result = future.get();
-            } catch (final InterruptedException | ExecutionException e) {
+                return future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                Thread.currentThread().interrupt();
                 return except("Unknown error while handling await function.", node.getLine());
             }
         } else {
