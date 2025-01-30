@@ -1203,7 +1203,7 @@ public final class ASTParser {
     private ASTNode parseForDeclaration() {
         final int line = consume().getLine(); // consume "for"
 
-        if (lookahead().is(OPERATOR, ":")) {
+        if (lookahead().is(OPERATOR, ":") || lookahead().is(VARIABLE, "in") && current().getType().equals(VARIABLE)) {
             final String var = consume(VARIABLE).getValue();
             consume();
             final ASTNode list = parseExpression();
