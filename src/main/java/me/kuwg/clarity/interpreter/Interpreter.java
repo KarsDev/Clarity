@@ -33,6 +33,8 @@ import me.kuwg.clarity.debug.MethodTimingRegistry;
 import me.kuwg.clarity.debug.PerformanceHistogram;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.*;
+import me.kuwg.clarity.interpreter.natf.NativeFunctionNode;
+import me.kuwg.clarity.library.natives.ClarityNativeFunction;
 import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.library.objects.VoidObject;
 import me.kuwg.clarity.library.objects.types.ClassObject;
@@ -129,7 +131,7 @@ public final class Interpreter {
         return ret;
     }
 
-    private boolean preInterpret(final ASTNode node, final BlockNode ignoredBlock, final Context context) {
+    private boolean preInterpret(final ASTNode node, final BlockNode block, final Context context) {
         if (node instanceof FunctionDeclarationNode) {
             interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
             return true;
@@ -154,6 +156,17 @@ public final class Interpreter {
         } else if (node instanceof StaticBlockNode) {
             interpretStaticBlock((StaticBlockNode) node, context);
             return true;
+        } else if (node instanceof DefaultNativeFunctionCallNode && Clarity.INFORMATION.getOption("loadnatives")) {
+            DefaultNativeFunctionCallNode def = (DefaultNativeFunctionCallNode) node;
+
+            final ClarityNativeFunction<?> natf = nmh.getDefault(def.getName());
+
+            if (natf != null && natf.getName().equals(def.getName())) {
+                final ASTNode newNode = new NativeFunctionNode(natf, def.getParams());
+                block.getChildren().set(block.getChildren().indexOf(node), newNode);
+            }
+
+            return false;
         } else {
             return false;
         }
@@ -216,6 +229,7 @@ public final class Interpreter {
         else if (node instanceof DeleteFunctionNode) return interpretDeleteFunction((DeleteFunctionNode) node, context);
         else if (node instanceof AwaitBlockNode) return interpretAwaitBlock((AwaitBlockNode) node, context);
         else if (node instanceof AwaitFunctionCallNode) return interpretAwaitFunctionCall((AwaitFunctionCallNode) node, context);
+        else if (node instanceof NativeFunctionNode) return interpretNativeFunction((NativeFunctionNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -2348,6 +2362,27 @@ public final class Interpreter {
 
         context.setCurrentFunctionName(null);
         return result;
+    }
+
+    private Object interpretNativeFunction(final NativeFunctionNode node, final Context context) {
+        final List<Object> params = new ArrayList<>(node.getParams().size());
+        for (final ASTNode param : node.getParams()) {
+            final Object added = interpretNode(param, context);
+            if (added instanceof VoidObject) {
+                return except("Passing void as parameter", node.getLine());
+            }
+            params.add(added);
+        }
+
+        final ClarityNativeFunction<?> fun = node.getFunction();
+
+        Register.register(NATIVECALL, fun.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
+
+        if (!fun.applies(fun.getName(), params)) {
+            return except("Clarity native function does not apply (try using -nlnat running flag)", node.getLine());
+        }
+
+        return fun.call(params);
     }
 
     /*

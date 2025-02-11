@@ -99,7 +99,7 @@ public final class NativeMethodHandler {
      *
      * @param name   the name of the native function to invoke
      * @param params the list of parameters to provide to the function
-     * @return the result of the function call, or {@code null} if an error occurs
+     * @return the result of the function call, or {@code VoidObject} if an error occurs
      * @throws IllegalArgumentException if the function is not found or not accessible
      */
     public Object callDefault(final String name, final List<Object> params) {
@@ -114,6 +114,16 @@ public final class NativeMethodHandler {
     }
 
     /**
+     * Gets a default native function. Used for pre-interpreting.
+     *
+     * @param name the name of the native function to invoke
+     * @return the native function object, or {@code VoidObject} if none is found
+     */
+    public ClarityNativeFunction<?> getDefault(final String name) {
+        return defaultFunctions.get(name);
+    }
+
+    /**
      * Invokes a packaged native function based on the provided package and function name,
      * along with the calling class and parameters.
      *
@@ -121,7 +131,7 @@ public final class NativeMethodHandler {
      * @param name        the name of the function to invoke
      * @param callerClass the class invoking the function
      * @param params      the list of parameters to provide to the function
-     * @return the result of the function call, or {@code null} if an error occurs
+     * @return the result of the function call, or {@code VoidObject} if an error occurs
      * @throws IllegalArgumentException if the function is not found or not accessible
      */
     public Object callPackaged(final String pkg, final String name, final String callerClass, final List<Object> params) {
@@ -144,7 +154,7 @@ public final class NativeMethodHandler {
      * @param method  the name of the method to invoke within the class
      * @param params  the parameters to pass to the method
      * @param context the current execution context, providing necessary environmental information
-     * @return the result of the class method call, or {@code null} if an error occurs
+     * @return the result of the class method call, or {@code VoidObject} if an error occurs
      * @throws IllegalArgumentException if the class or method is not found or not accessible
      */
     public Object callClassNative(final String name, final String method, final List<Object> params, final Context context) {
