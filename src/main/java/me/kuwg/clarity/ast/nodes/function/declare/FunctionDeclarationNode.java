@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.function.declare;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.ast.PreInterpretable;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
@@ -8,7 +9,7 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-public class FunctionDeclarationNode extends ASTNode {
+public class FunctionDeclarationNode extends ASTNode implements PreInterpretable {
 
     protected String functionName;
     private String typeDefault;

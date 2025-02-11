@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.statements;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.ast.PreInterpretable;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
@@ -8,7 +9,7 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-public class SelectNode extends ASTNode {
+public class SelectNode extends ASTNode implements PreInterpretable {
 
     private ASTNode condition;
     private List<WhenNode> cases;
@@ -31,7 +32,7 @@ public class SelectNode extends ASTNode {
         return cases;
     }
 
-    public final BlockNode getDefaultBlock() {
+    public final BlockNode getBlock() {
         return defaultBlock;
     }
 
@@ -68,7 +69,7 @@ public class SelectNode extends ASTNode {
         this.defaultBlock = (BlockNode) in.readNode();
     }
 
-    public static class WhenNode extends ASTNode {
+    public static class WhenNode extends ASTNode implements PreInterpretable {
 
         private ASTNode whenExpression;
         private BlockNode block;

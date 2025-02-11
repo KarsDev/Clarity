@@ -1,13 +1,14 @@
 package me.kuwg.clarity.ast.nodes.statements;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.ast.PreInterpretable;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
 
-public class ForNode extends ASTNode {
+public class ForNode extends ASTNode implements PreInterpretable {
 
     private ASTNode declaration;
     private ASTNode condition;

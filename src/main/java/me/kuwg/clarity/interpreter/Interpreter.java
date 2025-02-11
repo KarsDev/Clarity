@@ -3,6 +3,7 @@ package me.kuwg.clarity.interpreter;
 import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.ast.PreInterpretable;
 import me.kuwg.clarity.ast.nodes.block.*;
 import me.kuwg.clarity.ast.nodes.clazz.ClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.ClassInstantiationNode;
@@ -164,6 +165,16 @@ public final class Interpreter {
             if (natf != null && natf.getName().equals(def.getName())) {
                 final ASTNode newNode = new NativeFunctionNode(natf, def.getParams());
                 block.getChildren().set(block.getChildren().indexOf(node), newNode);
+            }
+
+            return false;
+        } else if (node instanceof PreInterpretable) {
+            final BlockNode inside = ((PreInterpretable) node).getBlock();
+
+            for (final ASTNode sub : inside) {
+                if (preInterpret(sub, inside, context)) {
+                    inside.getChildren().remove(sub);
+                }
             }
 
             return false;
@@ -338,6 +349,12 @@ public final class Interpreter {
                 return interpretDeleteVariable((DeleteVariableNode) node, context);
             } else if (node instanceof DeleteFunctionNode) {
                 return interpretDeleteFunction((DeleteFunctionNode) node, context);
+            }  else if (node instanceof AwaitBlockNode) {
+                return interpretAwaitBlock((AwaitBlockNode) node, context);
+            } else if (node instanceof AwaitFunctionCallNode) {
+                return interpretAwaitFunctionCall((AwaitFunctionCallNode) node, context);
+            } else if (node instanceof NativeFunctionNode) {
+                return interpretNativeFunction((NativeFunctionNode) node, context);
             }
             throw new UnsupportedOperationException("Unsupported node: " + node.getClass().getSimpleName() + ", val=" + node);
         } finally {
@@ -423,7 +440,7 @@ public final class Interpreter {
             inheritedClass = null;
         }
 
-        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, getConstructors(node.getConstructors()), node.getBody(),false);
+        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, getConstructors(node.getConstructors()), node.getBlock(),false);
         context.defineClass(name, definition);
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
@@ -1392,9 +1409,9 @@ public final class Interpreter {
     private void interpretInclude(final IncludeNode node, final Context context) {
         if (node.isNative()) context.getNatives().add(node.getName());
 
-        for (final ASTNode astnode : node.getIncluded()) {
-            if (preInterpret(astnode, node.getIncluded(), context)) {
-                node.getIncluded().getChildren().remove(astnode);
+        for (final ASTNode astnode : node.getBlock()) {
+            if (preInterpret(astnode, node.getBlock(), context)) {
+                node.getBlock().getChildren().remove(astnode);
                 continue;
             }
             final Object result = interpretNode(astnode, context);
@@ -1700,7 +1717,7 @@ public final class Interpreter {
 
         final ClassDefinition inheritedClass = (ClassDefinition) context.getClass(node.getInheritedClass()); // no need to check, native class do not have errors (we hope)
 
-        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, getConstructors(node.getConstructors()), node.getBody(), true);
+        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, getConstructors(node.getConstructors()), node.getBlock(), true);
         context.defineClass(name, definition);
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
@@ -1764,7 +1781,7 @@ public final class Interpreter {
             }
         }
 
-        return interpretBlock(node.getDefaultBlock(), context);
+        return interpretBlock(node.getBlock(), context);
     }
 
     private Object interpretNativeCast(final NativeCastNode node, final Context context) {

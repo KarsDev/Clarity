@@ -317,7 +317,7 @@ public final class ASTOptimizer {
             final BlockNode optimizedBlock = (BlockNode) optimizeNode(whenNode.getBlock());
             optimizedCases.add(new SelectNode.WhenNode(optimizedWhenExpression, optimizedBlock));
         }
-        final BlockNode optimizedDefaultBlock = node.getDefaultBlock() != null ? (BlockNode) optimizeNode(node.getDefaultBlock()) : null;
+        final BlockNode optimizedDefaultBlock = node.getBlock() != null ? (BlockNode) optimizeNode(node.getBlock()) : null;
         return new SelectNode(optimizedCondition, optimizedCases, optimizedDefaultBlock);
     }
 

@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.clazz;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.ast.PreInterpretable;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
@@ -9,7 +10,7 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-public class NativeClassDeclarationNode extends ASTNode {
+public class NativeClassDeclarationNode extends ASTNode implements PreInterpretable {
 
     private String name;
     private boolean isConstant;
@@ -50,7 +51,7 @@ public class NativeClassDeclarationNode extends ASTNode {
         return constructors;
     }
 
-    public final BlockNode getBody() {
+    public final BlockNode getBlock() {
         return body;
     }
 

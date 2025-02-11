@@ -1,12 +1,13 @@
 package me.kuwg.clarity.ast.nodes.block;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.ast.PreInterpretable;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
 
-public class AsyncBlockNode extends ASTNode {
+public class AsyncBlockNode extends ASTNode implements PreInterpretable {
 
     private ASTNode name;
     private BlockNode block;
