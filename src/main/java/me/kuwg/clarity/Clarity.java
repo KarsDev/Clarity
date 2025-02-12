@@ -137,6 +137,10 @@ public final class Clarity {
                             verboseLog("Verbose: Printing AST information.");
                             printASTInfo();
                             return;
+                        case "printoptions":
+                            verboseLog("Verbose: Printing information options.");
+                            ClarityRunningInformation.printOptions();
+                            return;
                     }
                     verboseLog("Verbose: Input file required for the given command.");
                     printInputFileRequired();

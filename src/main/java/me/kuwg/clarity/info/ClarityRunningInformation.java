@@ -18,12 +18,18 @@ public final class ClarityRunningInformation {
      * true and false argument representations.
      */
     private static final Option[] OPTIONS = {
-            load("optimize", true, "noopt", "opt"),              // optimization (deprecated)
-            load("verbose", false, "noverb", "verb"),            // verbose (log)
-            load("startinfo", false, "nsinfo", "sinfo"),         // starting info (jvm startup times)
-            load("speedinfo", false, "nspeedinfo", "speedinfo"), // speed info (graph)
-            load("defaults", true, "nodef", "def"),              // defaults natives (include)
-            load("loadnatives", false, "nlnat", "loadnatives"),  // load default natives in interpreter
+            // optimization (deprecated)
+            load("optimize", true, "noopt", "opt", "Deprecated option for AST optimization."),
+            // verbose (log)
+            load("verbose", false, "noverb", "verb", "Enables startup verbose."),
+            // starting info (jvm startup times)
+            load("startinfo", false, "nsinfo", "sinfo", "Enables writing JVM startup timings information."),
+            // speed info (graph)
+            load("speedinfo", false, "nspeedinfo", "speedinfo", "Creates a graph at the end of the interpretation that describes node speed."),
+            // default natives (include)
+            load("defaults", true, "nodef", "def", "Enables including default natives."),
+            // load default natives in interpreter
+            load("loadnatives", false, "nlnat", "loadnatives", "Enables pre-loading for known default natives in the interpreter."),
 
     };
 
@@ -36,7 +42,6 @@ public final class ClarityRunningInformation {
     /**
      * Constructor that initializes the {@code ClarityRunningInformation} object
      * by parsing command-line arguments and loading the corresponding options.
-     *
      */
     public ClarityRunningInformation() {
         loadedOptions = new HashMap<>();
@@ -73,8 +78,8 @@ public final class ClarityRunningInformation {
      * @param argTrue  the argument that corresponds to the "true" value of the option
      * @return a new {@code Option} object
      */
-    private static Option load(final String name, final boolean def, final String argFalse, final String argTrue) {
-        return new Option(name, def, argFalse, argTrue);
+    private static Option load(final String name, final boolean def, final String argFalse, final String argTrue, final String description) {
+        return new Option(name, def, argFalse, argTrue, description);
     }
 
     /**
@@ -86,6 +91,24 @@ public final class ClarityRunningInformation {
      */
     public boolean getOption(final String name) {
         return loadedOptions.getOrDefault(name, false);
+    }
+
+    /**
+     * Prints all the options and their description.
+     */
+    public static void printOptions() {
+        final StringBuilder sb = new StringBuilder("Printing options:\n");
+
+        for (final Option option : OPTIONS) {
+            sb.append("\t").append(option.name).append(": ")
+                    .append("\n\t\tDefault: ").append(option.def)
+                    .append("\n\t\tEnable: '").append(option.argTrue).append("'")
+                    .append("\n\t\tDisable: '").append(option.argFalse).append("'")
+                    .append("\n\t\tDescription: ").append(option.description)
+                    .append("\n");
+        }
+
+        System.out.println(sb);
     }
 
     /**
@@ -113,18 +136,25 @@ public final class ClarityRunningInformation {
         public final String argTrue;
 
         /**
+         * The description of the option.
+         */
+        public final String description;
+
+        /**
          * Constructs a new {@code Option} object with the given parameters.
          *
-         * @param name     the name of the option
-         * @param def      the default boolean value for the option
-         * @param argFalse the argument that corresponds to the "false" value of the option
-         * @param argTrue  the argument that corresponds to the "true" value of the option
+         * @param name        the name of the option
+         * @param def         the default boolean value for the option
+         * @param argFalse    the argument that corresponds to the "false" value of the option
+         * @param argTrue     the argument that corresponds to the "true" value of the option
+         * @param description the description of the option
          */
-        private Option(final String name, final boolean def, final String argFalse, final String argTrue) {
+        private Option(final String name, final boolean def, final String argFalse, final String argTrue, final String description) {
             this.name = name;
             this.def = def;
             this.argFalse = "-" + argFalse;
             this.argTrue = "-" + argTrue;
+            this.description = description;
         }
     }
 }
