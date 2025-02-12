@@ -60,7 +60,6 @@ import static me.kuwg.clarity.library.objects.VoidObject.VOID_RETURN;
 import static me.kuwg.clarity.register.Register.RegisterElementType.*;
 
 public final class Interpreter {
-
     private static final ExecutorService ASYNC_POOL = Executors.newCachedThreadPool();
 
     private final AST ast;
@@ -164,7 +163,8 @@ public final class Interpreter {
 
             if (natf != null && natf.getName().equals(def.getName())) {
                 final ASTNode newNode = new NativeFunctionNode(natf, def.getParams());
-                block.getChildren().set(block.getChildren().indexOf(node), newNode);
+                final int index = block.getChildren().indexOf(node);
+                block.getChildren().set(index, newNode);
             }
 
             return false;
@@ -2395,11 +2395,12 @@ public final class Interpreter {
 
         Register.register(NATIVECALL, fun.getName() + getParams(params), node.getLine(), context.getCurrentClassName());
 
-        if (!fun.applies(fun.getName(), params)) {
+        if (fun.applies(fun.getName(), params)) {
+            return fun.call(params);
+        } else {
             return except("Clarity native function does not apply (try using -nlnat running flag)", node.getLine());
         }
 
-        return fun.call(params);
     }
 
     /*

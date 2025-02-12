@@ -23,7 +23,7 @@ public final class ClarityRunningInformation {
             load("startinfo", false, "nsinfo", "sinfo"),         // starting info (jvm startup times)
             load("speedinfo", false, "nspeedinfo", "speedinfo"), // speed info (graph)
             load("defaults", true, "nodef", "def"),              // defaults natives (include)
-            load("loadnatives", true, "nlnat", "loadnatives"),   // load default natives in interpreter
+            load("loadnatives", false, "nlnat", "loadnatives"),  // load default natives in interpreter
 
     };
 
