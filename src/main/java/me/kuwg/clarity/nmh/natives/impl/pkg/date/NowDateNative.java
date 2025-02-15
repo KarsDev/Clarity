@@ -2,12 +2,13 @@ package me.kuwg.clarity.nmh.natives.impl.pkg.date;
 
 import me.kuwg.clarity.interpreter.definition.EnumClassDefinition;
 import me.kuwg.clarity.library.objects.types.ClassObject;
+import me.kuwg.clarity.nmh.natives.abstracts.PackagedNativeFunction;
 import me.kuwg.clarity.util.ClassUtil;
 
 import java.time.LocalDate;
 import java.util.List;
 
-public class NowDateNative extends DateNativeFunction<ClassObject> {
+public class NowDateNative extends PackagedNativeFunction<ClassObject> {
 
     private static final String DATE_CLASS_NAME, DAY_ENUM_CLASS_NAME, MONTH_ENUM_CLASS_NAME, YEAR_CLASS_NAME;
 
@@ -32,5 +33,15 @@ public class NowDateNative extends DateNativeFunction<ClassObject> {
         final ClassObject CURRENT_YEAR = ClassUtil.initClass(YEAR_CLASS_NAME, now.getYear());
 
         return ClassUtil.initClass(DATE_CLASS_NAME, CURRENT_WEEK, CURRENT_DAY, CURRENT_MONTH, CURRENT_YEAR);
+    }
+
+    @Override
+    protected final boolean canCall(final String className) {
+        return "Date".equals(className);
+    }
+
+    @Override
+    protected boolean applies0(final List<Object> params) {
+        return params.isEmpty();
     }
 }

@@ -445,6 +445,8 @@ public final class Interpreter {
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
 
+        StaticBlockNode staticBlock = null;
+
         for (final ASTNode statement : definition.getBody()) {
             if (statement instanceof VariableDeclarationNode) {
                 final VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
@@ -483,9 +485,13 @@ public final class Interpreter {
                     definition.staticFunctions.add(def);
                 }
             } else if (statement instanceof StaticBlockNode) {
-                interpretStaticBlock((StaticBlockNode) statement, context);
+                if (staticBlock != null) return except("More than one static block found in class " + definition.getName(), statement.getLine());
+                staticBlock = (StaticBlockNode) statement;
             }
         }
+
+        // static block is the last to get interpreted
+        if (staticBlock != null) interpretStaticBlock(staticBlock, context);
 
         context.setCurrentClassName(ocn);
 
