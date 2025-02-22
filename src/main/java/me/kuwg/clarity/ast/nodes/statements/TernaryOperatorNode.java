@@ -53,10 +53,10 @@ public class TernaryOperatorNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(condition, version);
-        out.writeNode(trueBranch, version);
-        out.writeNode(falseBranch, version);
+    protected void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(condition);
+        out.writeNode(trueBranch);
+        out.writeNode(falseBranch);
     }
 
     @Override

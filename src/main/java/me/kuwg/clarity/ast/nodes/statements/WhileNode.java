@@ -44,9 +44,9 @@ public class WhileNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(condition, version);
-        out.writeNode(block, version);
+    protected void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(condition);
+        out.writeNode(block);
     }
 
     @Override

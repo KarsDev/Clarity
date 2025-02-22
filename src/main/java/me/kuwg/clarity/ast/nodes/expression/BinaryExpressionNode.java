@@ -66,10 +66,10 @@ public class BinaryExpressionNode extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(left, version);
+    public void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(left);
         out.writeString(operator);
-        out.writeNode(right, version);
+        out.writeNode(right);
     }
 
     @Override

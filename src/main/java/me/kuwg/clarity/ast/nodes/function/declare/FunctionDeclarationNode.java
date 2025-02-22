@@ -98,15 +98,15 @@ public class FunctionDeclarationNode extends ASTNode implements PreInterpretable
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(functionName);
         out.writeString(String.valueOf(typeDefault));
         out.writeBoolean(isStatic);
         out.writeBoolean(isConst);
         out.writeBoolean(isLocal);
         out.writeBoolean(isAsync);
-        out.writeNodeList(parameterNodes, version);
-        out.writeNode(block, version);
+        out.writeNodeList(parameterNodes);
+        out.writeNode(block);
     }
 
     @Override

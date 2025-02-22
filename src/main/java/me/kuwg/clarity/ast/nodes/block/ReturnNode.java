@@ -33,8 +33,8 @@ public class ReturnNode extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(value, version);
+    public void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(value);
     }
 
     @Override

@@ -8,7 +8,6 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 import java.io.IOException;
 
 public abstract class ASTNode implements ASTNodeCompiler {
-
     public ASTNode(){
     }
 
@@ -26,12 +25,12 @@ public abstract class ASTNode implements ASTNodeCompiler {
 
     public abstract void print(final StringBuilder sb, final String indent);
 
-    protected abstract void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException;
+    protected abstract void save0(final ASTOutputStream out) throws IOException;
 
     @Override
-    public final void save(final ASTOutputStream out, CompilerVersion version) throws IOException {
+    public final void save(final ASTOutputStream out) throws IOException {
         out.writeVarInt(line);
-        save0(out, version);
+        save0(out);
     }
 
     protected abstract void load0(ASTInputStream in, final CompilerVersion version) throws IOException;

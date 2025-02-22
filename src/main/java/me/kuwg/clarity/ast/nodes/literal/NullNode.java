@@ -14,7 +14,7 @@ public class NullNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    protected void save0(final ASTOutputStream out) throws IOException {
     }
 
     @Override

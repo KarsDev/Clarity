@@ -34,6 +34,7 @@ public class IntegerNode extends AbstractNumberNode {
     @Override
     public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeLong(value);
+    public void save0(final ASTOutputStream out) throws IOException {
     }
 
     @Override
@@ -47,4 +48,5 @@ public class IntegerNode extends AbstractNumberNode {
                 "value=" + value +
                 '}';
     }
+
 }

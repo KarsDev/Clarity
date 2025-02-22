@@ -42,8 +42,8 @@ public class IsNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(expression, version);
+    protected void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(expression);
         out.writeVarInt(type.ordinal());
         if (type.isClass()) out.writeString(type.getValue());
     }

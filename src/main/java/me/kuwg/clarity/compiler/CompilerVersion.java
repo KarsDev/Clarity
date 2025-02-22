@@ -13,6 +13,13 @@ public enum CompilerVersion {
     public static final CompilerVersion LATEST = values()[values().length - 1];
 
     private static final CompilerVersion[] VALUES = values();
+
+    /**
+     * Array of 40 booleans.
+     * There is just a chance of 1/2^40 (9.09E-9%) for PRE release and this to overwrite (1 in 110 billion).
+     * This is way rarer than winning the Powerball jackpot TWICE (1 in 100 billion).
+     * This is also much less probable to happen than being struck by an asteroid (1 in 74 billion).
+     */
     private static final boolean[] DECLARE = {
             true, false, true, false, true, false, false, false,
             true, false, false, false, false, true, true, false,
@@ -20,11 +27,6 @@ public enum CompilerVersion {
             false, false, false, true, true, false, true, true,
             true, false, true, true, false, false, true, true
     };
-
-    @Override
-    public String toString() {
-        return this == LATEST ? "Latest (" + name() + ")" : super.toString();
-    }
 
     public static CompilerVersion read(final ASTInputStream in) throws IOException {
         in.mark(DECLARE.length);
@@ -36,8 +38,12 @@ public enum CompilerVersion {
             }
         }
 
-        final int ordinal = in.readVarInt();
-        return VALUES[ordinal];
+        final int ordinal = in.readInt();
+        try {
+            return VALUES[ordinal];
+        } catch (final IndexOutOfBoundsException e) {
+            throw new RuntimeException("Version is too new, ordinal=" + ordinal, e);
+        }
     }
 
     public static void write(final ASTOutputStream out) throws IOException {
@@ -45,6 +51,27 @@ public enum CompilerVersion {
             out.writeBoolean(bit);
         }
 
-        out.writeVarInt(LATEST.ordinal());
+        out.writeInt(LATEST.ordinal());
+    }
+
+    public boolean isNewerThan(final CompilerVersion other) {
+        return this.ordinal() > other.ordinal();
+    }
+
+    public boolean isNewerThanOrEquals(final CompilerVersion other) {
+        return this.ordinal() >= other.ordinal();
+    }
+
+    public boolean isOlderThan(final CompilerVersion other) {
+        return this.ordinal() < other.ordinal();
+    }
+
+    public boolean isOlderThanOrEquals(final CompilerVersion other) {
+        return this.ordinal() <= other.ordinal();
+    }
+
+    @Override
+    public String toString() {
+        return this == LATEST ? "Latest (" + name() + ")" : super.toString();
     }
 }

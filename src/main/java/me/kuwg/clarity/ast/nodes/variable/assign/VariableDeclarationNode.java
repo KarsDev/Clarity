@@ -87,10 +87,10 @@ public class VariableDeclarationNode extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
         out.writeString(String.valueOf(typeDefault));
-        out.writeNode(value, version);
+        out.writeNode(value);
         out.writeBoolean(isConstant);
         out.writeBoolean(isStatic);
         out.writeBoolean(isLocal);

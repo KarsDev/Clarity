@@ -26,7 +26,7 @@ public final class AST extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) {
+    public void save0(final ASTOutputStream out) {
         throw new RuntimeException("Cannot save AST");
     }
 

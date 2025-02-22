@@ -52,10 +52,10 @@ public class ForeachNode extends ASTNode implements PreInterpretable {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    protected void save0(final ASTOutputStream out) throws IOException {
         out.writeString(variable);
-        out.writeNode(list, version);
-        out.writeNode(block, version);
+        out.writeNode(list);
+        out.writeNode(block);
     }
 
     @Override

@@ -59,11 +59,11 @@ public class EnumDeclarationNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    protected void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
         out.writeBoolean(isConstant);
         out.writeString(fileName);
-        out.writeNodeList(enumValues, version);
+        out.writeNodeList(enumValues);
     }
 
     @Override
@@ -106,9 +106,9 @@ public class EnumDeclarationNode extends ASTNode {
         }
 
         @Override
-        protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        protected void save0(final ASTOutputStream out) throws IOException {
             out.writeString(name);
-            out.writeNode(value, version);
+            out.writeNode(value);
         }
 
         @Override

@@ -53,10 +53,10 @@ public class ObjectFunctionCallNode extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(caller);
         out.writeString(called);
-        out.writeNodeList(params, version);
+        out.writeNodeList(params);
     }
 
     @Override

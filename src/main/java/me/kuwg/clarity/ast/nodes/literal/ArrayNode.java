@@ -32,8 +32,8 @@ public class ArrayNode extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNodeList(nodes, version);
+    public void save0(final ASTOutputStream out) throws IOException {
+        out.writeNodeList(nodes);
     }
 
     @Override

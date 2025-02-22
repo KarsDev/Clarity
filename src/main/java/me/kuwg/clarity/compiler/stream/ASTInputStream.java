@@ -20,7 +20,7 @@ import static me.kuwg.clarity.compiler.ASTData.SEGMENT_BITS;
  * @author hi12167pies
  */
 public final class ASTInputStream extends DataInputStream {
-    private final BufferedInputStream bufferedStream;
+    public final BufferedInputStream bufferedStream;
 
     public ASTInputStream(InputStream inputStream) {
         super(new BufferedInputStream(inputStream)); // wrapper for mark/reset support
@@ -72,7 +72,7 @@ public final class ASTInputStream extends DataInputStream {
         int id = readVarInt();
         Class<? extends ASTNodeCompiler> clazz = ASTData.getClassFromId(id);
         if (clazz == null) {
-            return null;
+            throw new IOException("Null class for id " + id);
         }
 
         ASTNodeCompiler node;

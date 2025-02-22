@@ -19,10 +19,10 @@ public final class ASTSaver {
     }
 
     public void save(final File file) throws IOException {
-        try (final GZIPOutputStream gzipOut = new GZIPOutputStream(Files.newOutputStream(file.toPath()));
-             ASTOutputStream out = new ASTOutputStream(gzipOut)) {
+        try (final GZIPOutputStream gzipOut = new GZIPOutputStream(Files.newOutputStream(file.toPath()))) {
+            final ASTOutputStream out = new ASTOutputStream(gzipOut);
             CompilerVersion.write(out);
-            out.writeNode(ast.getRoot(), CompilerVersion.LATEST);
+            out.writeNode(ast.getRoot());
         }
     }
 }

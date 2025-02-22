@@ -37,9 +37,9 @@ public class AsyncBlockNode extends ASTNode implements PreInterpretable {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(name, version);
-        out.writeNode(block, version);
+    protected void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(name);
+        out.writeNode(block);
     }
 
     @Override

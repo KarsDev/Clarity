@@ -27,10 +27,10 @@ public class NativeCastNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    protected void save0(final ASTOutputStream out) throws IOException {
         out.writeVarInt(type.ordinal());
         if (type.isClass()) out.writeString(type.getValue());
-        out.writeNode(casted, version);
+        out.writeNode(casted);
     }
 
     @Override

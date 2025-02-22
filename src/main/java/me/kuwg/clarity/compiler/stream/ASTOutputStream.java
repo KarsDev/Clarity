@@ -3,7 +3,6 @@ package me.kuwg.clarity.compiler.stream;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.compiler.ASTData;
 import me.kuwg.clarity.compiler.ASTNodeCompiler;
-import me.kuwg.clarity.compiler.CompilerVersion;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -26,11 +25,10 @@ public final class ASTOutputStream extends DataOutputStream {
     /**
      * Writes an {@link ASTNodeCompiler} to the output stream.
      *
-     * @param node    The ASTNodeCompiler to be written.
-     * @param version
+     * @param node The ASTNodeCompiler to be written.
      * @throws IOException If an I/O error occurs.
      */
-    public void writeNode(ASTNodeCompiler node, final CompilerVersion version) throws IOException {
+    public void writeNode(ASTNodeCompiler node) throws IOException {
         // Get node id
         int id = ASTData.getIdFromNode(node == null ? null : node.getClass());
 
@@ -42,21 +40,20 @@ public final class ASTOutputStream extends DataOutputStream {
         writeVarInt(id);
 
         if (node != null) {
-            node.save(this, version);
+            node.save(this);
         }
     }
 
     /**
      * Writes a list of {@link ASTNode} to the output stream.
      *
-     * @param list    The list of ASTNodes to be written.
-     * @param version
+     * @param list The list of ASTNodes to be written.
      * @throws IOException If an I/O error occurs.
      */
-    public void writeNodeList(List<? extends ASTNode> list, final CompilerVersion version) throws IOException {
+    public void writeNodeList(List<? extends ASTNode> list) throws IOException {
         writeVarInt(list.size());
         for (ASTNode astNode : list) {
-            writeNode(astNode, version);
+            writeNode(astNode);
         }
     }
 

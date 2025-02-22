@@ -81,13 +81,13 @@ public class NativeClassDeclarationNode extends ASTNode implements PreInterpreta
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
         out.writeBoolean(isConstant);
         out.writeString(inheritedClass != null ? inheritedClass : "null");
         out.writeString(fileName);
-        out.writeNodeList(constructors, version);
-        out.writeNode(body, version);
+        out.writeNodeList(constructors);
+        out.writeNode(body);
     }
 
     @Override

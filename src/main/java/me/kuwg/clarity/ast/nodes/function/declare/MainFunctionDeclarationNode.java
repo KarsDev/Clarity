@@ -18,8 +18,8 @@ public class MainFunctionDeclarationNode extends FunctionDeclarationNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(super.block, version);
+    public void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(super.block);
     }
 
     @Override

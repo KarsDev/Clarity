@@ -34,8 +34,8 @@ public class ObjectVariableReferenceNode extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(caller, version);
+    public void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(caller);
         out.writeString(called);
     }
 

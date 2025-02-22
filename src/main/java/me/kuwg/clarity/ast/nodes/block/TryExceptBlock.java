@@ -61,10 +61,10 @@ public class TryExceptBlock extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(tryBlock, version);
+    protected void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(tryBlock);
         out.writeString(String.valueOf(excepted));
-        out.writeNode(exceptBlock, version);
+        out.writeNode(exceptBlock);
     }
 
     @Override

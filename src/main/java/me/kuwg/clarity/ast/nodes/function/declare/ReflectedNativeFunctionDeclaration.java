@@ -92,11 +92,11 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    protected void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
         out.writeString(String.valueOf(typeDefault));
         out.writeString(fileName);
-        out.writeNodeList(params, version);
+        out.writeNodeList(params);
         out.writeBoolean(isStatic);
         out.writeBoolean(isConst);
         out.writeBoolean(isLocal);

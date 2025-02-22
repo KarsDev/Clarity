@@ -29,7 +29,7 @@ public class BooleanNode extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeBoolean(value);
     }
 

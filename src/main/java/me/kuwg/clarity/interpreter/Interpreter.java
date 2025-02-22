@@ -170,7 +170,6 @@ public final class Interpreter {
             return false;
         } else if (node instanceof PreInterpretable) {
             final BlockNode inside = ((PreInterpretable) node).getBlock();
-
             for (final ASTNode sub : inside) {
                 if (preInterpret(sub, inside, context)) {
                     inside.getChildren().remove(sub);

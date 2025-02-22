@@ -44,9 +44,9 @@ public class IncludeNode extends ASTNode implements PreInterpretable {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
-        out.writeNode(included, version);
+        out.writeNode(included);
         out.writeBoolean(isNative);
     }
 

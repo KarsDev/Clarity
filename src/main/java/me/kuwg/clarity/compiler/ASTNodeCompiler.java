@@ -9,6 +9,6 @@ import java.io.IOException;
  * @author hi12167pies
  */
 public interface ASTNodeCompiler {
-    void save(ASTOutputStream out, CompilerVersion version) throws IOException;
+    void save(ASTOutputStream out) throws IOException;
     void load(ASTInputStream in, CompilerVersion version) throws IOException;
 }

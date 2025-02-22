@@ -75,11 +75,11 @@ public class IfNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(condition, version);
-        out.writeNode(ifBlock, version);
-        out.writeNodeList(elseIfStatements, version);
-        out.writeNode(elseBlock, version);
+    protected void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(condition);
+        out.writeNode(ifBlock);
+        out.writeNodeList(elseIfStatements);
+        out.writeNode(elseBlock);
     }
 
     @Override

@@ -43,9 +43,9 @@ public class LambdaBlockNode extends ASTNode implements PreInterpretable {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNodeList(params, version);
-        out.writeNode(block, version);
+    protected void save0(final ASTOutputStream out) throws IOException {
+        out.writeNodeList(params);
+        out.writeNode(block);
     }
 
     @Override

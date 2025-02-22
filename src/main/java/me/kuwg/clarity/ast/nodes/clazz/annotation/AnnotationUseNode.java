@@ -54,10 +54,10 @@ public class AnnotationUseNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    protected void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
-        out.writeNodeList(values, version);
-        out.writeNode(following, version);
+        out.writeNodeList(values);
+        out.writeNode(following);
     }
 
     @Override
@@ -95,9 +95,9 @@ public class AnnotationUseNode extends ASTNode {
         }
 
         @Override
-        protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        protected void save0(final ASTOutputStream out) throws IOException {
             out.writeString(name);
-            out.writeNode(value, version);
+            out.writeNode(value);
         }
 
         @Override

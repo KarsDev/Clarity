@@ -33,7 +33,7 @@ public class NativeFunctionNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    protected void save0(final ASTOutputStream out) throws IOException {
         throw new RuntimeException("Unsupported operation for native function node: \"save\"");
     }
 

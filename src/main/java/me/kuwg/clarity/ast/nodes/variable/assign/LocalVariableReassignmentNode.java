@@ -38,9 +38,9 @@ public class LocalVariableReassignmentNode extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    public void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
-        out.writeNode(value, version);
+        out.writeNode(value);
     }
 
     @Override

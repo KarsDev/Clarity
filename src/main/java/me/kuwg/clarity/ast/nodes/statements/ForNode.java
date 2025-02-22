@@ -65,11 +65,11 @@ public class ForNode extends ASTNode implements PreInterpretable {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(declaration, version);
-        out.writeNode(condition, version);
-        out.writeNode(incrementation, version);
-        out.writeNode(block, version);
+    protected void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(declaration);
+        out.writeNode(condition);
+        out.writeNode(incrementation);
+        out.writeNode(block);
     }
 
     @Override

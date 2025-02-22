@@ -36,9 +36,9 @@ public class DeleteFunctionNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+    protected void save0(final ASTOutputStream out) throws IOException {
         out.writeString(name);
-        out.writeNode(params, version);
+        out.writeNode(params);
     }
 
     @Override

@@ -45,11 +45,11 @@ public class AssertNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(condition, version);
+    protected void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(condition);
         final boolean b = orElse != null;
         out.writeBoolean(b);
-        if (b) out.writeNode(orElse, version);
+        if (b) out.writeNode(orElse);
     }
 
     @Override

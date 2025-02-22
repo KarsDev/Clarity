@@ -57,10 +57,10 @@ public class SelectNode extends ASTNode implements PreInterpretable {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeNode(condition, version);
-        out.writeNodeList(cases, version);
-        out.writeNode(defaultBlock, version);
+    protected void save0(final ASTOutputStream out) throws IOException {
+        out.writeNode(condition);
+        out.writeNodeList(cases);
+        out.writeNode(defaultBlock);
     }
 
     @Override
@@ -106,9 +106,9 @@ public class SelectNode extends ASTNode implements PreInterpretable {
         }
 
         @Override
-        protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-            out.writeNode(whenExpression, version);
-            out.writeNode(block, version);
+        protected void save0(final ASTOutputStream out) throws IOException {
+            out.writeNode(whenExpression);
+            out.writeNode(block);
         }
 
         @Override
