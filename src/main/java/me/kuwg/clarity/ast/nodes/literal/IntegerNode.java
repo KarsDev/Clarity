@@ -5,6 +5,7 @@ import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class IntegerNode extends AbstractNumberNode {
 
@@ -32,14 +33,33 @@ public class IntegerNode extends AbstractNumberNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
-        out.writeLong(value);
     public void save0(final ASTOutputStream out) throws IOException {
+        final String longAsString = Long.toString(value);
+
+        final boolean writingAsString = longAsString.getBytes(StandardCharsets.UTF_8).length << 3 < 64;
+
+        out.writeBoolean(writingAsString);
+
+        if (writingAsString) {
+            out.writeString(longAsString);
+        } else {
+            out.writeLong(value);
+        }
     }
 
     @Override
     public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
-        this.value = in.readLong();
+        if (version.isOlderThan(CompilerVersion.V1_0)) {
+            this.value = in.readLong();
+            return;
+        }
+
+        if (!in.readBoolean()) {
+            this.value = in.readLong();
+            return;
+        }
+
+        this.value = Long.parseLong(in.readString());
     }
 
     @Override
