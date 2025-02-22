@@ -104,4 +104,48 @@ public final class ASTOutputStream extends DataOutputStream {
             value >>>= 7;
         }
     }
+
+    public void writeOptimalLong(final long value) throws IOException {
+        final int lBits = Long.BYTES * 8;
+        final String lStrBytes = Long.toString(value);
+        final int lStrBits = lStrBytes.getBytes(StandardCharsets.UTF_8).length * 8;
+
+        final int stringBytes = getVarIntBits(lStrBits) + lStrBits;
+
+        if (stringBytes < lBits) {
+            writeBoolean(true);
+            writeString(lStrBytes);
+        } else {
+            writeBoolean(false);
+            writeLong(value);
+        }
+    }
+
+    public void writeOptimalDouble(final double value) throws IOException {
+        final int dBits = Double.BYTES * 8;
+        final String dStrBytes = Double.toString(value);
+        final int dStrBits = dStrBytes.getBytes(StandardCharsets.UTF_8).length * 8;
+
+        final int stringBytes = getVarIntBits(dStrBits) + dStrBits;
+
+        if (stringBytes < dBits) {
+            writeBoolean(true);
+            writeString(dStrBytes);
+        } else {
+            writeBoolean(false);
+            writeDouble(value);
+        }
+    }
+
+    private static int getVarIntBits(int value) {
+        int bits = 0;
+        while (true) {
+            bits += 7;
+            if ((value & ~SEGMENT_BITS) == 0) {
+                break;
+            }
+            value >>>= 7;
+        }
+        return bits;
+    }
 }

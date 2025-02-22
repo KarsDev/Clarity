@@ -152,4 +152,28 @@ public final class ASTInputStream extends DataInputStream {
 
         return value;
     }
+
+    public long readOptimalLong(final CompilerVersion version) throws IOException {
+        if (version.isOlderThan(CompilerVersion.V1_0)) {
+            return readLong();
+        }
+
+        if (!readBoolean()) {
+            return readLong();
+        }
+
+        return Long.parseLong(readString());
+    }
+
+    public double readOptimalDouble(final CompilerVersion version) throws IOException {
+        if (version.isOlderThan(CompilerVersion.V1_0)) {
+            return readDouble();
+        }
+
+        if (!readBoolean()) {
+            return readDouble();
+        }
+
+        return Double.parseDouble(readString());
+    }
 }

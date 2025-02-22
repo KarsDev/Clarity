@@ -5,9 +5,6 @@ import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-
-import static me.kuwg.clarity.compiler.ASTData.getVarIntBits;
 
 public class IntegerNode extends AbstractNumberNode {
 
@@ -36,32 +33,12 @@ public class IntegerNode extends AbstractNumberNode {
 
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
-        final String longAsString = Long.toString(value);
-
-        final boolean writingAsString = longAsString.getBytes(StandardCharsets.UTF_8).length << 3 + getVarIntBits(longAsString.length()) < 64;
-
-        out.writeBoolean(writingAsString);
-
-        if (writingAsString) {
-            out.writeString(longAsString);
-        } else {
-            out.writeLong(value);
-        }
+        out.writeOptimalLong(value);
     }
 
     @Override
     public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
-        if (version.isOlderThan(CompilerVersion.V1_0)) {
-            this.value = in.readLong();
-            return;
-        }
-
-        if (!in.readBoolean()) {
-            this.value = in.readLong();
-            return;
-        }
-
-        this.value = Long.parseLong(in.readString());
+        this.value = in.readOptimalLong(version);
     }
 
     @Override

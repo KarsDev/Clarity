@@ -20,7 +20,7 @@ public enum CompilerVersion {
      * This is way rarer than winning the Powerball jackpot TWICE (1 in 100 billion).
      * This is also much less probable to happen than being struck by an asteroid (1 in 74 billion).
      */
-    private static final boolean[] DECLARE = {
+    private static final boolean[] VERSION_PREFIX = {
             true, false, true, false, true, false, false, false,
             true, false, false, false, false, true, true, false,
             true, false, true, true, true, false, false, true,
@@ -29,9 +29,9 @@ public enum CompilerVersion {
     };
 
     public static CompilerVersion read(final ASTInputStream in) throws IOException {
-        in.mark(DECLARE.length);
+        in.mark(VERSION_PREFIX.length);
 
-        for (final boolean bit : DECLARE) {
+        for (final boolean bit : VERSION_PREFIX) {
             if (in.readBoolean() != bit) {
                 in.reset();
                 return PRE;
@@ -47,7 +47,7 @@ public enum CompilerVersion {
     }
 
     public static void write(final ASTOutputStream out) throws IOException {
-        for (final boolean bit : DECLARE) {
+        for (final boolean bit : VERSION_PREFIX) {
             out.writeBoolean(bit);
         }
 

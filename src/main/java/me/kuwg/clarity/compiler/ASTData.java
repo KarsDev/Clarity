@@ -129,16 +129,4 @@ public final class ASTData {
     public static Class<? extends ASTNodeCompiler> getClassFromId(int id) {
         return ID_TO_NODE.getOrDefault(id, null);
     }
-
-    public static int getVarIntBits(int value) {
-        int bits = 0;
-        while (true) {
-            bits += 7;
-            if ((value & ~SEGMENT_BITS) == 0) {
-                break;
-            }
-            value >>>= 7;
-        }
-        return bits;
-    }
 }
