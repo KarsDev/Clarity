@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.variable.assign;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -86,21 +87,21 @@ public class VariableDeclarationNode extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeString(name);
         out.writeString(String.valueOf(typeDefault));
-        out.writeNode(value);
+        out.writeNode(value, version);
         out.writeBoolean(isConstant);
         out.writeBoolean(isStatic);
         out.writeBoolean(isLocal);
     }
 
     @Override
-    public void load0(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.name = in.readString();
         this.typeDefault = in.readString();
         if (this.typeDefault.equals("null")) this.typeDefault = null;
-        this.value = in.readNode();
+        this.value = in.readNode(version);
         this.isConstant = in.readBoolean();
         this.isStatic = in.readBoolean();
         this.isLocal = in.readBoolean();

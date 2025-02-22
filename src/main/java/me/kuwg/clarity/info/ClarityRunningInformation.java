@@ -10,6 +10,7 @@ import java.util.Map;
  * configuration options from the command-line arguments. It interprets specific arguments
  * and determines their boolean values based on predefined options.
  */
+@SuppressWarnings("SpellCheckingInspection")
 public final class ClarityRunningInformation {
 
     /**
@@ -20,17 +21,24 @@ public final class ClarityRunningInformation {
     private static final Option[] OPTIONS = {
             // optimization (deprecated)
             load("optimize", true, "noopt", "opt", "Deprecated option for AST optimization."),
+
             // verbose (log)
             load("verbose", false, "noverb", "verb", "Enables startup verbose."),
+
             // starting info (jvm startup times)
-            load("startinfo", false, "nsinfo", "sinfo", "Enables writing JVM startup timings information."),
+            load("startinfo", false, "nsinfo", "sinfo", "Enables debugging JVM startup timings information."),
+
             // speed info (graph)
             load("speedinfo", false, "nspeedinfo", "speedinfo", "Creates a graph at the end of the interpretation that describes node speed."),
+
             // default natives (include)
             load("defaults", true, "nodef", "def", "Enables including default natives."),
+
             // load default natives in interpreter
             load("loadnatives", false, "nlnat", "loadnatives", "Enables pre-loading for known default natives in the interpreter."),
 
+            // compiler version
+            load("compilerversion", false, "nocompver", "compver", "Enables debugging for compiler version.")
     };
 
     /**

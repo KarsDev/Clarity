@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.clazz.envm;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -58,19 +59,19 @@ public class EnumDeclarationNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeString(name);
         out.writeBoolean(isConstant);
         out.writeString(fileName);
-        out.writeNodeList(enumValues);
+        out.writeNodeList(enumValues, version);
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.name = in.readString();
         this.isConstant = in.readBoolean();
         this.fileName = in.readString();
-        this.enumValues = in.readNodeListNoCast();
+        this.enumValues = in.readNodeListNoCast(version);
     }
 
     public static class EnumValueNode extends ASTNode {
@@ -105,15 +106,15 @@ public class EnumDeclarationNode extends ASTNode {
         }
 
         @Override
-        protected void save0(final ASTOutputStream out) throws IOException {
+        protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
             out.writeString(name);
-            out.writeNode(value);
+            out.writeNode(value, version);
         }
 
         @Override
-        protected void load0(final ASTInputStream in) throws IOException {
+        protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
             this.name = in.readString();
-            this.value = in.readNode();
+            this.value = in.readNode(version);
         }
     }
 }

@@ -4,6 +4,7 @@ import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.PreInterpretable;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -81,23 +82,23 @@ public class ClassDeclarationNode extends ASTNode implements PreInterpretable {
     }
 
     @Override
-    public void save0(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeString(name);
         out.writeBoolean(isConstant);
         out.writeString(inheritedClass != null ? inheritedClass : "null");
         out.writeString(fileName);
-        out.writeNodeList(constructors);
-        out.writeNode(body);
+        out.writeNodeList(constructors, version);
+        out.writeNode(body, version);
     }
 
     @Override
-    public void load0(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.name = in.readString();
         this.isConstant = in.readBoolean();
         this.inheritedClass = in.readString();
         if (this.inheritedClass.equals("null")) this.inheritedClass = null;
         this.fileName = in.readString();
-        this.constructors = in.readNodeListNoCast();
-        this.body = (BlockNode) in.readNode();
+        this.constructors = in.readNodeListNoCast(version);
+        this.body = (BlockNode) in.readNode(version);
     }
 }

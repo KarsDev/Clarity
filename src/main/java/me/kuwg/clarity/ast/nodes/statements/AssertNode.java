@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.statements;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -44,17 +45,17 @@ public class AssertNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
-        out.writeNode(condition);
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        out.writeNode(condition, version);
         final boolean b = orElse != null;
         out.writeBoolean(b);
-        if (b) out.writeNode(orElse);
+        if (b) out.writeNode(orElse, version);
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
-        this.condition = in.readNode();
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
+        this.condition = in.readNode(version);
         final boolean b = in.readBoolean();
-        if (b) this.orElse = in.readNode();
+        if (b) this.orElse = in.readNode(version);
     }
 }

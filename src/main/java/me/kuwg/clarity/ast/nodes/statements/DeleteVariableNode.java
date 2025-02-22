@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.statements;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -26,12 +27,12 @@ public class DeleteVariableNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeString(name);
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.name = in.readString();
     }
 }

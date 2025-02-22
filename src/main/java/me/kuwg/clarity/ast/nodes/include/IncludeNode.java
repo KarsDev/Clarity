@@ -3,6 +3,7 @@ package me.kuwg.clarity.ast.nodes.include;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.PreInterpretable;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -43,16 +44,16 @@ public class IncludeNode extends ASTNode implements PreInterpretable {
     }
 
     @Override
-    public void save0(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeString(name);
-        out.writeNode(included);
+        out.writeNode(included, version);
         out.writeBoolean(isNative);
     }
 
     @Override
-    public void load0(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.name = in.readString();
-        this.included = (BlockNode) in.readNode();
+        this.included = (BlockNode) in.readNode(version);
         this.isNative = in.readBoolean();
     }
 

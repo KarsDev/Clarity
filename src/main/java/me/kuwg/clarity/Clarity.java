@@ -4,6 +4,7 @@ import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.compiler.ASTData;
 import me.kuwg.clarity.compiler.ASTLoader;
 import me.kuwg.clarity.compiler.ASTSaver;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.info.ClarityRunningInformation;
 import me.kuwg.clarity.installer.modules.ClarityModuleInstaller;
 import me.kuwg.clarity.installer.sys.ClarityInstaller;
@@ -270,6 +271,7 @@ public final class Clarity {
 
     private static void runCompiledFile(File file) {
         AST ast = loadASTFromFile(file);
+
         INTERPRETER = new Interpreter(ast);
         EXIT_CODE = INTERPRETER.interpret();
     }
@@ -304,6 +306,10 @@ public final class Clarity {
     private static void compileFile(String[] args, File file) throws IOException {
         String output = determineOutputFileName(args, file);
         if (output == null) return;
+
+        if (INFORMATION.getOption("compilerversion")) {
+            System.out.println("Current compiler version: " + CompilerVersion.LATEST);
+        }
 
         AST ast = parseASTFromSource(file);
         System.out.println("Saving the compiled AST to: " + output);

@@ -3,6 +3,7 @@ package me.kuwg.clarity.ast.nodes.block;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.PreInterpretable;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -42,14 +43,14 @@ public class LambdaBlockNode extends ASTNode implements PreInterpretable {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
-        out.writeNodeList(params);
-        out.writeNode(block);
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        out.writeNodeList(params, version);
+        out.writeNode(block, version);
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
-        this.params = in.readNodeListNoCast();
-        this.block = (BlockNode) in.readNode();
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
+        this.params = in.readNodeListNoCast(version);
+        this.block = (BlockNode) in.readNode(version);
     }
 }

@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.function.call;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -44,14 +45,14 @@ public class LocalFunctionCallNode extends ASTNode {
 
 
     @Override
-    public void save0(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeString(functionName);
-        out.writeNodeList(params);
+        out.writeNodeList(params, version);
     }
 
     @Override
-    public void load0(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.functionName = in.readString();
-        this.params = in.readNodeListNoCast();
+        this.params = in.readNodeListNoCast(version);
     }
 }

@@ -1,5 +1,6 @@
 package me.kuwg.clarity.compiler;
 
+import me.kuwg.clarity.Clarity;
 import me.kuwg.clarity.ast.AST;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
@@ -27,7 +28,13 @@ public final class ASTLoader {
     public AST load() throws IOException {
         try (final GZIPInputStream gzipIn = new GZIPInputStream(Files.newInputStream(path))) {
             final ASTInputStream stream = new ASTInputStream(gzipIn);
-            final BlockNode rootNode = (BlockNode) stream.readNode();
+            final CompilerVersion version = CompilerVersion.read(stream);
+            final BlockNode rootNode = (BlockNode) stream.readNode(version);
+
+            if (Clarity.INFORMATION.getOption("compilerversion")) {
+                System.out.println("Loaded compiler version: " + version);
+            }
+
             stream.close();
             return new AST(rootNode);
         }

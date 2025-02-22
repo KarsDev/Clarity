@@ -3,6 +3,7 @@ package me.kuwg.clarity.ast.nodes.statements;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.PreInterpretable;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -64,18 +65,18 @@ public class ForNode extends ASTNode implements PreInterpretable {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
-        out.writeNode(declaration);
-        out.writeNode(condition);
-        out.writeNode(incrementation);
-        out.writeNode(block);
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        out.writeNode(declaration, version);
+        out.writeNode(condition, version);
+        out.writeNode(incrementation, version);
+        out.writeNode(block, version);
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
-        this.declaration = in.readNode();
-        this.condition = in.readNode();
-        this.incrementation = in.readNode();
-        this.block = (BlockNode) in.readNode();
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
+        this.declaration = in.readNode(version);
+        this.condition = in.readNode(version);
+        this.incrementation = in.readNode(version);
+        this.block = (BlockNode) in.readNode(version);
     }
 }

@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.clazz.cast;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -26,17 +27,17 @@ public class NativeCastNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeVarInt(type.ordinal());
         if (type.isClass()) out.writeString(type.getValue());
-        out.writeNode(casted);
+        out.writeNode(casted, version);
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.type = CastType.ofOrdinal((in.readVarInt()));
         if (this.type.isClass()) this.type.setValue(in.readString());
-        this.casted = in.readNode();
+        this.casted = in.readNode(version);
     }
 
     public final CastType getType() {

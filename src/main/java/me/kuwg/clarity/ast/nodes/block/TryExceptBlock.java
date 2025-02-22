@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.block;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -60,18 +61,18 @@ public class TryExceptBlock extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
-        out.writeNode(tryBlock);
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        out.writeNode(tryBlock, version);
         out.writeString(String.valueOf(excepted));
-        out.writeNode(exceptBlock);
+        out.writeNode(exceptBlock, version);
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
-        this.tryBlock = (BlockNode) in.readNode();
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
+        this.tryBlock = (BlockNode) in.readNode(version);
         this.excepted = in.readString();
         if (this.excepted.equals("null")) this.excepted = null;
-        this.exceptBlock = (BlockNode) in.readNode();
+        this.exceptBlock = (BlockNode) in.readNode(version);
     }
 
     @Override

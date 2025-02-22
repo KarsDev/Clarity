@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast;
 
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -25,12 +26,12 @@ public final class AST extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out) {
+    public void save0(final ASTOutputStream out, final CompilerVersion version) {
         throw new RuntimeException("Cannot save AST");
     }
 
     @Override
-    public void load0(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         throw new RuntimeException("Cannot load AST");
     }
 

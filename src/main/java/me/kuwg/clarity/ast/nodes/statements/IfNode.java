@@ -2,6 +2,7 @@ package me.kuwg.clarity.ast.nodes.statements;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -74,18 +75,18 @@ public class IfNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
-        out.writeNode(condition);
-        out.writeNode(ifBlock);
-        out.writeNodeList(elseIfStatements);
-        out.writeNode(elseBlock);
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        out.writeNode(condition, version);
+        out.writeNode(ifBlock, version);
+        out.writeNodeList(elseIfStatements, version);
+        out.writeNode(elseBlock, version);
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
-        this.condition = in.readNode();
-        this.ifBlock = (BlockNode) in.readNode();
-        this.elseIfStatements = in.readNodeListNoCast();
-        this.elseBlock = (BlockNode) in.readNode();
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
+        this.condition = in.readNode(version);
+        this.ifBlock = (BlockNode) in.readNode(version);
+        this.elseIfStatements = in.readNodeListNoCast(version);
+        this.elseBlock = (BlockNode) in.readNode(version);
     }
 }

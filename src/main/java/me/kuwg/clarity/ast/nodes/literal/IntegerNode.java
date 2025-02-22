@@ -1,5 +1,6 @@
 package me.kuwg.clarity.ast.nodes.literal;
 
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -31,12 +32,12 @@ public class IntegerNode extends AbstractNumberNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeLong(value);
     }
 
     @Override
-    public void load0(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.value = in.readLong();
     }
 

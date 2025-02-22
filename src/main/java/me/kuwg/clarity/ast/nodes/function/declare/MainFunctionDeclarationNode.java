@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.function.declare;
 
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -17,14 +18,14 @@ public class MainFunctionDeclarationNode extends FunctionDeclarationNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out) throws IOException {
-        out.writeNode(super.block);
+    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        out.writeNode(super.block, version);
     }
 
     @Override
-    public void load0(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         super.functionName = "main";
         super.parameterNodes = new ArrayList<>();
-        super.block = (BlockNode) in.readNode();
+        super.block = (BlockNode) in.readNode(version);
     }
 }

@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.function.declare;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -91,11 +92,11 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeString(name);
         out.writeString(String.valueOf(typeDefault));
         out.writeString(fileName);
-        out.writeNodeList(params);
+        out.writeNodeList(params, version);
         out.writeBoolean(isStatic);
         out.writeBoolean(isConst);
         out.writeBoolean(isLocal);
@@ -103,12 +104,12 @@ public class ReflectedNativeFunctionDeclaration extends ASTNode {
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.name = in.readString();
         this.typeDefault = in.readString();
         if (this.typeDefault.equals("null")) this.typeDefault = null;
         this.fileName = in.readString();
-        this.params = in.readNodeListNoCast();
+        this.params = in.readNodeListNoCast(version);
         this.isStatic = in.readBoolean();
         this.isConst = in.readBoolean();
         this.isLocal = in.readBoolean();

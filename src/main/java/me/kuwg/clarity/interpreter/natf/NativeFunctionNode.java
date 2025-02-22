@@ -1,6 +1,7 @@
 package me.kuwg.clarity.interpreter.natf;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 import me.kuwg.clarity.library.natives.ClarityNativeFunction;
@@ -32,12 +33,12 @@ public class NativeFunctionNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         throw new RuntimeException("Unsupported operation for native function node: \"save\"");
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         throw new RuntimeException("Unsupported operation for native function node: \"load\"");
     }
 }

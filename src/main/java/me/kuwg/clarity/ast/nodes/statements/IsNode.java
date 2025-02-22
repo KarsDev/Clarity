@@ -2,6 +2,7 @@ package me.kuwg.clarity.ast.nodes.statements;
 
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -41,15 +42,15 @@ public class IsNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
-        out.writeNode(expression);
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        out.writeNode(expression, version);
         out.writeVarInt(type.ordinal());
         if (type.isClass()) out.writeString(type.getValue());
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
-        this.expression = in.readNode();
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
+        this.expression = in.readNode(version);
         this.type = CastType.ofOrdinal(in.readVarInt());
         if (this.type.isClass()) this.type.setValue(in.readString());
     }

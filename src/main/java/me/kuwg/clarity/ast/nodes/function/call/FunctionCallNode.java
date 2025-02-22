@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.function.call;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -45,15 +46,15 @@ public class FunctionCallNode extends ASTNode {
 
 
     @Override
-    public void save0(final ASTOutputStream out) throws IOException {
-        out.writeNode(caller);
-        out.writeNodeList(params);
+    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        out.writeNode(caller, version);
+        out.writeNodeList(params, version);
     }
 
     @Override
-    public void load0(final ASTInputStream in) throws IOException {
-        this.caller = in.readNode();
-        this.params = in.readNodeListNoCast();
+    public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
+        this.caller = in.readNode(version);
+        this.params = in.readNodeListNoCast(version);
     }
 
     @Override

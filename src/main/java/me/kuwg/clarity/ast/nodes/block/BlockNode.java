@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.block;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -37,14 +38,14 @@ public class BlockNode extends ASTNode implements Iterable<ASTNode> {
     }
 
     @Override
-    public void save0(final ASTOutputStream out) throws IOException {
-        out.writeNodeList(children);
+    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        out.writeNodeList(children, version);
     }
 
     @Override
-    public void load0(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.children.clear();
-        this.children.addAll(in.readNodeList());
+        this.children.addAll(in.readNodeList(version));
     }
 
     @Override

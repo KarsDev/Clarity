@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.expression;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -65,16 +66,16 @@ public class BinaryExpressionNode extends ASTNode {
     }
 
     @Override
-    public void save0(final ASTOutputStream out) throws IOException {
-        out.writeNode(left);
+    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
+        out.writeNode(left, version);
         out.writeString(operator);
-        out.writeNode(right);
+        out.writeNode(right, version);
     }
 
     @Override
-    public void load0(final ASTInputStream in) throws IOException {
-        this.left = in.readNode();
+    public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
+        this.left = in.readNode(version);
         this.operator = in.readString();
-        this.right = in.readNode();
+        this.right = in.readNode(version);
     }
 }

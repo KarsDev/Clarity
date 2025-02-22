@@ -3,6 +3,7 @@ package me.kuwg.clarity.ast.nodes.function.declare;
 import me.kuwg.clarity.ast.ASTNode;
 import me.kuwg.clarity.ast.PreInterpretable;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -97,19 +98,19 @@ public class FunctionDeclarationNode extends ASTNode implements PreInterpretable
     }
 
     @Override
-    public void save0(final ASTOutputStream out) throws IOException {
+    public void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeString(functionName);
         out.writeString(String.valueOf(typeDefault));
         out.writeBoolean(isStatic);
         out.writeBoolean(isConst);
         out.writeBoolean(isLocal);
         out.writeBoolean(isAsync);
-        out.writeNodeList(parameterNodes);
-        out.writeNode(block);
+        out.writeNodeList(parameterNodes, version);
+        out.writeNode(block, version);
     }
 
     @Override
-    public void load0(final ASTInputStream in) throws IOException {
+    public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.functionName = in.readString();
         this.typeDefault = in.readString();
         if (this.typeDefault.equals("null")) this.typeDefault = null;
@@ -117,7 +118,7 @@ public class FunctionDeclarationNode extends ASTNode implements PreInterpretable
         this.isConst = in.readBoolean();
         this.isLocal = in.readBoolean();
         this.isAsync = in.readBoolean();
-        this.parameterNodes = in.readNodeListNoCast();
-        this.block = (BlockNode) in.readNode();
+        this.parameterNodes = in.readNodeListNoCast(version);
+        this.block = (BlockNode) in.readNode(version);
     }
 }

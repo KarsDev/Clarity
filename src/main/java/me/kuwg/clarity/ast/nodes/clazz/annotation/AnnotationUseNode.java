@@ -1,6 +1,7 @@
 package me.kuwg.clarity.ast.nodes.clazz.annotation;
 
 import me.kuwg.clarity.ast.ASTNode;
+import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
@@ -53,17 +54,17 @@ public class AnnotationUseNode extends ASTNode {
     }
 
     @Override
-    protected void save0(final ASTOutputStream out) throws IOException {
+    protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
         out.writeString(name);
-        out.writeNodeList(values);
-        out.writeNode(following);
+        out.writeNodeList(values, version);
+        out.writeNode(following, version);
     }
 
     @Override
-    protected void load0(final ASTInputStream in) throws IOException {
+    protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
         this.name = in.readString();
-        this.values = in.readNodeListNoCast();
-        this.following = in.readNode();
+        this.values = in.readNodeListNoCast(version);
+        this.following = in.readNode(version);
     }
 
     public static class AnnotationValueAssign extends ASTNode {
@@ -94,15 +95,15 @@ public class AnnotationUseNode extends ASTNode {
         }
 
         @Override
-        protected void save0(final ASTOutputStream out) throws IOException {
+        protected void save0(final ASTOutputStream out, final CompilerVersion version) throws IOException {
             out.writeString(name);
-            out.writeNode(value);
+            out.writeNode(value, version);
         }
 
         @Override
-        protected void load0(final ASTInputStream in) throws IOException {
+        protected void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
             this.name = in.readString();
-            this.value = in.readNode();
+            this.value = in.readNode(version);
         }
     }
 }
