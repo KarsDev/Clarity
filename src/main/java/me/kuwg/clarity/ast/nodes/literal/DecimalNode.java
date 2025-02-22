@@ -5,6 +5,9 @@ import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
+import static me.kuwg.clarity.compiler.ASTData.getVarIntBits;
 
 public class DecimalNode extends AbstractNumberNode {
 
@@ -30,12 +33,32 @@ public class DecimalNode extends AbstractNumberNode {
 
     @Override
     public void save0(final ASTOutputStream out) throws IOException {
-        out.writeDouble(value);
+        final String doubleAsString = Double.toString(value);
+
+        final boolean writingAsString = doubleAsString.getBytes(StandardCharsets.UTF_8).length << 3 + getVarIntBits(doubleAsString.length()) < 64;
+
+        out.writeBoolean(writingAsString);
+
+        if (writingAsString) {
+            out.writeString(doubleAsString);
+        } else {
+            out.writeDouble(value);
+        }
     }
 
     @Override
     public void load0(final ASTInputStream in, final CompilerVersion version) throws IOException {
-        this.value = in.readDouble();
+        if (version.isOlderThan(CompilerVersion.V1_0)) {
+            this.value = in.readDouble();
+            return;
+        }
+
+        if (!in.readBoolean()) {
+            this.value = in.readDouble();
+            return;
+        }
+
+        this.value = Double.parseDouble(in.readString());
     }
 
     @Override
