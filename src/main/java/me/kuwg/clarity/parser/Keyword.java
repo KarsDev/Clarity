@@ -42,6 +42,7 @@ public enum Keyword {
                     format("local [modifier...] fn [-> <type>] {...}", "Creates a local function in a class."),
                     format("local.var", "References a variable in the class."),
                     format("local.var = <value>", "Changes the value of a variable in the class"),
+                    format("local.fun([params])", "Calls a local variable in the class."),
 
             };
         }
@@ -380,6 +381,37 @@ public enum Keyword {
             return new String[] {
                     format("await <function>", "Pauses execution until the asynchronous function completes and returns a result."),
                     format("await -> <block>", "Waits for the asynchronous execution of a block of code."),
+
+            };
+        }
+    },
+    VIRTUAL {
+        @Override
+        public String[] usage() {
+            return new String[] {
+                    format("virtual <class definition>", "Defines a virtual class."),
+                    format("virtual [async] fn <name>([params])", "Defines a virtual function in a virtual class."),
+
+            };
+        }
+    },
+    EXTENDS {
+        @Override
+        public String[] usage() {
+            return new String[] {
+                    format("<class definition> extends <name>", "Extends a virtual class with all of its properties and virtual functions."),
+
+            };
+        }
+    },
+    PARENT {
+        @Override
+        public String[] usage() {
+            return new String[] {
+                    format("parent([params])", "Calls the parent constructor."),
+                    format("parent.var", "References a variable in the parent class."),
+                    format("parent.var = <value>", "Changes the value of a variable in the parent class"),
+                    format("parent.fun([params])", "Calls a parent variable in the class."),
 
             };
         }
