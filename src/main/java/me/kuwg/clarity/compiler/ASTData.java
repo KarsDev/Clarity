@@ -8,12 +8,10 @@ import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationDeclarationNode;
 import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationUseNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.virtual.VirtualClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
-import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
-import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
-import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
-import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
+import me.kuwg.clarity.ast.nodes.function.declare.*;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
@@ -73,6 +71,7 @@ public final class ASTData {
         registerNode(ReflectedNativeFunctionDeclaration.class, 0x308);
         registerNode(MemberFunctionCallNode.class, 0x309);
         registerNode(AwaitFunctionCallNode.class, 0x310);
+        registerNode(VirtualFunctionDeclarationNode.class, 0x311);
 
         // Variable (0x400)
         registerNode(VariableDeclarationNode.class, 0x400);
@@ -102,6 +101,7 @@ public final class ASTData {
         registerNode(EnumDeclarationNode.class, 0x704);
         registerNode(AnnotationDeclarationNode.class, 0x705);
         registerNode(AnnotationUseNode.class, 0x706);
+        registerNode(VirtualClassDeclarationNode.class, 0x707);
 
         // FREE 0x800
 
