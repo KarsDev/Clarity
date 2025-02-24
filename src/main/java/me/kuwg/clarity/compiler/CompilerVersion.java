@@ -6,7 +6,7 @@ import me.kuwg.clarity.compiler.stream.ASTOutputStream;
 import java.io.IOException;
 
 public enum CompilerVersion {
-    PRE, V1_0,
+    PRE, V1_0, V1_1
 
     ;
 
