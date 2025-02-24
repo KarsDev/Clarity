@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.List;
 
 public class ClassDeclarationNode extends ASTNode implements PreInterpretable {
-
     private String name;
     private boolean isConstant;
     private String fileName;
@@ -66,7 +65,7 @@ public class ClassDeclarationNode extends ASTNode implements PreInterpretable {
             sb.append(indent).append("    ").append("Inherits: ").append(inheritedClass).append("\n");
         }
         sb.append(indent).append("    ").append("File: ").append(fileName).append("\n");
-        if (constructors.size() != 0) {
+        if (!constructors.isEmpty()) {
             sb.append(indent).append("    ").append("Constructors:\n");
             for (final FunctionDeclarationNode constructor : constructors) {
                 constructor.print(sb, indent + "        -");

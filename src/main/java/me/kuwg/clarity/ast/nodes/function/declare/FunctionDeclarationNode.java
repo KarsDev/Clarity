@@ -68,7 +68,7 @@ public class FunctionDeclarationNode extends ASTNode implements PreInterpretable
     @Override
     public void print(final StringBuilder sb, final String indent) {
         sb.append(indent).append("Function: ").append(functionName).append(typeDefault != null ? " (" + typeDefault + ")" : "").append("\n");
-        sb.append(indent).append("Parameters: ");
+
 
         if (isConst) {
             sb.append(indent).append("  Type: Constant\n");
@@ -82,6 +82,8 @@ public class FunctionDeclarationNode extends ASTNode implements PreInterpretable
         if (isAsync) {
             sb.append(indent).append("  Type: Async\n");
         }
+
+        sb.append(indent).append("Parameters: ");
 
         if (parameterNodes.isEmpty()) {
             sb.append("None\n");
