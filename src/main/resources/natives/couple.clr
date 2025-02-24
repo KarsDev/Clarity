@@ -1,0 +1,44 @@
+const class Couple {
+    local var x
+    local var y
+
+    constructor() {
+        local.x = null
+        local.y = null
+    }
+
+    constructor(x, y) {
+        local.x = x
+        local.y = y
+    }
+
+    constructor(general) {
+        local.x = general
+        local.y = general
+    }
+
+    fn getX() {
+        return local.x
+    }
+
+    fn getY() {
+        return local.y
+    }
+
+    fn setX(x) {
+        local.x = x
+    }
+
+    fn setY(y) {
+        local.y = y
+    }
+
+    fn print() {
+        return "Couple{x=" + local.x + ", y=" + local.y + "}"
+    }
+
+    fn equals(other) {
+        if (!other is Couple) return false
+        return other.x == local.x && other.y == local.y
+    }
+}
