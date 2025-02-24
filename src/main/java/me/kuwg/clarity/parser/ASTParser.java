@@ -238,6 +238,8 @@ public final class ASTParser {
                 return parseSingleInclude();
             case AWAIT:
                 return parseAwaitDeclaration();
+            case VIRTUAL:
+                return parseVirtualDeclaration();
             default:
                 Register.throwException("Unsupported keyword: " + keyword + ", at line " + current.getLine());
                 return null;
@@ -319,7 +321,7 @@ public final class ASTParser {
             return parseFunctionDeclaration().setLine(line);
         }
 
-        final String name = consume(VARIABLE).getValue();
+        final String name = variable();
 
         if (typeDefault.equals("void")) { // can't create void variables
             Register.throwException("Void variables are not supported: " + name, line);
@@ -356,7 +358,7 @@ public final class ASTParser {
         if (matchAndConsume(KEYWORD, "native")) {
             consume(KEYWORD, "fn");
 
-            final String name = consume(VARIABLE).getValue();
+            final String name = variable();
             final List<ParameterNode> params = parseParameters();
 
             final String typeDefault = parseScopedValue();
@@ -367,7 +369,7 @@ public final class ASTParser {
 
         matchAndConsume(KEYWORD, "fn");
 
-        final String name = matchAndConsume(KEYWORD, "constructor") ? "constructor" : consume(VARIABLE).getValue();
+        final String name = matchAndConsume(KEYWORD, "constructor") ? "constructor" : variable();
         final int line = current().getLine();
         final List<ParameterNode> params = parseParameters();
 
@@ -432,7 +434,7 @@ public final class ASTParser {
             final String name;
 
             while (true) {
-                final String val = consume(VARIABLE).getValue();
+                final String val = variable();
 
                 if (matchAndConsume(DIVIDER, "(")) {
                     name = val;
@@ -456,7 +458,7 @@ public final class ASTParser {
             return ("def".equals(ip) ? new DefaultNativeFunctionCallNode(name, params) : new PackagedNativeFunctionCallNode(name, ip, params)).setLine(line);
         }
 
-        final String name = consume(VARIABLE).getValue();
+        final String name = variable();
 
         final List<ASTNode> params = new ArrayList<>();
 
@@ -542,7 +544,7 @@ public final class ASTParser {
                 if (match(KEYWORD)) {
                     valueOf = CastType.fromValue(consume(KEYWORD).getValue());
                 } else {
-                    final String value = consume(VARIABLE).getValue();
+                    final String value = variable();
 
                     valueOf = value.equals("num") ? CastType.NUM : new CastType.ClassCastType(value);
                 }
@@ -571,7 +573,7 @@ public final class ASTParser {
                 ASTNode node = new VariableReferenceNode(token.getValue()).setLine(line);
                 while (true) {
                     if (matchAndConsume(OPERATOR, ".")) {
-                        final String name = consume(VARIABLE).getValue();
+                        final String name = variable();
                         if (matchAndConsume(DIVIDER, "(")) {
                             List<ASTNode> params = new ArrayList<>();
                             while (!match(DIVIDER, ")")) {
@@ -586,7 +588,7 @@ public final class ASTParser {
                             String called;
 
                             do {
-                                called = consume(VARIABLE).getValue();
+                                called = variable();
                                 node = new ObjectVariableReferenceNode(node, called).setLine(current().getLine());
                             } while (matchAndConsume(OPERATOR, "."));
 
@@ -701,7 +703,7 @@ public final class ASTParser {
                 ASTNode node = parseNumber(token).setLine(line);
                 while (true) {
                     if (matchAndConsume(OPERATOR, ".")) {
-                        final String name = consume(VARIABLE).getValue();
+                        final String name = variable();
                         if (matchAndConsume(DIVIDER, "(")) {
                             List<ASTNode> params = new ArrayList<>();
                             while (!match(DIVIDER, ")")) {
@@ -722,7 +724,7 @@ public final class ASTParser {
                 ASTNode node = new LiteralNode(token.getValue()).setLine(line);
                 while (true) {
                     if (matchAndConsume(OPERATOR, ".")) {
-                        final String name = consume(VARIABLE).getValue();
+                        final String name = variable();
                         if (matchAndConsume(DIVIDER, "(")) {
                             List<ASTNode> params = new ArrayList<>();
                             while (!match(DIVIDER, ")")) {
@@ -859,12 +861,12 @@ public final class ASTParser {
         final boolean isConstant = matchAndConsume(KEYWORD, "const");
 
         consume(); // consume "class"
-        final String name = consume(VARIABLE).getValue();
+        final String name = variable();
 
         final String inheritedClass;
 
         if (matchAndConsume(KEYWORD, "inherits")) {
-            inheritedClass = consume(VARIABLE).getValue();
+            inheritedClass = variable();
         } else {
             inheritedClass = null;
         }
@@ -915,7 +917,7 @@ public final class ASTParser {
         consume(); // consume "new"
 
         final int line = current().getLine();
-        final String clazz = consume(VARIABLE).getValue(); // get the class name
+        final String clazz = variable(); // get the class name
         consume(DIVIDER, "(");
 
         final List<ASTNode> params = new ArrayList<>();
@@ -933,7 +935,7 @@ public final class ASTParser {
         while (true) {
             if (matchAndConsume(OPERATOR, ".")) {
                 if (match(VARIABLE)) {
-                    final String nextPart = consume(VARIABLE).getValue();
+                    final String nextPart = variable();
                     if (match(DIVIDER, "(")) {
                         node = parseMethodCall(nextPart, node);
                     } else {
@@ -1055,7 +1057,7 @@ public final class ASTParser {
                 final File file;
 
                 if (matchAndConsume(VARIABLE, "from")) {
-                    file = new File(Clarity.USER_HOME + "/Clarity/libraries/" + consume(VARIABLE).getValue(), path);
+                    file = new File(Clarity.USER_HOME + "/Clarity/libraries/" + variable(), path);
                 } else {
                     file = new File(path);
                 }
@@ -1129,7 +1131,7 @@ public final class ASTParser {
         if (isCompiled) {
             final File file;
             if (matchAndConsume(VARIABLE, "from")) {
-                file = new File(Clarity.USER_HOME + "/Clarity/libraries/" + consume(VARIABLE).getValue(), path);
+                file = new File(Clarity.USER_HOME + "/Clarity/libraries/" + variable(), path);
             } else {
                 file = new File(path);
             }
@@ -1214,14 +1216,14 @@ public final class ASTParser {
 
         if (matchAndConsume(OPERATOR, "*")) return "*";
 
-        path.append(consume(VARIABLE).getValue());
+        path.append(variable());
 
         while (matchAndConsume(OPERATOR, ".")) {
             if (matchAndConsume(OPERATOR, "*")) {
                 path.append(compiled ? "t" : "f").append("*");
                 return path.toString();
             }
-            path.append("\\").append(consume(VARIABLE).getValue());
+            path.append("\\").append(variable());
         }
 
         return path + (compiled ? ".cclr" : ".clr");
@@ -1260,7 +1262,7 @@ public final class ASTParser {
         final int line = consume().getLine(); // consume "for"
 
         if (lookahead().is(OPERATOR, ":") || lookahead().is(VARIABLE, "in") && current().getType().equals(VARIABLE)) {
-            final String var = consume(VARIABLE).getValue();
+            final String var = variable();
             consume();
             final ASTNode list = parseExpression();
             return new ForeachNode(var, list, parseBlock()).setLine(line);
@@ -1312,11 +1314,11 @@ public final class ASTParser {
         }
 
         consume(KEYWORD, "class");
-        final String name = consume(VARIABLE).getValue();
+        final String name = variable();
 
         final String inheritedClass;
         if (matchAndConsume(KEYWORD, "inherits")) {
-            inheritedClass = consume(VARIABLE).getValue();
+            inheritedClass = variable();
         } else {
             inheritedClass = null;
         }
@@ -1454,7 +1456,7 @@ public final class ASTParser {
     private ASTNode parseEnumDeclaration()  {
         final boolean isConstant = matchAndConsume(KEYWORD, "const");
         final int line = consume().getLine(); // consume "enum"
-        final String enumName = consume(VARIABLE).getValue();
+        final String enumName = variable();
         consume(DIVIDER, "{");
 
         final List<EnumDeclarationNode.EnumValueNode> enumValues = new ArrayList<>();
@@ -1480,14 +1482,14 @@ public final class ASTParser {
     private ASTNode parseAnnotationClassDeclaration() {
         consume(); // consume keyword 'class'
 
-        final String name = consume(VARIABLE).getValue();
+        final String name = variable();
 
         // custom block parsing
         consume(DIVIDER, "{");
 
         final List<AnnotationDeclarationNode.AnnotationElement> elements = new ArrayList<>();
         while (!matchAndConsume(DIVIDER, "}")) {
-            final String requiredValueName = consume(VARIABLE).getValue();
+            final String requiredValueName = variable();
             final ASTNode node = matchAndConsume(KEYWORD, "default") ? parseExpression() : null;
             elements.add(new AnnotationDeclarationNode.AnnotationElement(requiredValueName, node));
         }
@@ -1496,7 +1498,7 @@ public final class ASTParser {
     }
 
     private ASTNode parseAnnotationUse() {
-        final String used = consume(VARIABLE).getValue();
+        final String used = variable();
         final List<AnnotationUseNode.AnnotationValueAssign> values = new ArrayList<>();
         if (matchAndConsume(DIVIDER, "(")) {
             while (true) {
@@ -1575,7 +1577,7 @@ public final class ASTParser {
     private ASTNode parseDeleteDeclaration() {
         final int line = consume().getLine(); // "consume "delete"
 
-        final String name = consume(VARIABLE).getValue();
+        final String name = variable();
 
         if (matchAndConsume(DIVIDER, "(")) {
             final ASTNode params = parseExpression();
@@ -1587,7 +1589,7 @@ public final class ASTParser {
     }
 
     private ASTNode parseAwaitDeclaration() {
-        final int line = consume().getLine();
+        final int line = consume().getLine(); // consume "await"
 
         if (matchAndConsume(OPERATOR, "->")) {
             final BlockNode block = parseBlock();
@@ -1621,6 +1623,10 @@ public final class ASTParser {
     *
     *
      */
+
+    private String variable() {
+        return consume(VARIABLE).getValue();
+    }
 
     private Token matchIfConsume(final TokenType type, final String value) {
         return match(type, value) ? consume() : current();
