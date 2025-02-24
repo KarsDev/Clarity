@@ -4,6 +4,7 @@ import me.kuwg.clarity.library.ClarityNativeLibrary;
 import me.kuwg.clarity.library.natives.ClarityNativeClass;
 import me.kuwg.clarity.library.natives.ClarityNativeFunction;
 import me.kuwg.clarity.nmh.natives.abstracts.DefaultNativeFunction;
+import me.kuwg.clarity.nmh.natives.impl.clazz.ClassObjectNativeClass;
 import me.kuwg.clarity.nmh.natives.impl.clazz.FileNativeClass;
 import me.kuwg.clarity.nmh.natives.impl.clazz.MathNativeClass;
 import me.kuwg.clarity.nmh.natives.impl.clazz.UnsafeNativeClass;
@@ -59,6 +60,7 @@ public final class LocalClarityNativeLibrary implements ClarityNativeLibrary {
                 new MathNativeClass(),
                 new FileNativeClass(),
                 new UnsafeNativeClass(),
+                new ClassObjectNativeClass(),
 
         };
     }

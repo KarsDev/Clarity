@@ -22,7 +22,6 @@ public final class Privileges {
             "System",
             "Math",
             "Reflections",
-            "Class",
             "DEFAULTS"
     );
 

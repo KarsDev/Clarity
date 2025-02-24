@@ -9,6 +9,7 @@ import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
 import me.kuwg.clarity.interpreter.definition.VariableDefinition;
 import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.register.Register;
+import me.kuwg.clarity.util.StillTesting;
 
 import java.util.*;
 
@@ -178,7 +179,9 @@ public final class Context {
         return currentClassName != null ? currentClassName : (parentContext != null ? parentContext.getCurrentClassName() : null);
     }
 
+    @StillTesting
     public void setCurrentClassName(final String currentClassName) {
+        if (currentClassName == null) return;
         this.currentClassName = currentClassName;
     }
 
@@ -200,6 +203,14 @@ public final class Context {
 
     public void removeCurrentAnnotationName(final String currentAnnotationName) {
         this.currentAnnotationNames.remove(currentAnnotationName);
+    }
+
+    public Context highest() {
+        Context c = this;
+        while (c.parentContext != null) {
+            c = c.parentContext;
+        }
+        return c;
     }
 
     public void mergeContext(final Context source) {

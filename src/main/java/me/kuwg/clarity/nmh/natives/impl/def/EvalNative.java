@@ -23,7 +23,7 @@ public class EvalNative extends DefaultNativeFunction<Object> {
 
             final ASTParser parser = new ASTParser("none", "none", Tokenizer.tokenize(code));
 
-            final AST ast = parser.parse();
+            final AST ast = parser.parseL();
 
             final Interpreter interpreter = new Interpreter(ast);
             return interpreter.interpretBlock(ast.getRoot(), interpreter.general());

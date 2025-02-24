@@ -114,7 +114,8 @@ public final class ASTData {
         registerNode(IsNode.class, 0x904);
         registerNode(DeleteVariableNode.class, 0x905);
         registerNode(DeleteFunctionNode.class, 0x906);
-        registerNode(TernaryOperatorNode.class, 0x69);
+        registerNode(TernaryOperatorNode.class, 0x907);
+        registerNode(LocalReferenceNode.class, 0x908);
     }
 
     private static void registerNode(Class<? extends ASTNodeCompiler> clazz, int id) {

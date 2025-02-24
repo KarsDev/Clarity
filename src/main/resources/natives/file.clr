@@ -14,7 +14,7 @@ const native class File {
      # var file = new File("/path/to/file.txt")  // Initializes a File object for "file.txt".
      #/
     constructor(path) {
-        this.path = path
+        local.path = path
     }
 
     /##
@@ -35,7 +35,7 @@ const native class File {
     native fn exists()
 
     /##
-     # Function: delete
+     # Function: deleteFile
      #
      # Description:
      # Deletes the file at the specified path.
@@ -47,9 +47,9 @@ const native class File {
      # - bool value: `true` if the file was successfully deleted, `false` otherwise.
      #
      # Example:
-     # var deleted = file.delete()  // Deletes the file.
+     # var deleted = file.deleteFile()  // Deletes the file.
      #/
-    native fn delete()
+    native fn deleteFile()
 
     /##
      # Function: renameTo

@@ -42,6 +42,7 @@ public final class ClassUtil {
      * @throws IllegalStateException If the class is not found or if a return statement is encountered in the class body.
      */
     public static ClassObject initClass(final String className, final Context context, final Object... constructorParams) {
+        final String ocn = context.getCurrentClassName();
         context.setCurrentClassName(className);
 
         final Context classContext = new Context(context);
@@ -76,7 +77,7 @@ public final class ClassUtil {
         if (val != VOID_OBJECT) INTERPRETER.except("Return in class body", -404);
 
         final ClassObject result = INTERPRETER.interpretConstructors(inheritedObject, definition.getConstructors(), Arrays.asList(constructorParams), classContext, className);
-        context.setCurrentClassName(null);
+        context.setCurrentClassName(ocn);
         return result;
     }
 

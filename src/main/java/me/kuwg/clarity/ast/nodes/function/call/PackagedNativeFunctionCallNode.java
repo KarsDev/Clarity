@@ -59,4 +59,13 @@ public class PackagedNativeFunctionCallNode extends ASTNode {
         this.pkg = in.readString();
         this.params = in.readNodeListNoCast(version);
     }
+
+    @Override
+    public String toString() {
+        return "PackagedNativeFunctionCallNode{" +
+                "name='" + name + '\'' +
+                ", pkg='" + pkg + '\'' +
+                ", params=" + params +
+                '}';
+    }
 }

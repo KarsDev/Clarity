@@ -1,0 +1,12 @@
+native class ClassObject {
+    constructor() {
+    }
+
+    fn getClassName() {
+        return "ClassObject"
+    }
+
+    fn print() {
+        return "ClassObject#" + getClassName()
+    }
+}

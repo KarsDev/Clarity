@@ -135,9 +135,8 @@ public final class NativeMethodHandler {
      * @throws IllegalArgumentException if the function is not found or not accessible
      */
     public Object callPackaged(final String pkg, final String name, final String callerClass, final List<Object> params) {
-        final String key = pkg + "." + name;
+        final String key = pkg + (pkg.endsWith(".") ? "" : ".") + name;
         final ClarityPackagedNativeFunction<?> function = packagedFunctions.get(key);
-
         if (function != null && function.applies(pkg, name, callerClass, params)) {
             return function.call(params);
         }

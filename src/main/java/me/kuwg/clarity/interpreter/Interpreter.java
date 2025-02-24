@@ -45,6 +45,7 @@ import me.kuwg.clarity.nmh.NativeMethodHandler;
 import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.register.Register.RegisterElementType;
 import me.kuwg.clarity.token.Tokenizer;
+import me.kuwg.clarity.util.Debugging;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -67,6 +68,7 @@ public final class Interpreter {
     private final Context general;
     private final ExemptionHandler exemptionHandler;
 
+    @Debugging
     public Interpreter(final AST ast) {
         // optimization is useless
         this.ast = ast;
@@ -148,8 +150,11 @@ public final class Interpreter {
             return true;
         } else if (node instanceof ReflectedNativeFunctionDeclaration) {
             final ReflectedNativeFunctionDeclaration reflected = (ReflectedNativeFunctionDeclaration) node;
-            if (reflected.isStatic()) interpretReflectedNativeFunctionDeclaration(reflected, context);
-            return true;
+            if (reflected.isStatic()) {
+                interpretReflectedNativeFunctionDeclaration(reflected, context);
+                return true;
+            }
+            return false;
         } else if (node instanceof AnnotationDeclarationNode) {
             interpretAnnotationDeclaration((AnnotationDeclarationNode) node, context);
             return true;
@@ -189,21 +194,21 @@ public final class Interpreter {
 
         if (node instanceof BlockNode) return interpretBlock((BlockNode) node, context);
         else if (node instanceof VariableDeclarationNode) return interpretVariableDeclaration((VariableDeclarationNode) node, context);
-        else if (node instanceof BinaryExpressionNode) return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
+        else if (node instanceof BinaryExpressionNode) return interpretBinaryExpression((BinaryExpressionNode) node, context);
         else if (node instanceof DefaultNativeFunctionCallNode) return interpretDefaultNativeFunctionCall((DefaultNativeFunctionCallNode) node, context);
         else if (node instanceof IntegerNode) return ((IntegerNode) node).getValue();
         else if (node instanceof DecimalNode) return ((DecimalNode) node).getValue();
         else if (node instanceof LiteralNode) return ((LiteralNode) node).getValue();
         else if (node instanceof VariableReferenceNode) return interpretVariableReference((VariableReferenceNode) node, context);
         else if (node instanceof FunctionCallNode) return interpretFunctionCall((FunctionCallNode) node, context);
-        else if (node instanceof ReturnNode) return interpretReturnNode((ReturnNode) node, context);
+        else if (node instanceof ReturnNode) return interpretReturn((ReturnNode) node, context);
         else if (node instanceof ClassInstantiationNode) return interpretClassInstantiation((ClassInstantiationNode) node, context);
         else if (node instanceof FunctionDeclarationNode) return interpretFunctionDeclaration((FunctionDeclarationNode) node, context);
         else if (node instanceof ClassDeclarationNode) return interpretClassDeclaration((ClassDeclarationNode) node, context);
         else if (node instanceof VariableReassignmentNode) return interpretVariableReassignment((VariableReassignmentNode) node, context);
         else if (node instanceof ObjectFunctionCallNode) return interpretObjectFunctionCall((ObjectFunctionCallNode) node, context);
-        else if (node instanceof LocalVariableReferenceNode) return interpretLocalVariableReferenceNode((LocalVariableReferenceNode) node, context);
-        else if (node instanceof LocalFunctionCallNode) return interpretLocalFunctionCallNode((LocalFunctionCallNode) node, context);
+        else if (node instanceof LocalVariableReferenceNode) return interpretLocalVariableReference((LocalVariableReferenceNode) node, context);
+        else if (node instanceof LocalFunctionCallNode) return interpretLocalFunctionCall((LocalFunctionCallNode) node, context);
         else if (node instanceof ObjectVariableReferenceNode) return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
         else if (node instanceof ObjectVariableReassignmentNode) return interpretObjectVariableReassignment((ObjectVariableReassignmentNode) node, context);
         else if (node instanceof VoidNode) return VOID_RETURN;
@@ -240,6 +245,7 @@ public final class Interpreter {
         else if (node instanceof AwaitBlockNode) return interpretAwaitBlock((AwaitBlockNode) node, context);
         else if (node instanceof AwaitFunctionCallNode) return interpretAwaitFunctionCall((AwaitFunctionCallNode) node, context);
         else if (node instanceof NativeFunctionNode) return interpretNativeFunction((NativeFunctionNode) node, context);
+        //else if (node instanceof LocalReferenceNode) return context.getCurrentObject();
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -253,7 +259,7 @@ public final class Interpreter {
             } else if (node instanceof VariableDeclarationNode) {
                 return interpretVariableDeclaration((VariableDeclarationNode) node, context);
             } else if (node instanceof BinaryExpressionNode) {
-                return interpretBinaryExpressionNode((BinaryExpressionNode) node, context);
+                return interpretBinaryExpression((BinaryExpressionNode) node, context);
             } else if (node instanceof DefaultNativeFunctionCallNode) {
                 return interpretDefaultNativeFunctionCall((DefaultNativeFunctionCallNode) node, context);
             } else if (node instanceof IntegerNode) {
@@ -267,7 +273,7 @@ public final class Interpreter {
             } else if (node instanceof FunctionCallNode) {
                 return interpretFunctionCall((FunctionCallNode) node, context);
             } else if (node instanceof ReturnNode) {
-                return interpretReturnNode((ReturnNode) node, context);
+                return interpretReturn((ReturnNode) node, context);
             } else if (node instanceof ClassInstantiationNode) {
                 return interpretClassInstantiation((ClassInstantiationNode) node, context);
             } else if (node instanceof FunctionDeclarationNode) {
@@ -279,9 +285,9 @@ public final class Interpreter {
             } else if (node instanceof ObjectFunctionCallNode) {
                 return interpretObjectFunctionCall((ObjectFunctionCallNode) node, context);
             } else if (node instanceof LocalVariableReferenceNode) {
-                return interpretLocalVariableReferenceNode((LocalVariableReferenceNode) node, context);
+                return interpretLocalVariableReference((LocalVariableReferenceNode) node, context);
             } else if (node instanceof LocalFunctionCallNode) {
-                return interpretLocalFunctionCallNode((LocalFunctionCallNode) node, context);
+                return interpretLocalFunctionCall((LocalFunctionCallNode) node, context);
             } else if (node instanceof ObjectVariableReferenceNode) {
                 return interpretObjectVariableReference((ObjectVariableReferenceNode) node, context);
             } else if (node instanceof ObjectVariableReassignmentNode) {
@@ -507,7 +513,7 @@ public final class Interpreter {
         return constructors;
     }
 
-    private Object interpretBinaryExpressionNode(final BinaryExpressionNode node, final Context context) {
+    private Object interpretBinaryExpression(final BinaryExpressionNode node, final Context context) {
         final Object leftValue = interpretNode(node.getLeft(), context);
         final Object rightValue = interpretNode(node.getRight(), context);
 
@@ -531,6 +537,10 @@ public final class Interpreter {
 
         if (leftValue instanceof Boolean && rightValue instanceof Long) {
             return evaluateBooleanOperation((Boolean) leftValue, (long) rightValue == 1, operator, node.getLine());
+        }
+
+        if (leftValue instanceof ClassObject && rightValue instanceof ClassObject) {
+            return evaluateClassObjectOperation((ClassObject) leftValue, (ClassObject) rightValue, operator, node.getLine());
         }
 
         except("Invalid operands for binary expression: " + leftValue.getClass().getSimpleName() + " " + operator + " " + rightValue.getClass().getSimpleName(), node.getLine());
@@ -621,6 +631,15 @@ public final class Interpreter {
             default: return except("Unsupported operator for integers: " + operator, line);
         }
     }
+
+    private Object evaluateClassObjectOperation(final ClassObject left, final ClassObject right, final String operator, final int line) {
+        switch (operator) {
+            case "==": return left == right;
+            case "!=": return left != right;
+            default: return except("Unsupported operator for class objects: " + operator, line);
+        }
+    }
+
 
     private Object interpretDefaultNativeFunctionCall(final DefaultNativeFunctionCallNode node, final Context context) {
         final List<Object> params = new ArrayList<>(node.getParams().size());
@@ -737,7 +756,7 @@ public final class Interpreter {
         return !match;
     }
 
-    private Object interpretReturnNode(final ReturnNode node, final Context context) {
+    private Object interpretReturn(final ReturnNode node, final Context context) {
         final Object ret = interpretNode(node.getValue(), context);
         if (ret instanceof ReturnValue) return except("Return in return", node.getLine());
         return new ReturnValue(ret);
@@ -1250,7 +1269,7 @@ public final class Interpreter {
         }
     }
 
-    private Object interpretLocalVariableReferenceNode(final LocalVariableReferenceNode node, final Context context) {
+    private Object interpretLocalVariableReference(final LocalVariableReferenceNode node, final Context context) {
         final Object ret = context.parentContext().getVariable(node.getName());
         if (ret == VOID_OBJECT) {
             return except("Referencing a non-created variable: " + node.getName(), node.getLine());
@@ -1258,7 +1277,7 @@ public final class Interpreter {
         return ret;
     }
 
-    private Object interpretLocalFunctionCallNode(final LocalFunctionCallNode node, final Context raw) {
+    private Object interpretLocalFunctionCall(final LocalFunctionCallNode node, final Context raw) {
         final Context context = raw.parentContext();
         final String functionName = node.getName();
 
@@ -1689,6 +1708,7 @@ public final class Interpreter {
             nodes.add(new VariableReferenceNode(parameterNode.getName()));
 
         final String pkg = node.getFileName().substring(0, node.getFileName().length() - 3);
+
         final ASTNode astnode = new PackagedNativeFunctionCallNode(
                 node.getName(),
                 pkg.substring(0, 1).toUpperCase() + pkg.substring(1),
@@ -1701,7 +1721,16 @@ public final class Interpreter {
 
         for (final ParameterNode param : node.getParams()) params.add(param.getName());
 
-        final FunctionDefinition function = new FunctionDefinition(node.getName(), node.getTypeDefault(), node.isStatic(), node.isConst(), node.isLocal(), node.isAsync(), params, block);
+        final FunctionDefinition function = new FunctionDefinition(
+                node.getName(),
+                node.getTypeDefault(),
+                node.isStatic(),
+                node.isConst(),
+                node.isLocal(),
+                node.isAsync(),
+                params,
+                block
+        );
 
         if (node.isStatic()) {
             final ObjectType obj = context.getClass(node.getFileName());
@@ -1720,14 +1749,23 @@ public final class Interpreter {
 
         context.setCurrentClassName(name);
 
-        final ClassDefinition inheritedClass = (ClassDefinition) context.getClass(node.getInheritedClass()); // no need to check, native class do not have errors (we hope)
+        // no need to check, native class do not have errors (we hope)
+        final ClassDefinition inheritedClass = (ClassDefinition) context.getClass(node.getInheritedClass());
 
-        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, getConstructors(node.getConstructors()), node.getBlock(), true);
+        final ClassDefinition definition = new ClassDefinition(
+                name,
+                node.isConstant(),
+                inheritedClass,
+                getConstructors(node.getConstructors()),
+                node.getBlock(),
+                true
+        );
         context.defineClass(name, definition);
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
 
         definition.getBody().forEach(statement -> {
+
             if (statement instanceof VariableDeclarationNode) {
                 VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
                 if (declarationNode.isStatic()) {
@@ -1748,6 +1786,7 @@ public final class Interpreter {
                     FunctionDefinition def = (FunctionDefinition) o;
                     definition.staticFunctions.add(def);
                 }
+
             }
         });
 

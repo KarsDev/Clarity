@@ -1,10 +1,13 @@
 package me.kuwg.clarity.library.objects.types;
 
 import me.kuwg.clarity.Clarity;
+import me.kuwg.clarity.interpreter.Interpreter;
 import me.kuwg.clarity.interpreter.context.Context;
 import me.kuwg.clarity.interpreter.definition.FunctionDefinition;
-import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.register.Register;
+import me.kuwg.clarity.util.ClassUtil;
+
+import static me.kuwg.clarity.register.Register.RegisterElementType.FUNCALL;
 
 /**
  * Represents a class object within the Clarity framework. A ClassObject encapsulates
@@ -37,13 +40,26 @@ public final class ClassObject {
      * Constructs a new ClassObject.
      *
      * @param name      The name of the class.
-     * @param inherited The superclass (inherited ClassObject) if applicable, or null if there is no superclass.
+     * @param inherited The superclass (inherited ClassObject) if applicable, or default if there is no superclass.
      * @param context   The execution context associated with this class.
      */
     public ClassObject(final String name, final ClassObject inherited, final Context context) {
         this.name = name;
-        this.inherited = inherited;
+        this.inherited = inherited(name, inherited);
         this.context = context;
+    }
+
+    /**
+     * Creates the inherited class, or default ClassObject if none
+     *
+     * @param inherited parameter
+     * @return inherited class
+     */
+    private static ClassObject inherited(final String name, final ClassObject inherited) {
+        if (inherited != null) return inherited;
+        if (name.equals("ClassObject")) return null;
+
+        return ClassUtil.initClass("ClassObject");
     }
 
     /**
@@ -81,29 +97,34 @@ public final class ClassObject {
      * Otherwise, it returns a default string containing the class name.
      *
      * @return A string representation of the class. Either the result of the "print" function or
-     *         a default formatted string "ClassObject@name".
+     * a default formatted string "ClassObject@name".
      * @throws me.kuwg.clarity.register.RegisterException when return is not str
      */
     @Override
     public String toString() {
-        // Retrieves the "print" function from the context with 0 arguments.
-        final ObjectType type = context.getFunction("print", 0);
+        final FunctionDefinition definition = (FunctionDefinition) context.getFunction("print", 0);
+        final Context functionContext = new Context(context.parentContext());
 
-        // Check if the retrieved object is a FunctionDefinition instance.
-        if (type instanceof FunctionDefinition) {
-            // Interpret the function's block and retrieve the result.
-            final Object ret = Clarity.INTERPRETER.interpretNode(((FunctionDefinition) type).getBlock(), context);
+        Register.register(FUNCALL, "print()", -404, context.getCurrentClassName());
 
-            // If the interpreted result is a string, return it, else throw an exception.
-            if (ret instanceof String) {
-                return (String) ret;
-            } else {
-                Register.throwException("Expected string type in print() function, obtained " + ret);
-            }
+        if (definition.isAsync()) {
+            Register.throwException("Function print(0) can NOT be async.");
         }
 
-        // Default string representation if no "print" function is defined.
-        return "ClassObject@" + name;
+        final Object result = Clarity.INTERPRETER.interpretBlock(definition.getBlock(), functionContext);
+
+        if (Interpreter.checkTypes(definition.getTypeDefault(), result)) {
+            Register.throwException("Unexpected return: " + Interpreter.getAsCLRStr(result) + ", expected " + definition.getTypeDefault(), -404);
+        }
+
+        context.setCurrentFunctionName(null);
+
+        if (!(result instanceof String)) {
+            Register.throwException("Expected str return in print(0) function.");
+            return null;
+        }
+
+        return (String) result;
     }
 
     /**

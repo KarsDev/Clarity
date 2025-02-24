@@ -13,10 +13,7 @@ import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
-import me.kuwg.clarity.ast.nodes.function.call.AwaitFunctionCallNode;
-import me.kuwg.clarity.ast.nodes.function.call.DefaultNativeFunctionCallNode;
-import me.kuwg.clarity.ast.nodes.function.call.FunctionCallNode;
-import me.kuwg.clarity.ast.nodes.function.call.PackagedNativeFunctionCallNode;
+import me.kuwg.clarity.ast.nodes.function.call.*;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
@@ -54,12 +51,18 @@ public final class ASTParser {
 
     private static final List<IncludeNode> includes = new ArrayList<>();
 
+    private static IncludeNode CLASSOBJECT_NODE = null;
     private static IncludeNode DEFAULT_NODE = null;
+
     private static boolean LOADED;
 
     private void load() {
         try {
             LOADED = true;
+
+            CLASSOBJECT_NODE = parseClassObjectInclude();
+            includes.add(CLASSOBJECT_NODE);
+
             InputStream inputStream = getClass().getClassLoader().getResourceAsStream("DEFAULTS.clr");
             if (inputStream == null) {
                 throw new IOException();
@@ -74,7 +77,7 @@ public final class ASTParser {
 
             final List<Token> tokens = Tokenizer.tokenize(content);
             final ASTParser parser = new ASTParser(original, "DEFAULTS.clr", tokens);
-            final AST ast = parser.parse();
+            final AST ast = parser.parseL();
 
             if (Clarity.INFORMATION.getOption("defaults")) {
                 DEFAULT_NODE = new IncludeNode("DEFAULTS.clr", ast.getRoot(), false);
@@ -99,10 +102,12 @@ public final class ASTParser {
         this.tokens = tokens;
     }
 
-    public AST parse() {
+    // parse including defaults and classobject
+    public AST parseI() {
         final BlockNode node = new BlockNode();
 
-        // file included by default
+        // include defaults
+        node.addChild(CLASSOBJECT_NODE);
         if (DEFAULT_NODE != null) node.addChild(DEFAULT_NODE);
 
         // parse includes
@@ -110,14 +115,35 @@ public final class ASTParser {
             final List<IncludeNode> localIncludes = parseInclude();
 
             for (final IncludeNode localInclude : localIncludes) {
-                if (includes.stream().noneMatch(included -> included.getName().equals(localInclude.getName()))) {
+                if (!localInclude.getName().equals("classobject.clr") && includes.stream().noneMatch(included -> included.getName().equals(localInclude.getName()))) {
                     includes.add(localInclude);
                     node.addChild(localInclude);
                 }
             }
         }
 
-        includes.clear();
+        while (currentTokenIndex < tokens.size()) {
+            final ASTNode result = parseExpression();
+            if (result != null) node.addChild(result);
+        }
+        return new AST(node);
+    }
+
+    // parse without including defaults and classobject
+    public AST parseL() {
+        final BlockNode node = new BlockNode();
+
+        // parse includes
+        while (matchAndConsume(KEYWORD, "include")) {
+            final List<IncludeNode> localIncludes = parseInclude();
+
+            for (final IncludeNode localInclude : localIncludes) {
+                if (!localInclude.getName().equals("classobject.clr") && includes.stream().noneMatch(included -> included.getName().equals(localInclude.getName()))) {
+                    includes.add(localInclude);
+                    node.addChild(localInclude);
+                }
+            }
+        }
 
         while (currentTokenIndex < tokens.size()) {
             final ASTNode result = parseExpression();
@@ -275,6 +301,10 @@ public final class ASTParser {
 
         if (!isLocal && !isConst && match(DIVIDER, "{")) {
             return new StaticBlockNode(parseBlock(), isAsync);
+        }
+
+        if (!match(VARIABLE) && !match(KEYWORD)) {
+            return new LocalReferenceNode();
         }
 
         final String typeDefault = consume().getValue();
@@ -869,6 +899,9 @@ public final class ASTParser {
             } else if (node instanceof VariableReferenceNode) {
                 final VariableReferenceNode vrn = (VariableReferenceNode) node;
                 return new LocalVariableReferenceNode(vrn.getName()).setLine(line);
+            } else if (node instanceof FunctionCallNode) {
+                final FunctionCallNode fn = (FunctionCallNode) node;
+                return new LocalFunctionCallNode(((VariableReferenceNode) fn.getCaller()).getName(), fn.getParams());
             } else {
                 throw new RuntimeException("Unexpected node: " + node);
             }
@@ -978,7 +1011,7 @@ public final class ASTParser {
                                     final String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
                                     final List<Token> tokens = Tokenizer.tokenize(content);
                                     final ASTParser parser = new ASTParser(original, file.getName(), tokens);
-                                    final AST ast = parser.parse();
+                                    final AST ast = parser.parseL();
 
                                     includes.add(new IncludeNode(file.getName(), ast.getRoot(), true).setLine(line));
                                 }
@@ -1008,7 +1041,7 @@ public final class ASTParser {
                             final String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
                             final List<Token> tokens = Tokenizer.tokenize(content);
                             final ASTParser parser = new ASTParser(original, file.getName(), tokens);
-                            final AST ast = parser.parse();
+                            final AST ast = parser.parseL();
 
                             includes.add(new IncludeNode(file.getName(), ast.getRoot(), true).setLine(line));
                         }
@@ -1059,7 +1092,7 @@ public final class ASTParser {
 
                 final List<Token> tokens = Tokenizer.tokenize(content);
                 final ASTParser parser = new ASTParser(original, path, tokens);
-                final AST ast = parser.parse();
+                final AST ast = parser.parseL();
                 included = new IncludeNode(path, ast.getRoot(), true).setLine(line);
                 break include;
             }
@@ -1073,7 +1106,7 @@ public final class ASTParser {
 
             final List<Token> tokens = Tokenizer.tokenize(content);
             final ASTParser parser = new ASTParser(original, path, tokens);
-            final AST ast = parser.parse();
+            final AST ast = parser.parseL();
 
             included = new IncludeNode(path, ast.getRoot(), false).setLine(line);
         }
@@ -1132,7 +1165,7 @@ public final class ASTParser {
 
             final List<Token> tokens = Tokenizer.tokenize(content);
             final ASTParser parser = new ASTParser(original, path, tokens);
-            final AST ast = parser.parse();
+            final AST ast = parser.parseL();
             return new IncludeNode(path, ast.getRoot(), true).setLine(line);
         }
 
@@ -1145,9 +1178,32 @@ public final class ASTParser {
 
         final List<Token> tokens = Tokenizer.tokenize(content);
         final ASTParser parser = new ASTParser(original, path, tokens);
-        final AST ast = parser.parse();
+        final AST ast = parser.parseL();
 
         return new IncludeNode(path, ast.getRoot(), false).setLine(line);
+    }
+
+    private IncludeNode parseClassObjectInclude() {
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("natives/classobject.clr");
+        if (inputStream == null) {
+            try {
+                throw new IOException("Native library not found for class object: 'classobject.clr'");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        String content;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+            content = reader.lines().collect(Collectors.joining("\n"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        final List<Token> tokens = Tokenizer.tokenize(content);
+        final ASTParser parser = new ASTParser(original, "classobject.clr", tokens);
+        final AST ast = parser.parseL();
+        return new IncludeNode("classobject.clr", ast.getRoot(), true).setLine(-1);
     }
 
     private String parseIncludePath(final boolean compiled) {
