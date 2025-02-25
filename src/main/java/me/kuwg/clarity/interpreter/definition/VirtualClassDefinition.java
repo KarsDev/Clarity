@@ -8,8 +8,8 @@ public class VirtualClassDefinition extends ClassDefinition {
 
     private final VirtualFunctionDefinition[] virtualFunctions;
 
-    public VirtualClassDefinition(final String name, final ClassDefinition inheritedClass, final FunctionDefinition[] constructors, final BlockNode body, final VirtualFunctionDefinition[] virtualFunctions) {
-        super(name, false, inheritedClass, constructors, body, false);
+    public VirtualClassDefinition(final String name, final ClassDefinition inheritedClass, final VirtualClassDefinition extendedClass, final FunctionDefinition[] constructors, final BlockNode body, final VirtualFunctionDefinition[] virtualFunctions) {
+        super(name, false, inheritedClass, extendedClass, constructors, body, false);
         this.virtualFunctions = virtualFunctions;
     }
 
@@ -23,6 +23,7 @@ public class VirtualClassDefinition extends ClassDefinition {
                 "virtualFunctions=" + Arrays.toString(virtualFunctions) +
                 ", body=" + body +
                 ", constructors=" + Arrays.toString(constructors) +
+                ", extendedClass=" + extendedClass +
                 ", inheritedClass=" + inheritedClass +
                 ", isConstant=" + isConstant +
                 ", isNative=" + isNative +

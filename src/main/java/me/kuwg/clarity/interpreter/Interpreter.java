@@ -432,23 +432,36 @@ public final class Interpreter {
 
         final ClassDefinition inheritedClass;
 
-        final ObjectType type = context.getClass(node.getInheritedClass());
-
         if (node.getInheritedClass() != null) {
+            final ObjectType type = context.getClass(node.getInheritedClass());
             if (!(type instanceof ClassDefinition)) {
-                except("Inherited class not found: " + node.getInheritedClass(), node.getLine());
-                return null;
+                return except("Inherited class not found: " + node.getInheritedClass(), node.getLine());
             } else {
                 inheritedClass = (ClassDefinition) type;
                 if (inheritedClass.isConstant()) {
-                    except("Inheriting a const " + (inheritedClass.isNative() ? "native " : "") + "class: " + node.getInheritedClass(), node.getLine());
+                    return except("Inheriting a const " + (inheritedClass.isNative() ? "native " : "") + "class: " + node.getInheritedClass(), node.getLine());
                 }
             }
         } else {
             inheritedClass = null;
         }
 
-        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, getConstructors(node.getConstructors()), node.getBlock(),false);
+        final VirtualClassDefinition extendedClass;
+
+        if (node.getExtendedClass() != null) {
+            final ObjectType type = context.getClass(node.getExtendedClass());
+            if (!(type instanceof VirtualClassDefinition)) {
+                if (type instanceof ClassDefinition) {
+                    return except(node.getExtendedClass() + " is not a virtual class, so it can not be extended but just inherited.", node.getLine());
+                }
+                return except("Extended class not found: " + node.getExtendedClass(), node.getLine());
+            }
+            extendedClass = (VirtualClassDefinition) type;
+        } else {
+            extendedClass = null;
+        }
+
+        final ClassDefinition definition = new ClassDefinition(name, node.isConstant(), inheritedClass, extendedClass, getConstructors(node.getConstructors()), node.getBlock(),false);
         context.defineClass(name, definition);
 
         if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
@@ -1759,6 +1772,7 @@ public final class Interpreter {
                 name,
                 node.isConstant(),
                 inheritedClass,
+                null, // natives can not extend
                 getConstructors(node.getConstructors()),
                 node.getBlock(),
                 true
@@ -2456,9 +2470,23 @@ public final class Interpreter {
         final String name = node.getName();
         context.setCurrentClassName(name);
         final ClassDefinition inheritedClass;
+        final VirtualClassDefinition extendedClass;
         final FunctionDefinition[] constructors = getConstructors(node.getConstructors());
         final BlockNode body = node.getBlock();
         final VirtualFunctionDefinition[] virtualFunctions = new VirtualFunctionDefinition[node.getVirtualFunctions().size()];
+
+        if (node.getExtendedClass() != null) {
+            final ObjectType type = context.getClass(node.getExtendedClass());
+            if (!(type instanceof VirtualClassDefinition)) {
+                if (type instanceof ClassDefinition) {
+                    return except(node.getExtendedClass() + " is not a virtual class, so it can not be extended but just inherited.", node.getLine());
+                }
+                return except("Extended class not found: " + node.getExtendedClass(), node.getLine());
+            }
+            extendedClass = (VirtualClassDefinition) type;
+        } else {
+            extendedClass = null;
+        }
 
         if (node.getInheritedClass() != null) {
             final ObjectType type = context.getClass(node.getInheritedClass());
@@ -2489,7 +2517,7 @@ public final class Interpreter {
         }
 
 
-        final ClassDefinition definition = new VirtualClassDefinition(name, inheritedClass, constructors, body, virtualFunctions);
+        final ClassDefinition definition = new VirtualClassDefinition(name, inheritedClass, extendedClass, constructors, body, virtualFunctions);
 
         context.defineClass(node.getName(), definition);
 

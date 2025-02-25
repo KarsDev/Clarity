@@ -13,14 +13,16 @@ public class ClassDefinition extends ObjectType {
     protected final String name;
     protected final boolean isConstant;
     protected final ClassDefinition inheritedClass;
+    protected final VirtualClassDefinition extendedClass;
     protected final FunctionDefinition[] constructors;
     protected final BlockNode body;
     protected final boolean isNative;
 
-    public ClassDefinition(final String name, final boolean isConstant, final ClassDefinition inheritedClass, final FunctionDefinition[] constructors, final BlockNode body, final boolean isNative) {
+    public ClassDefinition(final String name, final boolean isConstant, final ClassDefinition inheritedClass, final VirtualClassDefinition extendedClass, final FunctionDefinition[] constructors, final BlockNode body, final boolean isNative) {
         this.name = name;
         this.isConstant = isConstant;
         this.inheritedClass = inheritedClass;
+        this.extendedClass = extendedClass;
         this.constructors = constructors;
         this.body = body;
         this.isNative = isNative;
@@ -36,6 +38,10 @@ public class ClassDefinition extends ObjectType {
 
     public final ClassDefinition getInheritedClass() {
         return inheritedClass;
+    }
+
+    public VirtualClassDefinition getExtendedClass() {
+        return extendedClass;
     }
 
     public final FunctionDefinition[] getConstructors() {
@@ -62,12 +68,14 @@ public class ClassDefinition extends ObjectType {
     @Override
     public String toString() {
         return "ClassDefinition{" +
-                "staticVariables=" + staticVariables +
+                "body=" + body +
+                ", staticVariables=" + staticVariables +
                 ", staticFunctions=" + staticFunctions +
                 ", name='" + name + '\'' +
-                ", inheritedClass='" + inheritedClass + '\'' +
+                ", isConstant=" + isConstant +
+                ", inheritedClass=" + inheritedClass +
+                ", extendedClass=" + extendedClass +
                 ", constructors=" + Arrays.toString(constructors) +
-                ", body=" + body +
                 ", isNative=" + isNative +
                 '}';
     }

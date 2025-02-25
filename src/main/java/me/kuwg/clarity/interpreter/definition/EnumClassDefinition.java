@@ -9,7 +9,7 @@ public class EnumClassDefinition extends ClassDefinition {
     private final List<EnumValue> enumValues;
 
     public EnumClassDefinition(final String name, final boolean isConstant, final List<EnumValue> enumValues) {
-        super(name, isConstant, null, null, null, false);
+        super(name, isConstant, null, null, null, null, false);
         this.enumValues = enumValues;
     }
 

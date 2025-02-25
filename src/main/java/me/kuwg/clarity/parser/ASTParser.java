@@ -872,6 +872,8 @@ public final class ASTParser {
 
         final int line = current().getLine();
 
+        final String extendedClass = matchAndConsume(KEYWORD, "extends") ? variable() : null;
+
         final BlockNode body = parseBlock();
 
         List<FunctionDeclarationNode> constructors = new ArrayList<>();
@@ -885,7 +887,7 @@ public final class ASTParser {
             }
         }
 
-        return new ClassDeclarationNode(name, isConstant, inheritedClass, fileName, constructors, body).setLine(line);
+        return new ClassDeclarationNode(name, isConstant, inheritedClass, extendedClass, fileName, constructors, body).setLine(line);
     }
 
     private ASTNode parseLocalDeclaration() {
@@ -1614,12 +1616,9 @@ public final class ASTParser {
 
             final String name = variable();
 
-            final String inheritedClass;
-            if (matchAndConsume(KEYWORD, "inherits")) {
-                inheritedClass = variable();
-            } else {
-                inheritedClass = null;
-            }
+            final String inheritedClass = matchAndConsume(KEYWORD, "inherits") ? variable() : null;
+
+            final String extendedClass = matchAndConsume(KEYWORD, "extends") ? variable() : null;
 
             final BlockNode body = parseBlock();
 
@@ -1638,7 +1637,7 @@ public final class ASTParser {
                 }
             }
 
-            return new VirtualClassDeclarationNode(name, inheritedClass, fileName, constructors, virtualFunctions, body).setLine(line);
+            return new VirtualClassDeclarationNode(name, inheritedClass, extendedClass, fileName, constructors, virtualFunctions, body).setLine(line);
         }
 
         // virtual function
