@@ -1,10 +1,9 @@
 package me.kuwg.clarity.interpreter.definition;
 
-import me.kuwg.clarity.library.objects.ObjectType;
 import me.kuwg.clarity.ast.nodes.block.BlockNode;
 import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
 import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
-import me.kuwg.clarity.register.Register;
+import me.kuwg.clarity.library.objects.ObjectType;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,13 +37,6 @@ public class FunctionDefinition extends ObjectType {
                 node.getParameterNodes().stream().map(ParameterNode::getName).collect(Collectors.toList()),
                 node.getBlock()
         );
-
-        if (isAsync) {
-            if (typeDefault == null || typeDefault.equals("void")) {
-                return;
-            }
-            Register.throwException("Async functions must return void", node.getLine());
-        }
     }
 
     public final String getName() {

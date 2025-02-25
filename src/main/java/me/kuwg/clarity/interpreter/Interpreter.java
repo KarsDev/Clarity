@@ -13,12 +13,10 @@ import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationUseNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.virtual.VirtualClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
-import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
-import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
-import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
-import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
+import me.kuwg.clarity.ast.nodes.function.declare.*;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
@@ -46,12 +44,14 @@ import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.register.Register.RegisterElementType;
 import me.kuwg.clarity.token.Tokenizer;
 import me.kuwg.clarity.util.Debugging;
+import me.kuwg.clarity.util.StillTesting;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import static me.kuwg.clarity.ast.nodes.clazz.cast.CastType.*;
 import static me.kuwg.clarity.interpreter.definition.BreakValue.BREAK;
@@ -245,7 +245,8 @@ public final class Interpreter {
         else if (node instanceof AwaitBlockNode) return interpretAwaitBlock((AwaitBlockNode) node, context);
         else if (node instanceof AwaitFunctionCallNode) return interpretAwaitFunctionCall((AwaitFunctionCallNode) node, context);
         else if (node instanceof NativeFunctionNode) return interpretNativeFunction((NativeFunctionNode) node, context);
-        //else if (node instanceof LocalReferenceNode) return context.getCurrentObject();
+        else if (node instanceof LocalReferenceNode) return except("Still not working...", node.getLine());
+        else if (node instanceof VirtualClassDeclarationNode) return interpretVirtualClassDeclaration((VirtualClassDeclarationNode) node, context);
 
         throw new UnsupportedOperationException("Unsupported node: " + (node == null ? "null" : node.getClass().getSimpleName()) + ", val=" + node);
     }
@@ -360,6 +361,8 @@ public final class Interpreter {
                 return interpretAwaitFunctionCall((AwaitFunctionCallNode) node, context);
             } else if (node instanceof NativeFunctionNode) {
                 return interpretNativeFunction((NativeFunctionNode) node, context);
+            } else if (node instanceof LocalReferenceNode) {
+                return except("Still not working...", node.getLine());
             }
             throw new UnsupportedOperationException("Unsupported node: " + node.getClass().getSimpleName() + ", val=" + node);
         } finally {
@@ -2445,6 +2448,101 @@ public final class Interpreter {
             return except("Clarity native function does not apply (try using -nlnat running flag)", node.getLine());
         }
 
+    }
+
+    @StillTesting
+    private Object interpretVirtualClassDeclaration(final VirtualClassDeclarationNode node, final Context context) {
+        final String ocn = context.getCurrentClassName();
+        final String name = node.getName();
+        context.setCurrentClassName(name);
+        final ClassDefinition inheritedClass;
+        final FunctionDefinition[] constructors = getConstructors(node.getConstructors());
+        final BlockNode body = node.getBlock();
+        final VirtualFunctionDefinition[] virtualFunctions = new VirtualFunctionDefinition[node.getVirtualFunctions().size()];
+
+        if (node.getInheritedClass() != null) {
+            final ObjectType type = context.getClass(node.getInheritedClass());
+            if (!(type instanceof ClassDefinition)) {
+                except("Inherited class not found: " + node.getInheritedClass(), node.getLine());
+                return null;
+            } else {
+                inheritedClass = (ClassDefinition) type;
+                if (inheritedClass.isConstant()) {
+                    except("Inheriting a const " + (inheritedClass.isNative() ? "native " : "") + "class: " + node.getInheritedClass(), node.getLine());
+                }
+            }
+        } else {
+            inheritedClass = null;
+        }
+
+        final List<VirtualFunctionDeclarationNode> functions = node.getVirtualFunctions();
+        for (int i = 0, functionsSize = functions.size(); i < functionsSize; i++) {
+            final VirtualFunctionDeclarationNode virtual = functions.get(i);
+            final VirtualFunctionDefinition vfd = new VirtualFunctionDefinition(
+                    virtual.getFunctionName(),
+                    virtual.getTypeDefault(),
+                    virtual.isAsync(),
+                    virtual.getParameterNodes().stream().map(ParameterNode::getName).collect(Collectors.toList())
+            );
+
+            virtualFunctions[i] = vfd;
+        }
+
+
+        final ClassDefinition definition = new VirtualClassDefinition(name, inheritedClass, constructors, body, virtualFunctions);
+
+        context.defineClass(node.getName(), definition);
+
+
+        if (!context.getNatives().contains(node.getFileName())) Privileges.checkClassName(name, node.getLine());
+
+        StaticBlockNode staticBlock = null;
+
+        for (final ASTNode statement : definition.getBody()) {
+            if (statement instanceof VariableDeclarationNode) {
+                final VariableDeclarationNode declarationNode = (VariableDeclarationNode) statement;
+                if (declarationNode.isStatic()) {
+                    final String dName = declarationNode.getName();
+
+                    final String dType = declarationNode.getTypeDefault();
+
+                    final Object dValue = declarationNode.getValue() == null ? null : interpretNode(declarationNode.getValue(), context);
+
+                    final boolean dConst = declarationNode.isConstant();
+
+                    final boolean dStatic = true;
+
+                    final boolean dLocal = declarationNode.isLocal();
+
+                    definition.staticVariables.put(dName, new VariableDefinition(dName, dType, dValue, dConst, dStatic, dLocal));
+                }
+            } else if (statement instanceof FunctionDeclarationNode) {
+                final FunctionDeclarationNode declarationNode = (FunctionDeclarationNode) statement;
+                final List<String> params = new ArrayList<>();
+
+                declarationNode.getParameterNodes().forEach(param -> params.add(param.getName()));
+
+                if (declarationNode.isStatic()) {
+                    definition.staticFunctions.add(new FunctionDefinition(declarationNode.getFunctionName(), declarationNode.getTypeDefault(), true, declarationNode.isConst(), declarationNode.isLocal(), declarationNode.isAsync(), params, declarationNode.getBlock()));
+                }
+            } else if (statement instanceof ReflectedNativeFunctionDeclaration) {
+                final Object o = interpretReflectedNativeFunctionDeclaration((ReflectedNativeFunctionDeclaration) statement, context);
+                if (o instanceof FunctionDefinition) {
+                    FunctionDefinition def = (FunctionDefinition) o;
+                    definition.staticFunctions.add(def);
+                }
+            } else if (statement instanceof StaticBlockNode) {
+                if (staticBlock != null) return except("More than one static block found in class " + definition.getName(), statement.getLine());
+                staticBlock = (StaticBlockNode) statement;
+            }
+        }
+
+        // static block is the last to get interpreted
+        if (staticBlock != null) interpretStaticBlock(staticBlock, context);
+
+        context.setCurrentClassName(ocn);
+
+        return VOID_OBJECT;
     }
 
     /*

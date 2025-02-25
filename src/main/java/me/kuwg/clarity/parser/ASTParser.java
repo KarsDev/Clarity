@@ -12,12 +12,10 @@ import me.kuwg.clarity.ast.nodes.clazz.annotation.AnnotationUseNode;
 import me.kuwg.clarity.ast.nodes.clazz.cast.CastType;
 import me.kuwg.clarity.ast.nodes.clazz.cast.NativeCastNode;
 import me.kuwg.clarity.ast.nodes.clazz.envm.EnumDeclarationNode;
+import me.kuwg.clarity.ast.nodes.clazz.virtual.VirtualClassDeclarationNode;
 import me.kuwg.clarity.ast.nodes.expression.BinaryExpressionNode;
 import me.kuwg.clarity.ast.nodes.function.call.*;
-import me.kuwg.clarity.ast.nodes.function.declare.FunctionDeclarationNode;
-import me.kuwg.clarity.ast.nodes.function.declare.MainFunctionDeclarationNode;
-import me.kuwg.clarity.ast.nodes.function.declare.ParameterNode;
-import me.kuwg.clarity.ast.nodes.function.declare.ReflectedNativeFunctionDeclaration;
+import me.kuwg.clarity.ast.nodes.function.declare.*;
 import me.kuwg.clarity.ast.nodes.include.IncludeNode;
 import me.kuwg.clarity.ast.nodes.literal.*;
 import me.kuwg.clarity.ast.nodes.member.MemberFunctionCallNode;
@@ -34,6 +32,7 @@ import me.kuwg.clarity.register.Register;
 import me.kuwg.clarity.token.Token;
 import me.kuwg.clarity.token.TokenType;
 import me.kuwg.clarity.token.Tokenizer;
+import me.kuwg.clarity.util.StillTesting;
 
 import java.io.*;
 import java.net.URL;
@@ -1563,7 +1562,7 @@ public final class ASTParser {
     }
 
     private ASTNode parseLambdaDeclaration() {
-        final int line = matchIfConsume(KEYWORD, "lambda").getLine(); // consume "lambda"
+        final int line = consumeIfMatch(KEYWORD, "lambda").getLine(); // consume "lambda"
         final List<ParameterNode> params;
 
         if (match(DIVIDER, "(")) params = parseParameters();
@@ -1605,7 +1604,54 @@ public final class ASTParser {
 
         return new AwaitFunctionCallNode((FunctionCallNode) node);
     }
+    
+    @StillTesting
+    private ASTNode parseVirtualDeclaration() {
+        final int line = consume().getLine(); // consume "virtual"
 
+        // virtual class
+        if (matchAndConsume(KEYWORD, "class")) {
+
+            final String name = variable();
+
+            final String inheritedClass;
+            if (matchAndConsume(KEYWORD, "inherits")) {
+                inheritedClass = variable();
+            } else {
+                inheritedClass = null;
+            }
+
+            final BlockNode body = parseBlock();
+
+            final List<FunctionDeclarationNode> constructors = new ArrayList<>();
+            final List<VirtualFunctionDeclarationNode> virtualFunctions = new ArrayList<>();
+            for (final ASTNode node : body.getChildren()) {
+                if (node instanceof FunctionDeclarationNode) {
+                    final FunctionDeclarationNode cast = (FunctionDeclarationNode) node;
+                    if (cast.getFunctionName().equals("constructor")) {
+                        constructors.add(cast);
+                        body.getChildren().remove(node);
+                    }
+                } else if (node instanceof VirtualFunctionDeclarationNode) {
+                    virtualFunctions.add((VirtualFunctionDeclarationNode) node);
+                    body.getChildren().remove(node);
+                }
+            }
+
+            return new VirtualClassDeclarationNode(name, inheritedClass, fileName, constructors, virtualFunctions, body).setLine(line);
+        }
+
+        // virtual function
+        final boolean async = matchAndConsume(KEYWORD, "async");
+        consume(KEYWORD, "fn");
+
+        final String name = variable();
+        final List<ParameterNode> params = parseParameters();
+        final String typeDefault = parseScopedValue();
+
+        return new VirtualFunctionDeclarationNode(name, typeDefault, async, params).setLine(line);
+    }
+    
     /*
     *
     *
@@ -1628,7 +1674,7 @@ public final class ASTParser {
         return consume(VARIABLE).getValue();
     }
 
-    private Token matchIfConsume(final TokenType type, final String value) {
+    private Token consumeIfMatch(final TokenType type, final String value) {
         return match(type, value) ? consume() : current();
     }
 

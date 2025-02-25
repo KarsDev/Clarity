@@ -1,11 +1,9 @@
 package me.kuwg.clarity.ast.nodes.block;
 
 import me.kuwg.clarity.ast.ASTNode;
-import me.kuwg.clarity.ast.nodes.function.declare.VirtualFunctionDeclarationNode;
 import me.kuwg.clarity.compiler.CompilerVersion;
 import me.kuwg.clarity.compiler.stream.ASTInputStream;
 import me.kuwg.clarity.compiler.stream.ASTOutputStream;
-import me.kuwg.clarity.register.Register;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -19,7 +17,6 @@ public class BlockNode extends ASTNode implements Iterable<ASTNode> {
     private final List<ASTNode> children = new CopyOnWriteArrayList<>();
 
     public void addChild(final ASTNode child) {
-        if (child instanceof VirtualFunctionDeclarationNode) Register.throwException("Unsupported virtual function in block", child.getLine());
         children.add(child);
     }
 

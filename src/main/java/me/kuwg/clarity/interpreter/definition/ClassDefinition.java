@@ -10,12 +10,12 @@ public class ClassDefinition extends ObjectType {
     public final Map<String, VariableDefinition> staticVariables = new HashMap<>();
     public final List<FunctionDefinition> staticFunctions = new ArrayList<>();
 
-    private final String name;
-    private final boolean isConstant;
-    private final ClassDefinition inheritedClass;
-    private final FunctionDefinition[] constructors;
-    private final BlockNode body;
-    private final boolean isNative;
+    protected final String name;
+    protected final boolean isConstant;
+    protected final ClassDefinition inheritedClass;
+    protected final FunctionDefinition[] constructors;
+    protected final BlockNode body;
+    protected final boolean isNative;
 
     public ClassDefinition(final String name, final boolean isConstant, final ClassDefinition inheritedClass, final FunctionDefinition[] constructors, final BlockNode body, final boolean isNative) {
         this.name = name;

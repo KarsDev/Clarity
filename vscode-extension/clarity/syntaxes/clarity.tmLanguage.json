@@ -32,7 +32,7 @@
 		},
 		"keywords": {
 			"name": "keyword",
-			"match": "\\b(true|false|class|var|constructor|local|fn|native|if|else|return|new|void|include|static|const|compiled|null|for|while|select|when|default|break|continue|float|int|inherits|assert|is|arr|str|enum|bool|async|raise|try|except|lambda|delete|await)\\b"
+			"match": "\\b(true|false|class|var|constructor|local|fn|native|if|else|return|new|void|include|static|const|compiled|null|for|while|select|when|default|break|continue|float|int|inherits|assert|is|arr|str|enum|bool|async|raise|try|except|lambda|delete|await|virtual|extends|parent)\\b"
 		},
 		"strings": {
 			"name": "string",
